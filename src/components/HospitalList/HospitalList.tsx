@@ -37,22 +37,6 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
             setLoading(false);
         }
     };
-
-    // Fallback static data for labs or when no API data
-    const staticHospitals = [
-        {
-            id: '1',
-            name: 'Apollo Super Speciality Hospital',
-            logo: '/logos/apollo.png',
-            description: 'Lorem ipsum dolor sit amet, consecurfaf afd adipiscing elit, sed do Lorem ipsum do...',
-            specialties: ['Cardiology', 'General Medicine', 'Pulmonologist', 'Gynacologist'],
-            distance: '4.2 Kms',
-            isTopRated: true,
-            departmentsCount: 7
-        },
-        // ... other static hospitals
-    ];
-
     const staticLabs = [
         {
             id: '1',
@@ -137,8 +121,8 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
                                         {/* Show doctor info for hospitals */}
                                         {serviceType === 'hospitals' && 'doctor' in facility && (
                                             <div className="mt-1">
-                                                <p className="text-xs text-blue-600">Dr. {facility.doctor.name}</p>
-                                                <p className="text-xs text-gray-500">₹{facility.doctor.price} consultation</p>
+                                                {/* <p className="text-xs text-blue-600">Dr. {facility.doctor.name}</p>
+                                                <p className="text-xs text-gray-500">₹{facility.doctor.price} consultation</p> */}
                                             </div>
                                         )}
                                     </div>
