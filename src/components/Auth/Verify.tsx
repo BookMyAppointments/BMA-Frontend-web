@@ -20,7 +20,7 @@ interface ResendRequest {
     email: string;
 }
 
-const API_BASE_URL: string = import.meta.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api/v1';
 
 const BirdLogo: React.FC = () => (
     <div className="flex justify-center mb-6">
