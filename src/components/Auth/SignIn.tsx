@@ -6,20 +6,15 @@ interface SignInFormData {
     email: string;
     password: string;
 }
-
-interface AuthData {
+interface ApiResponse {
+    success: boolean;
+    message: string;
     token: string;
     user: {
         id: string;
         email: string;
         name: string;
     };
-}
-
-interface ApiResponse {
-    success: boolean;
-    message: string;
-    data?: AuthData;
 }
 
 interface SignInRequest {
@@ -83,7 +78,7 @@ const SignIn: React.FC = () => {
 
             if (response.ok) {
                 console.log('Login successful:', data);
-                window.localStorage.setItem('token', data.data?.token || '');
+                window.localStorage.setItem('token', data?.token || '');
                 window.location.href = '/';
 
                 alert('Login successful!');

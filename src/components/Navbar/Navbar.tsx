@@ -1,14 +1,31 @@
 import type { FC } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useService } from '../../context/ServiceContext'
+import { useSession } from '../../context/SessionProvider'
 
 const Navbar: FC = () => {
     const { serviceType, toggleService } = useService()
+    const { user, isAuthenticated, logout } = useSession()
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
     const location = useLocation()
+    const navigate = useNavigate()
     const isHomePage = location.pathname === '/'
+
+    const handleProfileClick = () => {
+        if (!isAuthenticated) {
+            navigate('/signin')
+        } else {
+            setIsProfileMenuOpen(!isProfileMenuOpen)
+        }
+    }
+
+    const handleLogout = () => {
+        logout()
+        setIsProfileMenuOpen(false)
+        navigate('/signin')
+    }
 
     return (
         <nav className="hidden lg:block px-6 py-3 w-full"> {/* Changed md:block to lg:block */}
@@ -111,22 +128,22 @@ const Navbar: FC = () => {
                             </button>
                         </motion.div>
                     </div>
-                )}
-
-                {/* Profile section - pushed to the right */}
+                )}                {/* Profile section - pushed to the right */}
                 <div className="relative ml-auto">
                     <button 
-                        onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                        onClick={handleProfileClick}
                         className="flex items-center gap-2 bg-[#F3F3F3] rounded-full hover:bg-gray-100 transition-colors"
                     >
                         <div className="w-8 h-8 rounded-full bg-gray-200 m-1 overflow-hidden">
                             <img src="/profile-placeholder.png" alt="Profile" className="w-full h-full object-cover" />
                         </div>
-                        <span className="text-black font-semibold mx-2">Rachana Ranade</span>
+                        <span className="text-black font-semibold mx-2">
+                            {isAuthenticated ? user?.name : 'Sign In'}
+                        </span>
                     </button>
 
                     <AnimatePresence>
-                        {isProfileMenuOpen && (
+                        {isProfileMenuOpen && isAuthenticated && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -137,31 +154,35 @@ const Navbar: FC = () => {
                                 <Link 
                                     to="/profile"
                                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                    onClick={() => setIsProfileMenuOpen(false)}
                                 >
                                     Profile Settings
                                 </Link>
                                 <Link 
                                     to="/bookings"
                                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                    onClick={() => setIsProfileMenuOpen(false)}
                                 >
                                     Recent Bookings
                                 </Link>
                                 <Link 
                                     to="/health-records"
                                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                    onClick={() => setIsProfileMenuOpen(false)}
                                 >
                                     My Health Records
                                 </Link>
                                 <Link 
                                     to="/help"
                                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                    onClick={() => setIsProfileMenuOpen(false)}
                                 >
                                     Help & Support
                                 </Link>
                                 <div className="h-px bg-gray-200 my-1" />
                                 <button 
                                     className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-50"
-                                    onClick={() => {/* Add logout logic */}}
+                                    onClick={handleLogout}
                                 >
                                     Sign Out
                                 </button>
