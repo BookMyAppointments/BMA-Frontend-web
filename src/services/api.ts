@@ -48,6 +48,21 @@ export interface Hospital {
     };
 }
 
+export interface Lab {
+    id: string;
+    hospitalId: string;
+    name: string;
+    services: string[];
+    locationId: string;
+    location: {
+        id: string;
+        lat: number;
+        lng: number;
+        address: string;
+    };
+    hospital: Hospital;
+}
+
 export interface DoctorHospitalData {
     id: string;
     doctorId: string;
@@ -68,6 +83,26 @@ export const fetchDoctorsBySpecialization = async (specialization: string): Prom
         return data;
     } catch (error) {
         console.error('Error fetching doctors:', error);
+        throw error;
+    }
+};
+
+export const fetchLabs = async (service?: string): Promise<Lab[]> => {
+    try {
+        const url = service 
+            ? `${API_BASE_URL}/labs/all?service=${encodeURIComponent(service)}`
+            : `${API_BASE_URL}/labs/all`;
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching labs:', error);
         throw error;
     }
 };

@@ -48,6 +48,15 @@ const Categories: FC<CategoriesProps> = ({ onCategoryChange }) => {
         };
     }, []);
 
+    useEffect(() => {
+        // Update default category based on service type
+        if (serviceType === 'labs') {
+            setSelectedCategory('Blood Test');
+        } else {
+            setSelectedCategory('Cardiology');
+        }
+    }, [serviceType]);
+
     const handleCategorySelect = (categoryId: string) => {
         setSelectedCategory(categoryId);
         if (onCategoryChange) {
@@ -59,13 +68,13 @@ const Categories: FC<CategoriesProps> = ({ onCategoryChange }) => {
         {
             id: 'Cardiology',
             name: 'Cardiology',
-            icon: '/icons/specialties/cardiology.png',
+            icon: '/icons/cat.png',
             description: 'Heart & Cardiovascular Care'
         },
         {
             id: 'Orthopedics',
             name: 'Orthopedics',
-            icon: '/icons/specialties/orthopedics.png',
+            icon: '/icons/cat.png',
             description: 'Bone & Joint Care'
         },
         {
@@ -104,44 +113,44 @@ const Categories: FC<CategoriesProps> = ({ onCategoryChange }) => {
             icon: '/icons/cat.png',
             description: 'Urinary & Reproductive Health'
         }
-    ]
+    ];
 
     const labCategories: Category[] = [
         {
-            id: 'blood-test',
+            id: 'Blood Test',
             name: 'Blood Tests',
-            icon: '/icons/labs/blood-test.png',
+            icon: '/icons/cat.png',
             description: 'Complete Blood Analysis'
         },
         {
-            id: 'imaging',
-            name: 'Imaging',
-            icon: '/icons/labs/imaging.png',
-            description: 'X-Ray, CT Scan, MRI'
+            id: 'X-Ray',
+            name: 'X-Ray',
+            icon: '/icons/cat.png',
+            description: 'X-Ray Imaging'
         },
         {
-            id: 'pathology',
-            name: 'Pathology',
-            icon: '/icons/labs/pathology.png',
-            description: 'Tissue & Sample Analysis'
+            id: 'MRI',
+            name: 'MRI',
+            icon: '/icons/cat.png',
+            description: 'Magnetic Resonance Imaging'
         },
         {
-            id: 'microbiology',
-            name: 'Microbiology',
-            icon: '/icons/labs/microbiology.png',
-            description: 'Bacterial & Viral Tests'
+            id: 'CT Scan',
+            name: 'CT Scan',
+            icon: '/icons/cat.png',
+            description: 'Computed Tomography'
         },
         {
-            id: 'biochemistry',
-            name: 'Biochemistry',
-            icon: '/icons/labs/biochemistry.png',
-            description: 'Chemical Analysis'
+            id: 'Ultrasound',
+            name: 'Ultrasound',
+            icon: '/icons/cat.png',
+            description: 'Ultrasound Imaging'
         },
         {
-            id: 'hormone',
-            name: 'Hormone Tests',
-            icon: '/icons/labs/hormone.png',
-            description: 'Endocrine Analysis'
+            id: 'ECG',
+            name: 'ECG',
+            icon: '/icons/cat.png',
+            description: 'Electrocardiogram'
         }
     ];
 
