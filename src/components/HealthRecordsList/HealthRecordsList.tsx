@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
-import type { FC } from 'react'
+import { useState, useEffect, useRef } from 'react';
+import type { FC } from 'react';
+import axios from 'axios';
 
 interface HealthRecord {
     id: string;
@@ -15,27 +16,72 @@ const HealthRecordsList: FC = () => {
     const [records, setRecords] = useState<HealthRecord[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (!files) return;
+    const token = localStorage.getItem('token');
 
-        // Handle multiple files
-        Array.from(files).forEach(file => {
-            const newRecord: HealthRecord = {
-                id: Date.now().toString(),
-                fileName: file.name,
-                fileSize: formatFileSize(file.size),
-                uploadDate: new Date().toLocaleDateString(),
-                fileUrl: URL.createObjectURL(file),
-                fileType: file.type
-            };
-            setRecords(prev => [...prev, newRecord]);
-        });
+    const fetchRecords = async () => {
+        console.log('Fetching health records...');
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/documents`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-        // Reset file input
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+            console.log('Health records fetched:', res.data);
+
+            const urls = res.data?.medicalRecord[0]?.documents || [];
+            const mapped: HealthRecord[] = urls.map((url: string, i: number) => {
+                const nameFromUrl = decodeURIComponent(url.split('/').pop() || `Document-${i + 1}`);
+                return {
+                    id: `${Date.now()}-${i}`,
+                    fileName: nameFromUrl,
+                    fileSize: 'Unknown', // You can improve this if backend provides metadata
+                    uploadDate: new Date().toLocaleDateString(),
+                    fileUrl: url,
+                    fileType: nameFromUrl.split('.').pop() || 'unknown',
+                };
+            });
+
+            setRecords(mapped);
+        } catch (err) {
+            console.error('Failed to fetch health records:', err);
         }
+    };
+
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+
+        for (let i = 0; i < files.length; i++) {
+            const formData = new FormData();
+            formData.append('file', files[i]);
+
+            try {
+                const res = await axios.post(
+                    `${import.meta.env.VITE_BACKEND_URL}/file-upload/upload`,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                const fileUrl = res.data.url;
+                const newRecord: HealthRecord = {
+                    id: Date.now().toString(),
+                    fileName: files[i].name,
+                    fileSize: formatFileSize(files[i].size),
+                    uploadDate: new Date().toLocaleDateString(),
+                    fileUrl,
+                    fileType: files[i].type,
+                };
+                setRecords(prev => [...prev, newRecord]);
+            } catch (err) {
+                console.error(`Upload failed for ${files[i].name}:`, err);
+            }
+        }
+
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const formatFileSize = (bytes: number): string => {
@@ -53,6 +99,10 @@ const HealthRecordsList: FC = () => {
     const filteredRecords = records.filter(record =>
         record.fileName.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    useEffect(() => {
+        fetchRecords();
+    }, []);
 
     return (
         <div className="w-[97%] mx-auto mt-6 mb-8">
@@ -73,7 +123,7 @@ const HealthRecordsList: FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
-                        
+
                         <div className="flex-shrink-0">
                             <input
                                 ref={fileInputRef}
@@ -141,6 +191,6 @@ const HealthRecordsList: FC = () => {
             </div>
         </div>
     );
-}
+};
 
-export default HealthRecordsList
+export default HealthRecordsList;
