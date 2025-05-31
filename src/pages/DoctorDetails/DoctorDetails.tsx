@@ -16,7 +16,7 @@ const DoctorDetails: FC = () => {
 
         const fetchDoctor = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/v1/doctors/get/${id}`);
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/doctors/get/${id}`);
                 const data = await res.json();
                 setDoctor(data);
             } catch (err) {
