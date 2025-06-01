@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import type { FC } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar/Navbar'
 import MobileNavbar from '../../components/Navbar/MobileNavbar'
 import Footer from '../../components/Footer/Footer'
