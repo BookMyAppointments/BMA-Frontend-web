@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { FC } from 'react'
-import { useNavigate } from 'react-router-dom';
 import BookingForm from '../BookingForm/BookingForm';
 interface DoctorInfoProps {
     doctor: any;
@@ -9,7 +8,6 @@ interface DoctorInfoProps {
 const DoctorInfo: FC<DoctorInfoProps> = ({ doctor }) => {
     console.log(doctor);
     
-    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'about' | 'reviews' | 'others'>('about');
     const [pageShow, setPageShow] = useState(false);
 if(pageShow){

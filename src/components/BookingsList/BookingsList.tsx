@@ -48,7 +48,6 @@ const BookingsList: FC = () => {
     const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
     const [rescheduleData, setRescheduleData] = useState<RescheduleData>({
         date: '',

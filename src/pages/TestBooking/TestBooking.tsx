@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import type { FC } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar/Navbar'
 import MobileNavbar from '../../components/Navbar/MobileNavbar'
 import Footer from '../../components/Footer/Footer'
@@ -28,7 +27,6 @@ interface Test {
 }
 
 const TestBooking: FC = () => {
-    const navigate = useNavigate();
     const [labs, setLabs] = useState<Lab[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
