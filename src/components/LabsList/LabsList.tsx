@@ -10,7 +10,7 @@ interface LabsListProps {
     labs?: Lab[];
 }
 
-const LabsList: FC<LabsListProps> = ({ selectedService, labId, labs: providedLabs }) => {
+const LabsList: FC<LabsListProps> = ({ selectedService, labs: providedLabs }) => {
     const navigate = useNavigate();
     const { labs: fetchedLabs, loading, error } = useLabs(selectedService);
     const [currentPage, setCurrentPage] = useState(1);

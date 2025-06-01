@@ -28,7 +28,6 @@ interface Test {
 }
 
 const TestBooking: FC = () => {
-    const navigate = useNavigate();
     const [labs, setLabs] = useState<Lab[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
