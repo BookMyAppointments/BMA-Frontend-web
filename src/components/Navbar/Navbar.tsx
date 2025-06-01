@@ -1,17 +1,44 @@
 import type { FC } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useService } from '../../context/ServiceContext'
 import { useSession } from '../../context/SessionProvider'
+import axios from 'axios'
+import { API_BASE_URL } from '../../services/api'
 
 const Navbar: FC = () => {
     const { serviceType, toggleService } = useService()
     const { user, isAuthenticated, logout } = useSession()
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+    const [profilePicture, setProfilePicture] = useState('/profile-placeholder.png')
     const location = useLocation()
     const navigate = useNavigate()
     const isHomePage = location.pathname === '/'
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchUserProfile();
+        }
+    }, [isAuthenticated]);
+
+    const fetchUserProfile = async () => {
+        try {
+            const response = await axios.get(
+                `${API_BASE_URL}/auth/profile`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+            if (response.data.profile?.picture) {
+                setProfilePicture(response.data.profile.picture);
+            }
+        } catch (error) {
+            console.error('Failed to fetch profile:', error);
+        }
+    };
 
     const handleProfileClick = () => {
         if (!isAuthenticated) {
@@ -135,7 +162,7 @@ const Navbar: FC = () => {
                         className="flex items-center gap-2 bg-[#F3F3F3] rounded-full hover:bg-gray-100 transition-colors"
                     >
                         <div className="w-8 h-8 rounded-full bg-gray-200 m-1 overflow-hidden">
-                            <img src="/profile-placeholder.png" alt="Profile" className="w-full h-full object-cover" />
+                            <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
                         </div>
                         <span className="text-black font-semibold mx-2">
                             {isAuthenticated ? user?.name : 'Sign In'}

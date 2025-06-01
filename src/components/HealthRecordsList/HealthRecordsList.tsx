@@ -3,21 +3,21 @@ import type { FC } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../services/api';
 
-interface HealthRecord {
+interface MedicalRecord {
     id: string;
-    fileName: string;
-    fileSize: string;
-    uploadDate: string;
-    fileUrl: string;
-    fileType: string;
+    userId: string;
+    history: string[];
+    documents: string[];
 }
 
 const HealthRecordsList: FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [records, setRecords] = useState<HealthRecord[]>([]);
+    const [records, setRecords] = useState<MedicalRecord[]>([]);
+    const [selectedRecord, setSelectedRecord] = useState<string>('');
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const fetchDocuments = async () => {
+    const fetchMedicalRecords = async () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) return;
@@ -27,29 +27,20 @@ const HealthRecordsList: FC = () => {
             });
             console.log(res.data);
             
-            setRecords(res.data?.medicalRecord[0]?.documents.map((url: string, i: number) => {
-                const nameFromUrl = decodeURIComponent(url.split('/').pop() || `Document-${i + 1}`);
-                return {
-                    id: `${Date.now()}-${i}`,
-                    fileName: nameFromUrl,
-                    fileSize: 'Unknown', 
-                    uploadDate: new Date().toLocaleDateString(),
-                    fileUrl: url,
-                    fileType: nameFromUrl.split('.').pop() || 'unknown',
-                };
-            }) || []);
+            setRecords(res.data.medicalRecord || []);
         } catch (error) {
-            console.error('Error fetching documents:', error);
+            console.error('Error fetching medical records:', error);
         }
     };
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
-        if (!files || files.length === 0) return;
+        if (!files || files.length === 0 || !selectedRecord) return;
 
         for (let i = 0; i < files.length; i++) {
             const formData = new FormData();
             formData.append('file', files[i]);
+            formData.append('recordId', selectedRecord);
 
             try {
                 const res = await axios.post(
@@ -63,22 +54,17 @@ const HealthRecordsList: FC = () => {
                     }
                 );
 
-                const fileUrl = res.data.url;
-                const newRecord: HealthRecord = {
-                    id: Date.now().toString(),
-                    fileName: files[i].name,
-                    fileSize: formatFileSize(files[i].size),
-                    uploadDate: new Date().toLocaleDateString(),
-                    fileUrl,
-                    fileType: files[i].type,
-                };
-                setRecords(prev => [...prev, newRecord]);
+                // Refresh records after upload
+                fetchMedicalRecords();
             } catch (err) {
                 console.error(`Upload failed for ${files[i].name}:`, err);
+                alert('Failed to upload file');
             }
         }
 
         if (fileInputRef.current) fileInputRef.current.value = '';
+        setIsUploadModalOpen(false);
+        setSelectedRecord('');
     };
 
     const formatFileSize = (bytes: number): string => {
@@ -89,29 +75,46 @@ const HealthRecordsList: FC = () => {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    const handleDelete = (id: string) => {
-        setRecords(prev => prev.filter(record => record.id !== id));
+    const handleDelete = async (recordId: string, fileUrl: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            await axios.delete(
+                `${API_BASE_URL}/auth/documents/${encodeURIComponent(fileUrl)}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            // Refresh records after deletion
+            fetchMedicalRecords();
+        } catch (error) {
+            console.error('Error deleting document:', error);
+            alert('Failed to delete document');
+        }
     };
 
     const filteredRecords = records.filter(record =>
-        record.fileName.toLowerCase().includes(searchQuery.toLowerCase())
+        record.history.some(entry => entry.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        record.documents.some(doc => doc.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     useEffect(() => {
-        fetchDocuments();
+        fetchMedicalRecords();
     }, []);
 
     return (
         <div className="w-[97%] mx-auto mt-6 mb-8">
             <div className="bg-white rounded-lg p-4 md:p-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                    <h2 className="text-2xl font-semibold text-gray-800">Health Records</h2>
+                    <h2 className="text-2xl font-semibold text-gray-800">Medical Records</h2>
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                         <div className="relative flex-1 sm:w-64">
                             <input
                                 type="text"
-                                placeholder="Search files..."
+                                placeholder="Search records..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full px-4 py-2 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
@@ -122,16 +125,8 @@ const HealthRecordsList: FC = () => {
                         </div>
 
                         <div className="flex-shrink-0">
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                multiple
-                                onChange={handleFileUpload}
-                                className="hidden"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                            />
                             <button
-                                onClick={() => fileInputRef.current?.click()}
+                                onClick={() => setIsUploadModalOpen(true)}
                                 className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
                                 Upload Files
@@ -140,52 +135,121 @@ const HealthRecordsList: FC = () => {
                     </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                     {filteredRecords.map((record) => (
                         <div key={record.id} className="border border-gray-100 rounded-lg p-4 hover:border-gray-200">
-                            <div className="flex items-start gap-4">
-                                <div className="flex-1">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-gray-800">{record.fileName}</h3>
-                                            <p className="text-sm text-gray-500">
-                                                {record.fileSize} • Uploaded on {record.uploadDate}
-                                            </p>
-                                        </div>
-                                        <div className="flex gap-2 w-full sm:w-auto">
-                                            <button
-                                                onClick={() => window.open(record.fileUrl, '_blank')}
-                                                className="flex-1 sm:flex-none px-4 py-2 text-sm text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50"
-                                            >
-                                                View
-                                            </button>
-                                            <a
-                                                href={record.fileUrl}
-                                                download={record.fileName}
-                                                className="flex-1 sm:flex-none px-4 py-2 text-sm text-gray-600 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 text-center"
-                                            >
-                                                Download
-                                            </a>
-                                            <button
-                                                onClick={() => handleDelete(record.id)}
-                                                className="flex-1 sm:flex-none px-4 py-2 text-sm text-red-600 hover:text-red-700 border border-red-200 rounded-lg hover:bg-red-50"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
+                            <div className="mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800">Medical Record #{record.id.slice(0, 8)}</h3>
+                                {record.history.length > 0 && (
+                                    <div className="mt-2">
+                                        <h4 className="text-sm font-medium text-gray-700">History</h4>
+                                        <ul className="mt-1 space-y-1">
+                                            {record.history.map((entry, index) => (
+                                                <li key={index} className="text-sm text-gray-600">{entry}</li>
+                                            ))}
+                                        </ul>
                                     </div>
-                                </div>
+                                )}
+                            </div>
+                            
+                            <div className="space-y-3">
+                                {record.documents.map((docUrl, index) => {
+                                    const fileName = decodeURIComponent(docUrl.split('/').pop() || `Document-${index + 1}`);
+                                    return (
+                                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div>
+                                                <h4 className="text-sm font-medium text-gray-800">{fileName}</h4>
+                                                <p className="text-xs text-gray-500">
+                                                    Uploaded on {new Date().toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => window.open(docUrl, '_blank')}
+                                                    className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 border border-blue-200 rounded hover:bg-blue-50"
+                                                >
+                                                    View
+                                                </button>
+                                                <a
+                                                    href={docUrl}
+                                                    download={fileName}
+                                                    className="px-3 py-1 text-sm text-gray-600 hover:text-gray-700 border border-gray-200 rounded hover:bg-gray-50"
+                                                >
+                                                    Download
+                                                </a>
+                                                <button
+                                                    onClick={() => handleDelete(record.id, docUrl)}
+                                                    className="px-3 py-1 text-sm text-red-600 hover:text-red-700 border border-red-200 rounded hover:bg-red-50"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     ))}
 
                     {filteredRecords.length === 0 && (
                         <div className="text-center py-8">
-                            <p className="text-gray-500">No records found</p>
+                            <p className="text-gray-500">No medical records found</p>
                         </div>
                     )}
                 </div>
             </div>
+
+            {/* Upload Modal */}
+            {isUploadModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-lg font-semibold mb-4">Upload Files</h3>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Select Medical Record
+                            </label>
+                            <select
+                                value={selectedRecord}
+                                onChange={(e) => setSelectedRecord(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            >
+                                <option value="">Select a record</option>
+                                {records.map((record) => (
+                                    <option key={record.id} value={record.id}>
+                                        Record #{record.id.slice(0, 8)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    setIsUploadModalOpen(false);
+                                    setSelectedRecord('');
+                                }}
+                                className="px-4 py-2 text-gray-600 hover:text-gray-700"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={!selectedRecord}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
+                            >
+                                Choose Files
+                            </button>
+                        </div>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            onChange={handleFileUpload}
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

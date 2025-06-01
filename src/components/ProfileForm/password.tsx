@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { API_BASE_URL } from '../../services/api';
 
 export default function Password() {
     const [formData, setFormData] = useState({
@@ -27,13 +28,13 @@ export default function Password() {
         }
 
         try {
-            const response = await fetch('/api/change-password', {
+            const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    currentPassword: formData.currentPassword,
+                    email:localStorage.getItem("email"),
                     newPassword: formData.newPassword,
                 }),
             });
