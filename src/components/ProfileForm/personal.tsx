@@ -22,7 +22,7 @@ interface User {
 }
 
 export default function Personal() {
-    const [user, setUser] = useState<User | null>(null);
+    const [, setUser] = useState<User | null>(null);
     const [imageUrl, setImageUrl] = useState('/profile-placeholder.png');
     const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState({

@@ -43,7 +43,7 @@ const HealthRecordsList: FC = () => {
             formData.append('recordId', selectedRecord);
 
             try {
-                const res = await axios.post(
+                await axios.post(
                     `${API_BASE_URL}/file-upload/upload`,
                     formData,
                     {
@@ -67,16 +67,17 @@ const HealthRecordsList: FC = () => {
         setSelectedRecord('');
     };
 
-    const formatFileSize = (bytes: number): string => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
+    // const formatFileSize = (bytes: number): string => {
+    //     if (bytes === 0) return '0 Bytes';
+    //     const k = 1024;
+    //     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    //     const i = Math.floor(Math.log(bytes) / Math.log(k));
+    //     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    // };
 
     const handleDelete = async (recordId: string, fileUrl: string) => {
         try {
+            console.log('', recordId);
             const token = localStorage.getItem('token');
             if (!token) return;
 
