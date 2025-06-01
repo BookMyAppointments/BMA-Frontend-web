@@ -29,7 +29,7 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         try {
             const data = await fetchDoctorsBySpecialization(specialization);
             setDoctorData(data);
-            setCurrentPage(1); // Reset to first page
+            setCurrentPage(1); 
         } catch (err) {
             setError('Failed to fetch doctors. Please try again.');
             console.error('Error fetching doctors:', err);
@@ -51,7 +51,6 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         // ... other static labs
     ];
 
-    // Transform API data to display format
     const transformedHospitals = doctorData.map((item) => ({
         id: item.hospital.id,
         name: item.hospital.name,
@@ -80,7 +79,7 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
             <div className="w-full p-3 lg:p-6 flex justify-center items-center min-h-[200px]">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Loading doctors...</p>
+                    <p className="mt-2 text-gray-600">Loading Hospitals...</p>
                 </div>
             </div>
         );

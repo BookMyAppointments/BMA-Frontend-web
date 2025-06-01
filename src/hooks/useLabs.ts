@@ -25,6 +25,7 @@ export const useLabs = (service?: string) => {
     }, [service]);
 
     const refetch = () => loadLabs(service);
+console.log(labs);
 
     return {
         labs,
@@ -36,7 +37,7 @@ export const useLabs = (service?: string) => {
 
 export const useLabById = (labId: string) => {
     const [lab, setLab] = useState<Lab | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {

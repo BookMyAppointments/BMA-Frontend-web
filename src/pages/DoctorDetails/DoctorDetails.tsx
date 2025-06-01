@@ -15,9 +15,11 @@ const DoctorDetails: FC = () => {
         if (!id) return;
 
         const fetchDoctor = async () => {
-            try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/doctors/get/${id}`);
-                const data = await res.json();
+            try {  
+                const res = await fetch(`http://localhost:5000/api/v1/doctors/get/${id}`);
+                const data=await res.json();
+                console.log(data);
+                
                 setDoctor(data);
             } catch (err) {
                 console.error('Error fetching doctor data:', err);

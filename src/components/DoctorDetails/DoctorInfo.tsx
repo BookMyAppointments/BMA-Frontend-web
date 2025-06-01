@@ -1,12 +1,20 @@
 import { useState } from 'react'
 import type { FC } from 'react'
+import { useNavigate } from 'react-router-dom';
+import BookingForm from '../BookingForm/BookingForm';
 interface DoctorInfoProps {
     doctor: any;
 }
 
 const DoctorInfo: FC<DoctorInfoProps> = ({ doctor }) => {
+    console.log(doctor);
+    
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'about' | 'reviews' | 'others'>('about');
-
+    const [pageShow, setPageShow] = useState(false);
+if(pageShow){
+    return <BookingForm doctor={doctor} />
+}
     return (
         <div className="w-[97%] mx-auto mt-6">
             <div className="flex flex-col lg:flex-row gap-6 min-h-[600px]">
@@ -84,7 +92,7 @@ const DoctorInfo: FC<DoctorInfoProps> = ({ doctor }) => {
                         <h3 className="text-lg font-semibold text-gray-800">Book Appointment</h3>
                         <p className="text-gray-600 mt-2">Consultation Fee</p>
                         <p className="text-2xl font-semibold text-blue-600">₹{doctor.price}</p>
-                        <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                        <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700" onClick={()=>setPageShow(true)}>
                             Book Appointment
                         </button>
                     </div>

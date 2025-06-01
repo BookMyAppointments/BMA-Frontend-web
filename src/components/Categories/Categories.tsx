@@ -23,11 +23,12 @@ interface Category {
 
 interface CategoriesProps {
     onCategoryChange?: (category: string) => void;
+    initialCategory?: string;
 }
 
-const Categories: FC<CategoriesProps> = ({ onCategoryChange }) => {
+const Categories: FC<CategoriesProps> = ({ onCategoryChange, initialCategory }) => {
     const { serviceType } = useService()
-    const [selectedCategory, setSelectedCategory] = useState<string>('Cardiology');
+    const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'Blood Test');
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -51,11 +52,11 @@ const Categories: FC<CategoriesProps> = ({ onCategoryChange }) => {
     useEffect(() => {
         // Update default category based on service type
         if (serviceType === 'labs') {
-            setSelectedCategory('Blood Test');
+            setSelectedCategory(initialCategory || 'Blood Test');
         } else {
-            setSelectedCategory('Cardiology');
+            setSelectedCategory(initialCategory || 'Cardiology');
         }
-    }, [serviceType]);
+    }, [serviceType, initialCategory]);
 
     const handleCategorySelect = (categoryId: string) => {
         setSelectedCategory(categoryId);
@@ -181,7 +182,7 @@ const Categories: FC<CategoriesProps> = ({ onCategoryChange }) => {
                             />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className={`text-[10px] lg:text-xs font-medium truncate ${selectedCategory === category.id ? 'text-white' : 'text-gray-800'}`}>
+                            <h3 className={`text-xs lg:text-sm font-medium truncate ${selectedCategory === category.id ? 'text-white' : 'text-gray-800'}`}>
                                 {category.name}
                             </h3>
                             <p className={`text-[8px] lg:text-[10px] truncate ${selectedCategory === category.id ? 'text-white/80' : 'text-gray-500'}`}>

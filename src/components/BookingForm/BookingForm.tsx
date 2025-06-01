@@ -2,30 +2,75 @@ import { useState } from 'react'
 import type { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SuccessPopup from '../SuccessPopup/SuccessPopup'
+import type { DoctorHospitalData, Doctor } from '../../services/api'
+import { createAppointment } from '../../services/api'
 
-const BookingForm: FC = () => {
+interface BookingFormProps {
+    doctor: DoctorHospitalData | Doctor;
+}
+
+const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
     const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [selectedTime, setSelectedTime] = useState<string>('');
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const timeSlots = [
         '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', 
         '12:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'
     ];
 
-    const handleBooking = () => {
+    const formatTimeTo24Hour = (time12h: string) => {
+        const [time, modifier] = time12h.split(' ');
+        let [hours, minutes] = time.split(':');
+        
+        if (hours === '12') {
+            hours = '00';
+        }
+        
+        if (modifier === 'PM') {
+            hours = (parseInt(hours, 10) + 12).toString();
+        }
+        
+        return `${hours.padStart(2, '0')}:${minutes}`;
+    };
+
+    const handleBooking = async () => {
         if (!selectedDate || !selectedTime) {
             alert('Please select both date and time');
             return;
         }
 
-        setShowSuccessPopup(true);
-        setTimeout(() => {
-            setShowSuccessPopup(false);
-            navigate('/bookings');
-        }, 2000);
+        try {
+            setIsLoading(true);
+            const formattedTime = formatTimeTo24Hour(selectedTime);
+            const bookingData = {
+                doctorId: 'doctorId' in doctor ? doctor.doctorId : doctor.id,
+                scheduledAt: new Date(`${selectedDate}T${formattedTime}`).toISOString(),
+            };
+            console.log(bookingData);
+
+            await createAppointment(bookingData);
+            setShowSuccessPopup(true);
+            setTimeout(() => navigate('/bookings'), 2000);
+        } catch (error) {
+            console.error('Error creating appointment:', error);
+            alert('Failed to create appointment. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    // Helper function to get doctor data
+    const getDoctorData = () => {
+        if ('doctor' in doctor) {
+            return doctor.doctor;
+        }
+        return doctor;
+    };
+
+    const doctorData = getDoctorData();
 
     return (
         <div className="w-[97%] mx-auto mt-6">
@@ -33,14 +78,14 @@ const BookingForm: FC = () => {
                 {/* Doctor Info Section */}
                 <div className="flex items-center gap-4 pb-6 border-b">
                     <img 
-                        src="/doctors/doctor1.png"
-                        alt="Dr. James Deen Avora"
+                        src={doctorData.user.profile || '/default-doctor.png'}
+                        alt={doctorData.user.name}
                         className="w-auto h-20 rounded-full object-fit"
                     />
                     <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Dr. James Deen Avora</h2>
-                        <p className="text-gray-600">MBBS, MD. in Pulmonology</p>
-                        <p className="text-gray-500 text-sm">Apollo Super Speciality Hospital</p>
+                        <h2 className="text-xl font-semibold text-gray-800">Dr. {doctorData.user.name}</h2>
+                        <p className="text-gray-600">{doctorData.qualifications.join(', ')}</p>
+                        <p className="text-gray-500 text-sm">{doctorData.specialization.join(', ')}</p>
                     </div>
                 </div>
 
@@ -112,7 +157,7 @@ const BookingForm: FC = () => {
                                 
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Consultation Fee</span>
-                                    <span className="font-medium">₹799</span>
+                                    <span className="font-medium">₹{doctorData.price}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Platform Fee</span>
@@ -120,33 +165,37 @@ const BookingForm: FC = () => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Taxes</span>
-                                    <span className="font-medium">₹32.7</span>
+                                    <span className="font-medium">₹{(doctorData.price * 0.18).toFixed(1)}</span>
                                 </div>
-                                <div className="border-t pt-2 flex justify-between">
-                                    <span className="font-medium">Total Amount</span>
-                                    <span className="font-medium text-blue-600">₹834.7</span>
+                                <div className="border-t border-gray-200 pt-4">
+                                    <div className="flex justify-between">
+                                        <span className="font-medium">Total Amount</span>
+                                        <span className="font-medium text-blue-600">
+                                            ₹{(doctorData.price + 2 + (doctorData.price * 0.18)).toFixed(1)}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <button
                             onClick={handleBooking}
-                            disabled={!selectedDate || !selectedTime}
+                            disabled={!selectedDate || !selectedTime || isLoading}
                             className={`w-full bg-blue-500 text-white rounded-lg py-3 transition-colors ${
-                                (!selectedDate || !selectedTime) 
+                                (!selectedDate || !selectedTime || isLoading) 
                                     ? 'opacity-50 cursor-not-allowed' 
                                     : 'hover:bg-blue-600'
                             }`}
                         >
-                            Confirm Booking
+                            {isLoading ? 'Creating Appointment...' : 'Confirm Booking'}
                         </button>
                     </div>
                 </div>
             </div>
 
-            <SuccessPopup isVisible={showSuccessPopup} />
+            <SuccessPopup isVisible={showSuccessPopup} type="doctor" />
         </div>
-    )
+    );
 }
 
 export default BookingForm

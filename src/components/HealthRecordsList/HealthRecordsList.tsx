@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../services/api';
 
 interface HealthRecord {
     id: string;
@@ -16,33 +17,29 @@ const HealthRecordsList: FC = () => {
     const [records, setRecords] = useState<HealthRecord[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const token = localStorage.getItem('token');
-
-    const fetchRecords = async () => {
-        console.log('Fetching health records...');
+    const fetchDocuments = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/documents`, {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const res = await axios.get(`${API_BASE_URL}/auth/documents`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
-            console.log('Health records fetched:', res.data);
-
-            const urls = res.data?.medicalRecord[0]?.documents || [];
-            const mapped: HealthRecord[] = urls.map((url: string, i: number) => {
+            console.log(res.data);
+            
+            setRecords(res.data?.medicalRecord[0]?.documents.map((url: string, i: number) => {
                 const nameFromUrl = decodeURIComponent(url.split('/').pop() || `Document-${i + 1}`);
                 return {
                     id: `${Date.now()}-${i}`,
                     fileName: nameFromUrl,
-                    fileSize: 'Unknown', // You can improve this if backend provides metadata
+                    fileSize: 'Unknown', 
                     uploadDate: new Date().toLocaleDateString(),
                     fileUrl: url,
                     fileType: nameFromUrl.split('.').pop() || 'unknown',
                 };
-            });
-
-            setRecords(mapped);
-        } catch (err) {
-            console.error('Failed to fetch health records:', err);
+            }) || []);
+        } catch (error) {
+            console.error('Error fetching documents:', error);
         }
     };
 
@@ -56,12 +53,12 @@ const HealthRecordsList: FC = () => {
 
             try {
                 const res = await axios.post(
-                    `${import.meta.env.VITE_BACKEND_URL}/file-upload/upload`,
+                    `${API_BASE_URL}/file-upload/upload`,
                     formData,
                     {
                         headers: {
                             'Content-Type': 'multipart/form-data',
-                            Authorization: `Bearer ${token}`,
+                            Authorization: `Bearer ${localStorage.getItem('token')}`,
                         },
                     }
                 );
@@ -101,7 +98,7 @@ const HealthRecordsList: FC = () => {
     );
 
     useEffect(() => {
-        fetchRecords();
+        fetchDocuments();
     }, []);
 
     return (

@@ -2,9 +2,38 @@ import { useState } from 'react'
 import type { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const TestInfo: FC = () => {
+interface Test {
+    id: string;
+    name: string;
+    category: string;
+    price: number;
+    homeSample: boolean;
+    labId: string;
+    description?: string;
+    preparation?: string;
+    reportTime?: string;
+    lab?: {
+        id: string;
+        name: string;
+        location: {
+            address: string;
+            lat: number;
+            lng: number;
+        };
+    };
+}
+
+interface TestInfoProps {
+    test: Test;
+}
+
+const TestInfo: FC<TestInfoProps> = ({ test }) => {
     const [activeTab, setActiveTab] = useState<'about' | 'preparation' | 'others'>('about');
     const navigate = useNavigate();
+
+    const handleBookNow = () => {
+        navigate(`/test-booking?testId=${test.id}&labId=${test.labId}`);
+    };
 
     return (
         <div className="w-[97%] mx-auto mt-6">
@@ -51,29 +80,18 @@ const TestInfo: FC = () => {
                                     <div>
                                         <h3 className="text-lg font-semibold text-gray-800">About Test</h3>
                                         <p className="mt-2 text-gray-600">
-                                            A complete blood count (CBC) is one of the most commonly performed blood tests. It reveals important information about the types and numbers of cells in your blood. It helps your doctor check for various diseases and conditions.
+                                            {test.description || 'No description available'}
                                         </p>
                                     </div>
                                     
                                     <div>
-                                        <h4 className="text-md font-semibold text-gray-800">What It Measures</h4>
-                                        <ul className="mt-2 text-gray-600 list-disc list-inside">
-                                            <li>Red blood cells (RBCs)</li>
-                                            <li>White blood cells (WBCs)</li>
-                                            <li>Platelets</li>
-                                            <li>Hemoglobin levels</li>
-                                            <li>Hematocrit percentage</li>
-                                        </ul>
+                                        <h4 className="text-md font-semibold text-gray-800">Category</h4>
+                                        <p className="mt-2 text-gray-600">{test.category}</p>
                                     </div>
 
                                     <div>
-                                        <h4 className="text-md font-semibold text-gray-800">When It's Needed</h4>
-                                        <ul className="mt-2 text-gray-600 list-disc list-inside">
-                                            <li>During routine medical checkups</li>
-                                            <li>To monitor existing blood conditions</li>
-                                            <li>To diagnose various disorders</li>
-                                            <li>Before surgery</li>
-                                        </ul>
+                                        <h4 className="text-md font-semibold text-gray-800">Price</h4>
+                                        <p className="mt-2 text-gray-600">₹{test.price}</p>
                                     </div>
                                 </div>
                             )}
@@ -82,35 +100,9 @@ const TestInfo: FC = () => {
                                 <div className="space-y-6">
                                     <div>
                                         <h3 className="text-lg font-semibold text-gray-800">Test Preparation</h3>
-                                        <ul className="mt-4 space-y-4">
-                                            <li className="flex items-start gap-3">
-                                                <span className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                    1
-                                                </span>
-                                                <div>
-                                                    <h4 className="font-medium text-gray-800">Fasting Required</h4>
-                                                    <p className="text-gray-600 mt-1">Fast for 8-12 hours before the test</p>
-                                                </div>
-                                            </li>
-                                            <li className="flex items-start gap-3">
-                                                <span className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                    2
-                                                </span>
-                                                <div>
-                                                    <h4 className="font-medium text-gray-800">Avoid Smoking</h4>
-                                                    <p className="text-gray-600 mt-1">Do not smoke for at least 1 hour before the test</p>
-                                                </div>
-                                            </li>
-                                            <li className="flex items-start gap-3">
-                                                <span className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                    3
-                                                </span>
-                                                <div>
-                                                    <h4 className="font-medium text-gray-800">Medications</h4>
-                                                    <p className="text-gray-600 mt-1">Inform about any medications you're currently taking</p>
-                                                </div>
-                                            </li>
-                                        </ul>
+                                        <p className="mt-2 text-gray-600">
+                                            {test.preparation || 'No specific preparation required'}
+                                        </p>
                                     </div>
                                 </div>
                             )}
@@ -122,16 +114,20 @@ const TestInfo: FC = () => {
                                         <div className="mt-4 space-y-4">
                                             <div>
                                                 <h4 className="font-medium text-gray-800">Report Delivery</h4>
-                                                <p className="text-gray-600 mt-1">Reports will be available within 24 hours</p>
+                                                <p className="text-gray-600 mt-1">{test.reportTime || 'Within 24 hours'}</p>
                                             </div>
                                             <div>
                                                 <h4 className="font-medium text-gray-800">Sample Collection</h4>
-                                                <p className="text-gray-600 mt-1">Home collection available</p>
+                                                <p className="text-gray-600 mt-1">
+                                                    {test.homeSample ? 'Available at Lab & Home' : 'Available at Lab only'}
+                                                </p>
                                             </div>
-                                            <div>
-                                                <h4 className="font-medium text-gray-800">Payment Options</h4>
-                                                <p className="text-gray-600 mt-1">Cash, Cards, UPI accepted</p>
-                                            </div>
+                                            {test.lab && (
+                                                <div>
+                                                    <h4 className="font-medium text-gray-800">Lab Location</h4>
+                                                    <p className="text-gray-600 mt-1">{test.lab.location.address}</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -145,7 +141,7 @@ const TestInfo: FC = () => {
                     <div className="bg-white rounded-lg p-4">
                         <h2 className="text-lg font-semibold text-gray-800 mb-4">Book Test</h2>
                         <button 
-                            onClick={() => navigate('/test-booking')}
+                            onClick={handleBookNow}
                             className="w-full bg-blue-500 text-white rounded-lg py-3 hover:bg-blue-600 transition-colors"
                         >
                             Book Now
@@ -154,17 +150,20 @@ const TestInfo: FC = () => {
                         <div className="mt-6 space-y-4">
                             <div>
                                 <h3 className="text-sm font-medium text-gray-600">Sample Collection</h3>
-                                <p className="text-sm text-gray-800 mt-1">Available at Lab & Home</p>
+                                <p className="text-sm text-gray-800 mt-1">
+                                    {test.homeSample ? 'Available at Lab & Home' : 'Available at Lab only'}
+                                </p>
                             </div>
                             <div>
                                 <h3 className="text-sm font-medium text-gray-600">Report Delivery</h3>
-                                <p className="text-sm text-gray-800 mt-1">Within 24 hours</p>
+                                <p className="text-sm text-gray-800 mt-1">{test.reportTime || 'Within 24 hours'}</p>
                             </div>
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-600">Lab Timing</h3>
-                                <p className="text-sm text-gray-800 mt-1">Mon - Sat: 7:00 AM - 9:00 PM</p>
-                                <p className="text-sm text-gray-800">Sun: 8:00 AM - 6:00 PM</p>
-                            </div>
+                            {test.lab && (
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-600">Lab Name</h3>
+                                    <p className="text-sm text-gray-800 mt-1">{test.lab.name}</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

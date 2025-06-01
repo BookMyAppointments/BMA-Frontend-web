@@ -2,16 +2,22 @@ import type { FC } from 'react'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLabs } from '../../hooks/useLabs'
+import type { Lab } from '../../services/api'
 
 interface LabsListProps {
     selectedService?: string;
+    labId?: string;
+    labs?: Lab[];
 }
 
-const LabsList: FC<LabsListProps> = ({ selectedService }) => {
+const LabsList: FC<LabsListProps> = ({ selectedService, labId, labs: providedLabs }) => {
     const navigate = useNavigate();
-    const { labs, loading, error } = useLabs(selectedService);
+    const { labs: fetchedLabs, loading, error } = useLabs(selectedService);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 9;
+
+    // Use provided labs if available, otherwise use fetched labs
+    const labs = providedLabs || fetchedLabs;
 
     // Reset to first page when service changes
     useEffect(() => {
@@ -123,36 +129,32 @@ const LabsList: FC<LabsListProps> = ({ selectedService }) => {
                                     📍 {lab.location.address}
                                 </p>
                                 
-                                {lab.services.length > 0 && (
-                                    <div className="mt-2">
-                                        <div className="flex flex-wrap gap-1">
-                                            {lab.services.slice(0, 2).map((service, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full"
-                                                >
-                                                    {service}
-                                                </span>
-                                            ))}
-                                            {lab.services.length > 2 && (
-                                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                                                    +{lab.services.length - 2} more
-                                                </span>
-                                            )}
-                                        </div>
+                                <div className="mt-2">
+                                    <div className="flex flex-wrap gap-1">
+                                        {lab.services.slice(0, 2).map((service, index) => (
+                                            <span
+                                                key={index}
+                                                className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full"
+                                            >
+                                                {service}
+                                            </span>
+                                        ))}
+                                        {lab.services.length > 2 && (
+                                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                                +{lab.services.length - 2} more
+                                            </span>
+                                        )}
                                     </div>
-                                )}
-                                
-                                <div className="flex items-center justify-between mt-3">
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-yellow-400">⭐</span>
-                                        <span className="text-sm font-medium text-gray-700">4.5</span>
-                                        <span className="text-xs text-gray-500">(150+ reviews)</span>
-                                    </div>
-                                    <span className="text-xs text-blue-600 font-medium hover:underline">
-                                        View Details →
-                                    </span>
                                 </div>
+                                
+                                <div className="flex items-center gap-1 mt-2">
+                                    <span className="text-yellow-400">⭐</span>
+                                    <span className="text-sm font-medium text-gray-700">4.5</span>
+                                    <span className="text-xs text-gray-500">(150+ reviews)</span>
+                                </div>
+                                <span className="text-xs text-blue-600 font-medium hover:underline">
+                                    View Details →
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -205,7 +207,7 @@ const LabsList: FC<LabsListProps> = ({ selectedService }) => {
                 </div>
             )}
         </div>
-    )
+    );
 }
 
 export default LabsList
