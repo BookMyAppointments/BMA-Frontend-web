@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Mail, Phone, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
-import { toast } from 'react-toastify';
 
 interface FAQ {
     question: string;
