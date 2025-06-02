@@ -14,35 +14,54 @@ import SignUp from './components/Auth/SignUp'
 import SignIn from './components/Auth/SignIn'
 import Verify from './components/Auth/Verify'
 import { SessionProvider } from './context/SessionProvider'
+import ForgotPassword from './components/Auth/ForgotPassword'
+import Support from './pages/HelpSupport/Support'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 function App() {
     return (
-        <SessionProvider>
-            <ServiceProvider>
-                <BrowserRouter>
-                    <div className="App">
-                        <Routes>
-                            <Route path="/" element={<Home />} />
-                            <Route path="/signup" element={<SignUp />} />
-                            <Route path="/verify" element={<Verify />} />
-                            <Route path="/signin" element={<SignIn />} />
-                            <Route path="/hospital/:id" element={<HospitalDetails />} />
-                            <Route path="/labs" element={<LabDetails />} />
-                            <Route path="/lab/:id" element={<LabDetails />} />
-                            <Route path="/doctor/:id" element={<DoctorDetails />} />
-                            <Route path="/test/:id" element={<TestDetails />} />
-                            <Route path="/booking" element={<Booking />} />
-                            <Route path="/profile" element={<ProfileSettings />} />
-                            <Route path="/bookings" element={<RecentBookings />} />
-                            <Route path="/health-records" element={<HealthRecords />} />
-                            <Route path="/test-booking" element={<TestBooking />} />
-                        </Routes>
-                    </div>
-                </BrowserRouter>
-
-                
-            </ServiceProvider>
-        </SessionProvider>
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
+            <SessionProvider>
+                <ServiceProvider>
+                    <BrowserRouter>
+                        <div className="App">
+                            <Routes>
+                                <Route path="/" element={<Home />} />
+                                <Route path="/signup" element={<SignUp />} />
+                                <Route path="/verify" element={<Verify />} />
+                                <Route path="/signin" element={<SignIn />} />
+                                <Route path='/forgot-password' element={<ForgotPassword/>}/>
+                                <Route path="/hospital/:id" element={<HospitalDetails />} />
+                                <Route path="/labs" element={<LabDetails />} />
+                                <Route path="/lab/:id" element={<LabDetails />} />
+                                <Route path="/doctor/:id" element={<DoctorDetails />} />
+                                <Route path="/test/:id" element={<TestDetails />} />
+                                <Route path="/booking" element={<Booking />} />
+                                <Route path="/profile" element={<ProfileSettings />} />
+                                <Route path="/bookings" element={<RecentBookings />} />
+                                <Route path="/health-records" element={<HealthRecords />} />
+                                <Route path="/test-booking" element={<TestBooking />} />
+                                <Route path='/help' element={<Support />} />
+                            </Routes>
+                        </div>
+                    </BrowserRouter>
+                    <ToastContainer
+                        position="top-right"
+                        autoClose={3000}
+                        hideProgressBar={false}
+                        newestOnTop
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        pauseOnHover
+                        theme="light"
+                    />
+                </ServiceProvider>
+            </SessionProvider>
+        </GoogleOAuthProvider>
     )
 }
 
