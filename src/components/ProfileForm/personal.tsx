@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../services/api';
+import { toast } from 'react-toastify';
 
 interface Profile {
     id: string;
@@ -112,7 +113,7 @@ export default function Personal() {
             fetchUserProfile(); // Refresh user data after image upload
         } catch (error) {
             console.error('Upload failed:', error);
-            alert('Failed to upload image');
+            toast.error('Failed to upload image');
         } finally {
             setIsUploading(false);
         }
@@ -135,11 +136,11 @@ export default function Personal() {
 
             if (response.status === 200) {
                 fetchUserProfile(); // Refresh user data after update
-                alert('Profile updated successfully');
+                toast.error('Profile updated successfully');
             }
         } catch (error) {
             console.error('Update failed:', error);
-            alert('Failed to update profile');
+            toast.error('Failed to update profile');
         } finally {
             setIsUpdating(false);
         }

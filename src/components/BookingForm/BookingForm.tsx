@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import SuccessPopup from '../SuccessPopup/SuccessPopup'
 import type { DoctorHospitalData, Doctor } from '../../services/api'
 import { createAppointment } from '../../services/api'
+import { toast } from 'react-toastify'
 
 interface BookingFormProps {
     doctor: DoctorHospitalData | Doctor;
@@ -38,7 +39,6 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
 
     const handleBooking = async () => {
         if (!selectedDate || !selectedTime) {
-            alert('Please select both date and time');
             return;
         }
 
@@ -56,7 +56,7 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
             setTimeout(() => navigate('/bookings'), 2000);
         } catch (error) {
             console.error('Error creating appointment:', error);
-            alert('Failed to create appointment. Please try again.');
+            toast.error('Failed to create appointment. Please try again.');
         } finally {
             setIsLoading(false);
         }

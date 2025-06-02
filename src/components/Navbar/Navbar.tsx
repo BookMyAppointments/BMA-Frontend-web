@@ -6,12 +6,28 @@ import { useService } from '../../context/ServiceContext'
 import { useSession } from '../../context/SessionProvider'
 import axios from 'axios'
 import { API_BASE_URL } from '../../services/api'
+import { toast } from 'react-toastify'
+
+type SearchType = 'doctor' | 'hospital' | 'lab';
+
+interface SearchResult {
+    id: string;
+    name: string;
+    type: SearchType;
+    specialization?: string;
+    location?: string;
+}
 
 const Navbar: FC = () => {
     const { serviceType, toggleService } = useService()
     const { user, isAuthenticated, logout } = useSession()
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
     const [profilePicture, setProfilePicture] = useState('/profile-placeholder.png')
+    const [searchType, setSearchType] = useState<SearchType>('doctor')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [isSearchFocused, setIsSearchFocused] = useState(false)
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+    const [isSearching, setIsSearching] = useState(false)
     const location = useLocation()
     const navigate = useNavigate()
     const isHomePage = location.pathname === '/'
@@ -54,8 +70,65 @@ const Navbar: FC = () => {
         navigate('/signin')
     }
 
+    const handleSearch = async (query: string) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            let endpoint = '';
+            switch (searchType) {
+                case 'doctor':
+                    endpoint = `${API_BASE_URL}/search/doctors?name=${encodeURIComponent(query)}`;
+                    break;
+                case 'hospital':
+                    endpoint = `${API_BASE_URL}/search/hospitals?name=${encodeURIComponent(query)}`;
+                    break;
+                case 'lab':
+                    endpoint = `${API_BASE_URL}/search/labs?name=${encodeURIComponent(query)}`;
+                    break;
+            }
+console.log(endpoint);
+
+            const response = await axios.get(endpoint);
+            console.log(response);
+            
+            const results = response.data.map((item: any) => ({
+                id: item.id,
+                name: searchType === 'doctor' ? item.doctor.user.name : item.name,
+                type: searchType,
+                specialization: searchType === 'doctor' ? item.doctor.specialization : undefined,
+                location: item.location?.address || item.hospital?.location?.address
+            }));
+            setSearchResults(results);
+        } catch (error) {
+            console.error('Search error:', error);
+            toast.error('Failed to perform search');
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleResultClick = (result: SearchResult) => {
+        setSearchQuery('');
+        setSearchResults([]);
+        switch (result.type) {
+            case 'doctor':
+                navigate(`/doctor/${result.id}`);
+                break;
+            case 'hospital':
+                navigate(`/hospital/${result.id}`);
+                break;
+            case 'lab':
+                navigate(`/lab/${result.id}`);
+                break;
+        }
+    };
+
     return (
-        <nav className="hidden lg:block px-6 py-3 w-full"> {/* Changed md:block to lg:block */}
+        <nav className="hidden lg:block px-6 py-3 w-full">
             <div className="flex items-center">
                 {/* Logo and tagline */}
                 <div className="flex flex-col mr-6">
@@ -69,18 +142,58 @@ const Navbar: FC = () => {
                 </div>
 
                 {/* Search box */}
-                <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 w-[280px] mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 100 4z" clipRule="evenodd" />
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Gachibowli, Hyderabad"
-                        className="bg-transparent outline-none w-full text-gray-600 placeholder-gray-400"
-                    />
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                    </svg>
+                <div className="relative flex-1 max-w-2xl">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white">
+                        <select
+                            value={searchType}
+                            onChange={(e) => setSearchType(e.target.value as SearchType)}
+                            className="bg-transparent outline-none text-gray-600 border-r pr-2"
+                            onFocus={() => setIsSearchFocused(true)}
+                        >
+                            <option value="doctor">Doctors</option>
+                            <option value="hospital">Hospitals</option>
+                            <option value="lab">Labs</option>
+                        </select>
+                        <input
+                            type="text"
+                            placeholder={`Search ${searchType}s...`}
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                handleSearch(e.target.value);
+                            }}
+                            onFocus={() => setIsSearchFocused(true)}
+                            className="bg-transparent outline-none w-full text-gray-600 placeholder-gray-400"
+                        />
+                        {isSearching ? (
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                            </svg>
+                        )}
+                    </div>
+
+                    {/* Search Results Dropdown */}
+                    {isSearchFocused && searchResults.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-y-auto z-50">
+                            {searchResults.map((result) => (
+                                <button
+                                    key={result.id}
+                                    onClick={() => handleResultClick(result)}
+                                    className="w-full px-4 py-3 text-left hover:bg-gray-50 flex flex-col"
+                                >
+                                    <span className="font-medium text-gray-900">{result.name}</span>
+                                    {result.specialization && (
+                                        <span className="text-sm text-gray-500">{result.specialization}</span>
+                                    )}
+                                    {result.location && (
+                                        <span className="text-sm text-gray-500">{result.location}</span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Toggle buttons - only show on home page */}
@@ -108,7 +221,7 @@ const Navbar: FC = () => {
                                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     />
                                 </motion.div>
-                                <motion.span 
+                                <motion.span
                                     className="text-gray-600"
                                     initial={false}
                                     animate={{ 
@@ -141,7 +254,7 @@ const Navbar: FC = () => {
                                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     />
                                 </motion.div>
-                                <motion.span 
+                                <motion.span
                                     className="text-gray-600"
                                     initial={false}
                                     animate={{ 
@@ -155,7 +268,9 @@ const Navbar: FC = () => {
                             </button>
                         </motion.div>
                     </div>
-                )}                {/* Profile section - pushed to the right */}
+                )}
+
+                {/* Profile Section */}
                 <div className="relative ml-auto">
                     <button 
                         onClick={handleProfileClick}
@@ -175,41 +290,32 @@ const Navbar: FC = () => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 10 }}
-                                transition={{ duration: 0.2 }}
-                                className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-50"
+                                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50"
                             >
-                                <Link 
+                                <Link
                                     to="/profile"
-                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                                     onClick={() => setIsProfileMenuOpen(false)}
                                 >
                                     Profile Settings
                                 </Link>
-                                <Link 
+                                <Link
                                     to="/bookings"
-                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                                     onClick={() => setIsProfileMenuOpen(false)}
                                 >
-                                    Recent Bookings
+                                    My Bookings
                                 </Link>
-                                <Link 
+                                <Link
                                     to="/health-records"
-                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                                     onClick={() => setIsProfileMenuOpen(false)}
                                 >
-                                    My Health Records
+                                    Health Records
                                 </Link>
-                                <Link 
-                                    to="/help"
-                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
-                                    onClick={() => setIsProfileMenuOpen(false)}
-                                >
-                                    Help & Support
-                                </Link>
-                                <div className="h-px bg-gray-200 my-1" />
-                                <button 
-                                    className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-50"
+                                <button
                                     onClick={handleLogout}
+                                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                                 >
                                     Sign Out
                                 </button>
@@ -219,7 +325,7 @@ const Navbar: FC = () => {
                 </div>
             </div>
         </nav>
-    )
-}
+    );
+};
 
-export default Navbar
+export default Navbar;

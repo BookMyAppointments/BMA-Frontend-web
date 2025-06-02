@@ -86,11 +86,11 @@ const BookingsList: FC = () => {
                 console.log(`Fetched ${status} appointments:`, data);
                 allAppointments.push(...data);
             }
+console.log("appointments is",allAppointments);
 
             const transformedBookings: Booking[] = allAppointments
                 .map((appointment: any): Booking | null => {
                     if (appointment.doctorId) {
-                        // For pending appointments, we might not have hospital data yet
                         const hospital = appointment.doctor.affiliations?.[0]?.hospital;
                         
                         return {
@@ -239,9 +239,12 @@ const BookingsList: FC = () => {
         }
     });
 
-    const openGoogleMaps = (coordinates: { lat: number; lng: number }) => {
-        window.open(`https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}&z=17`, '_blank');
-    };
+ const openGoogleMaps = (coordinates: { lat: number; lng: number }) => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`;
+    window.open(url, '_blank');
+};
+
+
 
     if (loading) {
         return (

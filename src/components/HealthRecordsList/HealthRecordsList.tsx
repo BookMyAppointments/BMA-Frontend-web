@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../services/api';
+import { toast } from 'react-toastify';
+import { Loader2 } from 'lucide-react';
 
 interface MedicalRecord {
     id: string;
@@ -13,6 +15,7 @@ interface MedicalRecord {
 const HealthRecordsList: FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [records, setRecords] = useState<MedicalRecord[]>([]);
+    const [loading,setLoading]=useState(false)
     const [selectedRecord, setSelectedRecord] = useState<string>('');
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,13 +39,14 @@ const HealthRecordsList: FC = () => {
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (!files || files.length === 0 || !selectedRecord) return;
-
+        
         for (let i = 0; i < files.length; i++) {
             const formData = new FormData();
             formData.append('file', files[i]);
             formData.append('recordId', selectedRecord);
-
+            
             try {
+                setLoading(true)
                 await axios.post(
                     `${API_BASE_URL}/file-upload/upload`,
                     formData,
@@ -58,7 +62,10 @@ const HealthRecordsList: FC = () => {
                 fetchMedicalRecords();
             } catch (err) {
                 console.error(`Upload failed for ${files[i].name}:`, err);
-                alert('Failed to upload file');
+                toast.error('Failed to upload file');
+            }
+            finally{
+                setLoading(false)
             }
         }
 
@@ -92,7 +99,7 @@ const HealthRecordsList: FC = () => {
             fetchMedicalRecords();
         } catch (error) {
             console.error('Error deleting document:', error);
-            alert('Failed to delete document');
+            toast.error('Failed to delete document');
         }
     };
 
@@ -104,7 +111,9 @@ const HealthRecordsList: FC = () => {
     useEffect(() => {
         fetchMedicalRecords();
     }, []);
-
+if(loading) return (
+    <Loader2 className='animate-spin text-blue-800 scale-150 absolute top-1/3 left-1/2'></Loader2>
+)
     return (
         <div className="w-[97%] mx-auto mt-6 mb-8">
             <div className="bg-white rounded-lg p-4 md:p-6">

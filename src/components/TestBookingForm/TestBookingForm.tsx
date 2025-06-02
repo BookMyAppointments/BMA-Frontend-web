@@ -3,6 +3,8 @@ import type { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SuccessPopup from '../SuccessPopup/SuccessPopup'
 import { API_BASE_URL } from '../../services/api'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 interface Test {
     id: string;
@@ -80,7 +82,7 @@ const TestBookingForm: FC<TestBookingFormProps> = ({ testId, labId }) => {
     const handleBooking = async () => {
         try {
             if (!selectedDate || !selectedTime || !test || !lab) {
-                alert('Please select both date and time');
+                toast.error('Please select both date and time');
                 return;
             }
 
@@ -112,6 +114,7 @@ const TestBookingForm: FC<TestBookingFormProps> = ({ testId, labId }) => {
                 throw new Error(errorData.message || 'Failed to book test');
             }
 
+            toast.success('Test booked successfully!');
             setShowSuccessPopup(true);
             setTimeout(() => {
                 setShowSuccessPopup(false);
@@ -119,7 +122,7 @@ const TestBookingForm: FC<TestBookingFormProps> = ({ testId, labId }) => {
             }, 2000);
         } catch (err) {
             console.error('Error booking test:', err);
-            setError(err instanceof Error ? err.message : 'Failed to book test');
+            toast.error(err instanceof Error ? err.message : 'Failed to book test');
         }
     };
 
