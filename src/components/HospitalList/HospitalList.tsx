@@ -10,13 +10,21 @@ interface HospitalListProps {
 
 const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }) => {
     const { serviceType } = useService()
+    const [userLocation,setUserLocation]=useState({lat:0,long:0})
     const [currentPage, setCurrentPage] = useState(1);
     const [doctorData, setDoctorData] = useState<DoctorHospitalData[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const itemsPerPage = 15;
-
-    // Fetch data when category changes
+useEffect(()=>{
+const fetchLocation=()=>navigator.geolocation.getCurrentPosition((position)=>{
+setUserLocation({
+    lat:position.coords.latitude,
+    long:position.coords.longitude
+})
+})
+fetchLocation()
+},[navigator.geolocation])
     useEffect(() => {
         if (serviceType === 'hospitals' && selectedCategory) {
             fetchDoctors(selectedCategory);
@@ -28,6 +36,8 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         setError(null);
         try {
             const data = await fetchDoctorsBySpecialization(specialization);
+            console.log(data);
+            
             setDoctorData(data);
             setCurrentPage(1); 
         } catch (err) {
@@ -50,14 +60,25 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         },
         // ... other static labs
     ];
-
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): string => {
+        const R = 6371; // Radius of the earth in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c; 
+        return `${distance.toFixed(1)} Kms`;
+    };
     const transformedHospitals = doctorData.map((item) => ({
         id: item.hospital.id,
         name: item.hospital.name,
         logo: '/logos/default.png', // Default logo since API doesn't provide it
         description: `Located at ${item.hospital.location.address}`,
         specialties: item.hospital.departments.slice(0, 4), // Show first 4 departments
-        distance: 'N/A', // Calculate based on location if needed
+        distance: calculateDistance(userLocation.lat,userLocation.long,item.hospital.location.lat,item.hospital.location.lng), // Calculate based on location if needed
         isTopRated: item.doctor.ratings >= 4, // Consider top rated if rating >= 4
         departmentsCount: item.hospital.departments.length,
         doctor: {
@@ -142,7 +163,7 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
 
                                 <div className="mt-3 lg:mt-4 pb-2 flex flex-wrap items-center gap-2 lg:gap-4 text-xs lg:text-sm">
                                     <div className="flex items-center gap-1">
-                                        <svg className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
@@ -157,7 +178,7 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
                                         </div>
                                     )}
                                     <div className="flex items-center gap-1">
-                                        <svg className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
                                         </svg>
                                         {facility.departmentsCount}+ {serviceType === 'hospitals' ? 'Departments' : 'Services'}
