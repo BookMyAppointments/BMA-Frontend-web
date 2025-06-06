@@ -32,12 +32,16 @@ export default function Password() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization':`Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify({
-                    email:localStorage.getItem("email"),
+                    
                     newPassword: formData.newPassword,
                 }),
             });
+            const data=await response.json()
+            console.log(data);
+            
 
             if (response.ok) {
                 setSuccess('Password successfully updated');
