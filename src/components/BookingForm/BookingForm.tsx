@@ -3,8 +3,18 @@ import type { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SuccessPopup from '../SuccessPopup/SuccessPopup'
 import type { DoctorHospitalData, Doctor } from '../../services/api'
-import { API_BASE_URL, createAppointment } from '../../services/api'
-import { toast } from 'react-toastify'
+import { createAppointment } from '../../services/api'
+import { toast } from 'react-toastify';
+
+interface Availability {
+    day: string;
+    startTime: string;
+    endTime: string;
+}
+
+interface DateChangeEvent extends React.ChangeEvent<HTMLInputElement> {
+    target: HTMLInputElement;
+}
 
 interface BookingFormProps {
     doctor: DoctorHospitalData | Doctor;
@@ -19,27 +29,29 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
     const [timeSlots, setTimeSlots] = useState<string[]>([]);
 
     const dates: { [key: number]: string } = {
-        0:"Sunday",
-        1:"Monday",
-        2:"Tuesday",
-        3:"Wednesday",
-        4:"Thursday",
-        5:"Friday",
-        6:"Saturday"
+        0: "Sunday",
+        1: "Monday",
+        2: "Tuesday",
+        3: "Wednesday",
+        4: "Thursday",
+        5: "Friday",
+        6: "Saturday"
     }
 
     const formatTimeTo24Hour = (time12h: string) => {
         const [time, modifier] = time12h.split(' ');
         let [hours, minutes] = time.split(':');
-        
+
         if (hours === '12') {
             hours = '00';
         }
-        
+
         if (modifier === 'PM') {
             hours = (parseInt(hours, 10) + 12).toString();
         }
-        
+
+        minutes = minutes || '00';
+
         return `${hours.padStart(2, '0')}:${minutes}`;
     };
 
@@ -67,20 +79,22 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
             setIsLoading(false);
         }
     };
-    const selectDate=(e)=>{
-        const day=dates[new Date(e.target.value).getDay()]
-        setSelectedDate(e.target.value)
-        const filteredDoctorData=doctorData.availability.filter((aval)=>aval.day===day)
-       
-        
+
+    const selectDate = (e: DateChangeEvent): void => {
+        const day: string = dates[new Date(e.target.value).getDay()];
+        setSelectedDate(e.target.value);
+        const filteredDoctorData: Availability[] = doctorData.availability.filter(
+            (aval: Availability) => aval.day === day
+        );
+
         // Generate time slots based on availability
         if (filteredDoctorData.length > 0) {
-            const slots = [];
-            const start = parseInt(filteredDoctorData[0].startTime.split(':')[0]);
-            const end = parseInt(filteredDoctorData[0].endTime.split(':')[0]);
-            
-            for (let hour = start; hour <= end; hour++) {
-                const time = hour <= 12 ? `${hour}:00 AM` : `${hour-12}:00 PM`;
+            const slots: string[] = [];
+            const start: number = parseInt(filteredDoctorData[0].startTime.split(':')[0]);
+            const end: number = parseInt(filteredDoctorData[0].endTime.split(':')[0]);
+
+            for (let hour: number = start; hour <= end; hour++) {
+                const time: string = hour <= 12 ? `${hour}:00 AM` : `${hour - 12}:00 PM`;
                 slots.push(time);
             }
             setTimeSlots(slots);
@@ -97,14 +111,14 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
 
     const doctorData = getDoctorData();
     console.log(doctorData);
-    
+
 
     return (
         <div className="w-[97%] mx-auto mt-6">
             <div className="bg-white rounded-lg p-6">
                 {/* Doctor Info Section */}
                 <div className="flex items-center gap-4 pb-6 border-b">
-                    <img 
+                    <img
                         src={doctorData.user.profile || '/default-doctor.png'}
                         alt={doctorData.user.name}
                         className="w-auto h-20 rounded-full object-fit"
@@ -124,31 +138,30 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-gray-600 mb-2">Select Date</label>
-                                    <input 
-                                        type="date" 
+                                    <input
+                                        type="date"
                                         className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
                                         value={selectedDate}
                                         onChange={selectDate}
                                         min={new Date().toISOString().split('T')[0]}
                                     />
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-gray-600 mb-2">Select Time</label>
                                     <div className="grid grid-cols-3 gap-3">
-                                        {timeSlots.length>0 ?timeSlots.map((time) => (
+                                        {timeSlots.length > 0 ? timeSlots.map((time) => (
                                             <button
                                                 key={time}
                                                 onClick={() => setSelectedTime(time)}
-                                                className={`px-4 py-2 rounded-lg border ${
-                                                    selectedTime === time 
-                                                        ? 'bg-blue-50 border-blue-500 text-blue-600' 
+                                                className={`px-4 py-2 rounded-lg border ${selectedTime === time
+                                                        ? 'bg-blue-50 border-blue-500 text-blue-600'
                                                         : 'border-gray-200 hover:border-blue-500'
-                                                }`}
+                                                    }`}
                                             >
                                                 {time}
                                             </button>
-                                        )):"No Available Slots"}
+                                        )) : "No Available Slots"}
                                     </div>
                                 </div>
                             </div>
@@ -181,7 +194,7 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
                                         <div className="border-t border-gray-200"></div>
                                     </>
                                 )}
-                                
+
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Consultation Fee</span>
                                     <span className="font-medium">₹{doctorData.price}</span>
@@ -208,11 +221,10 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
                         <button
                             onClick={handleBooking}
                             disabled={!selectedDate || !selectedTime || isLoading}
-                            className={`w-full bg-blue-500 text-white rounded-lg py-3 transition-colors ${
-                                (!selectedDate || !selectedTime || isLoading) 
-                                    ? 'opacity-50 cursor-not-allowed' 
+                            className={`w-full bg-blue-500 text-white rounded-lg py-3 transition-colors ${(!selectedDate || !selectedTime || isLoading)
+                                    ? 'opacity-50 cursor-not-allowed'
                                     : 'hover:bg-blue-600'
-                            }`}
+                                }`}
                         >
                             {isLoading ? 'Creating Appointment...' : 'Confirm Booking'}
                         </button>
