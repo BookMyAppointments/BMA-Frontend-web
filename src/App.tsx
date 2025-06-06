@@ -19,10 +19,13 @@ import Support from './pages/HelpSupport/Support'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { GoogleOAuthProvider } from '@react-oauth/google'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 
 
 function App() {
+    const client=new QueryClient()
     return (
+        <QueryClientProvider client={client}>
         <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
             <SessionProvider>
                 <ServiceProvider>
@@ -63,6 +66,7 @@ function App() {
                 </ServiceProvider>
             </SessionProvider>
         </GoogleOAuthProvider>
+        </QueryClientProvider>
     )
 }
 

@@ -3,7 +3,7 @@ import type { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SuccessPopup from '../SuccessPopup/SuccessPopup'
 import type { DoctorHospitalData, Doctor } from '../../services/api'
-import { createAppointment } from '../../services/api'
+import { API_BASE_URL, createAppointment } from '../../services/api'
 import { toast } from 'react-toastify'
 
 interface BookingFormProps {
@@ -16,11 +16,17 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
     const [selectedTime, setSelectedTime] = useState<string>('');
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [timeSlots, setTimeSlots] = useState<string[]>([]);
 
-    const timeSlots = [
-        '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', 
-        '12:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'
-    ];
+    const dates: { [key: number]: string } = {
+        0:"Sunday",
+        1:"Monday",
+        2:"Tuesday",
+        3:"Wednesday",
+        4:"Thursday",
+        5:"Friday",
+        6:"Saturday"
+    }
 
     const formatTimeTo24Hour = (time12h: string) => {
         const [time, modifier] = time12h.split(' ');
@@ -61,6 +67,25 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
             setIsLoading(false);
         }
     };
+    const selectDate=(e)=>{
+        const day=dates[new Date(e.target.value).getDay()]
+        setSelectedDate(e.target.value)
+        const filteredDoctorData=doctorData.availability.filter((aval)=>aval.day===day)
+       
+        
+        // Generate time slots based on availability
+        if (filteredDoctorData.length > 0) {
+            const slots = [];
+            const start = parseInt(filteredDoctorData[0].startTime.split(':')[0]);
+            const end = parseInt(filteredDoctorData[0].endTime.split(':')[0]);
+            
+            for (let hour = start; hour <= end; hour++) {
+                const time = hour <= 12 ? `${hour}:00 AM` : `${hour-12}:00 PM`;
+                slots.push(time);
+            }
+            setTimeSlots(slots);
+        }
+    }
 
     // Helper function to get doctor data
     const getDoctorData = () => {
@@ -71,6 +96,8 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
     };
 
     const doctorData = getDoctorData();
+    console.log(doctorData);
+    
 
     return (
         <div className="w-[97%] mx-auto mt-6">
@@ -101,7 +128,7 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
                                         type="date" 
                                         className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
                                         value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
+                                        onChange={selectDate}
                                         min={new Date().toISOString().split('T')[0]}
                                     />
                                 </div>
@@ -109,7 +136,7 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
                                 <div>
                                     <label className="block text-gray-600 mb-2">Select Time</label>
                                     <div className="grid grid-cols-3 gap-3">
-                                        {timeSlots.map((time) => (
+                                        {timeSlots.length>0 ?timeSlots.map((time) => (
                                             <button
                                                 key={time}
                                                 onClick={() => setSelectedTime(time)}
@@ -121,7 +148,7 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
                                             >
                                                 {time}
                                             </button>
-                                        ))}
+                                        )):"No Available Slots"}
                                     </div>
                                 </div>
                             </div>

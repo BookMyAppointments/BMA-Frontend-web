@@ -5,6 +5,7 @@ export interface Doctor {
     userId: string;
     specialization: string[];
     qualifications: string[];
+    noOfPatients:number
     ratings: number;
     about: string;
     price: number;
@@ -69,6 +70,7 @@ export interface DoctorHospitalData {
     hospitalId: string;
     doctor: Doctor;
     hospital: Hospital;
+    
 }
 
 export interface Appointment {
