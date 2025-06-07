@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
 
 // Types
 interface SignInFormData {
@@ -230,9 +231,9 @@ const SignIn: React.FC = () => {
                                 Remember me
                             </label>
                         </div>
-                        <a href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+                        <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
                             Forgot password?
-                        </a>
+                        </Link>
                     </div>
 
                     <button
@@ -245,9 +246,9 @@ const SignIn: React.FC = () => {
 
                     <p className="mt-4 text-center text-sm text-gray-600">
                         Don't have an account?{' '}
-                        <a href="/signup" className="text-blue-600 hover:text-blue-500">
+                        <Link to="/signup" className="text-blue-600 hover:text-blue-500">
                             Sign up
-                        </a>
+                        </Link>
                     </p>
                 </form>
             </div>

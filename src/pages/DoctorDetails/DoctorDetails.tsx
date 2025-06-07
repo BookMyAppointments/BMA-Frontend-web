@@ -5,6 +5,7 @@ import MobileNavbar from '../../components/Navbar/MobileNavbar';
 import Footer from '../../components/Footer/Footer';
 import { DoctorBanner } from '../../components/DoctorBanner/DoctorBanner';
 import DoctorInfo from '../../components/DoctorDetails/DoctorInfo';
+import { API_BASE_URL } from '../../services/api';
 
 const DoctorDetails: FC = () => {
     const { id } = useParams();
@@ -16,7 +17,7 @@ const DoctorDetails: FC = () => {
 
         const fetchDoctor = async () => {
             try {  
-                const res = await fetch(`http://localhost:5000/api/v1/doctors/get/${id}`);
+                const res = await fetch(`${API_BASE_URL}/doctors/get/${id}`);
                 const data=await res.json();
                 console.log(data);
                 
