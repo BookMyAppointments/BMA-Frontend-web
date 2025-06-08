@@ -25,7 +25,7 @@ interface User {
 }
 
 export default function Personal() {
-    const [, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [imageUrl, setImageUrl] = useState('/profile-placeholder.png');
     const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState({
@@ -37,13 +37,19 @@ export default function Personal() {
         dob: ''
     });
     const [isUpdating, setIsUpdating] = useState(false);
-    const [editMode, setEditMode] = useState({
-        name: false,
-        phone: false,
-        address: false,
-        gender: false,
-        dob: false
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [initialFormData, setInitialFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        gender: '',
+        dob: ''
     });
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [isSendingCode, setIsSendingCode] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
 
     useEffect(() => {
         fetchUserProfile();
@@ -59,17 +65,20 @@ export default function Personal() {
                     }
                 }
             );
-            console.log(response.data);
+            console.log(response.data.profile);
             
             setUser(response.data);
-            setFormData({
+            const newFormData = {
                 name: response.data.name || '',
                 email: response.data.email || '',
                 phone: response.data.phone || '',
                 address: response.data.profile?.address || '',
                 gender: response.data.profile?.gender || '',
-                dob: response.data.profile?.dob || ''
-            });
+                dob: response.data.profile?.dob ? new Date(response.data.profile.dob).toISOString().split('T')[0] : ''
+            };
+            
+            setFormData(newFormData);
+            setInitialFormData(newFormData);
             setImageUrl(response.data.profile?.picture || '/profile-placeholder.png');
         } catch (error) {
             console.error('Failed to fetch profile:', error);
@@ -83,11 +92,8 @@ export default function Personal() {
         }));
     };
 
-    const toggleEdit = (field: keyof typeof editMode) => {
-        setEditMode(prev => ({
-            ...prev,
-            [field]: !prev[field]
-        }));
+    const hasChanges = () => {
+        return Object.keys(formData).some(key => formData[key as keyof typeof formData] !== initialFormData[key as keyof typeof initialFormData]);
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,8 +127,71 @@ export default function Personal() {
         }
     };
 
+    const sendVerificationCode = async () => {
+        try {
+            setIsSendingCode(true);
+            await axios.post(
+                `${API_BASE_URL}/auth/send-verification-code`,
+                { email: formData.email },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+            setShowVerificationModal(true);
+            toast.success('Verification code sent to your email');
+        } catch (error: any) {
+            console.error('Failed to send verification code:', error);
+            toast.error(error.response?.data?.message || 'Failed to send verification code');
+        } finally {
+            setIsSendingCode(false);
+        }
+    };
+
+    const verifyEmail = async () => {
+        try {
+            setIsVerifying(true);
+            const response = await axios.post(
+                `${API_BASE_URL}/auth/verify`,
+                { 
+                    email: formData.email,
+                    code: verificationCode 
+                }
+            );
+            
+            if (response.status === 200) {
+                setShowVerificationModal(false);
+                toast.success('Email verified successfully');
+                return true;
+            }
+            return false;
+        } catch (error: any) {
+            console.error('Verification failed:', error);
+            toast.error(error.response?.data?.message || 'Invalid verification code');
+            return false;
+        } finally {
+            setIsVerifying(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!hasChanges()) {
+            toast.error('No changes made to update');
+            return;
+        }
+
+        // If email is changed, verify it first
+        if (formData.email !== initialFormData.email) {
+            await sendVerificationCode();
+            return;
+        }
+if(formData.phone.startsWith("+") || formData.phone.length<10 || formData.phone.length>10 || formData.phone.startsWith("0")) {
+    toast.error("Invalid phone number")
+    return;
+}
         setIsUpdating(true);
 
         try {
@@ -137,8 +206,10 @@ export default function Personal() {
             );
 
             if (response.status === 200) {
-                fetchUserProfile(); // Refresh user data after update
-                toast.error('Profile updated successfully');
+                setInitialFormData(formData);
+                setIsEditMode(false);
+                fetchUserProfile(); 
+                toast.success('Profile updated successfully');
             }
         } catch (error) {
             console.error('Update failed:', error);
@@ -148,142 +219,209 @@ export default function Personal() {
         }
     };
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800">Personal Information</h3>
+    const handleVerificationSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const isVerified = await verifyEmail();
+        if (isVerified) {
+            setIsUpdating(true);
+            try {
+                const response = await axios.put(
+                    `${API_BASE_URL}/auth/profile`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }
+                );
 
-            <div className="flex items-center space-x-6">
-                <div className="relative h-24 w-24">
-                    <img
-                        src={imageUrl}
-                        alt="Profile"
-                        className="rounded-full w-full h-full object-cover"
-                    />
-                    <input
-                        type="file"
-                        id="imageUpload"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                        accept="image/*"
-                    />
-                    <label
-                        htmlFor="imageUpload"
-                        className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full cursor-pointer"
-                    >
-                        {isUploading ? '...' : '📷'}
+                if (response.status === 200) {
+                    setInitialFormData(formData);
+                    setIsEditMode(false);
+                    fetchUserProfile(); 
+                    toast.success('Profile updated successfully');
+                }
+            } catch (error) {
+                console.error('Update failed:', error);
+                toast.error('Failed to update profile');
+            } finally {
+                setIsUpdating(false);
+            }
+        }
+    };
+
+    return (
+        <>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold text-gray-800">Personal Information</h3>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={isEditMode} 
+                            onChange={() => setIsEditMode(!isEditMode)} 
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span className="ml-2 text-sm font-medium text-gray-700">Edit Mode</span>
                     </label>
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center space-x-4">
-                    <div className="flex-1">
+                <div className="flex items-center space-x-6">
+                    <div className="relative h-24 w-24">
+                        <img
+                            src={imageUrl}
+                            alt="Profile"
+                            className="rounded-full w-full h-full object-cover"
+                        />
+                        <input
+                            type="file"
+                            id="imageUpload"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            accept="image/*"
+                        />
+                        <label
+                            htmlFor="imageUpload"
+                            className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full cursor-pointer"
+                        >
+                            {isUploading ? (
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            ) : '📷'}
+                        </label>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
                         <label className="block text-gray-700 mb-2">Full Name</label>
                         <input
                             type="text"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            disabled={!editMode.name}
-                            className={`w-full px-4 py-2 rounded-lg border ${editMode.name ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
+                            disabled={!isEditMode}
+                            className={`w-full px-4 py-2 rounded-lg border ${isEditMode ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
                         />
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer mt-6">
-                        <input type="checkbox" className="sr-only peer" checked={editMode.name} onChange={() => toggleEdit('name')} />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                </div>
 
-                <div>
-                    <label className="block text-gray-700 mb-2">Email</label>
-                    <input
-                        type="email"
-                        value={formData.email}
-                        disabled
-                        className="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50"
-                    />
-                </div>
+                    <div>
+                        <label className="block text-gray-700 mb-2">Email</label>
+                        <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            disabled={!isEditMode}
+                            className={`w-full px-4 py-2 rounded-lg border ${isEditMode ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
+                        />
+                    </div>
 
-                <div className="flex items-center space-x-4">
-                    <div className="flex-1">
+                    <div>
                         <label className="block text-gray-700 mb-2">Phone</label>
                         <input
                             type="tel"
                             name="phone"
                             value={formData.phone}
                             onChange={handleChange}
-                            disabled={!editMode.phone}
-                            className={`w-full px-4 py-2 rounded-lg border ${editMode.phone ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
+                            disabled={!isEditMode}
+                            className={`w-full px-4 py-2 rounded-lg border ${isEditMode ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
                         />
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer mt-6">
-                        <input type="checkbox" className="sr-only peer" checked={editMode.phone} onChange={() => toggleEdit('phone')} />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                </div>
 
-                <div className="flex items-center space-x-4">
-                    <div className="flex-1">
+                    <div>
                         <label className="block text-gray-700 mb-2">Address</label>
                         <input
                             type="text"
                             name="address"
                             value={formData.address}
                             onChange={handleChange}
-                            disabled={!editMode.address}
-                            className={`w-full px-4 py-2 rounded-lg border ${editMode.address ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
+                            disabled={!isEditMode}
+                            className={`w-full px-4 py-2 rounded-lg border ${isEditMode ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
                         />
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer mt-6">
-                        <input type="checkbox" className="sr-only peer" checked={editMode.address} onChange={() => toggleEdit('address')} />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                </div>
 
-                <div className="flex items-center space-x-4">
-                    <div className="flex-1">
+                    <div>
                         <label className="block text-gray-700 mb-2">Gender</label>
                         <input
                             type="text"
                             name="gender"
                             value={formData.gender}
                             onChange={handleChange}
-                            disabled={!editMode.gender}
-                            className={`w-full px-4 py-2 rounded-lg border ${editMode.gender ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
+                            disabled={!isEditMode}
+                            className={`w-full px-4 py-2 rounded-lg border ${isEditMode ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
                         />
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer mt-6">
-                        <input type="checkbox" className="sr-only peer" checked={editMode.gender} onChange={() => toggleEdit('gender')} />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                </div>
 
-                <div className="flex items-center space-x-4">
-                    <div className="flex-1">
+                    <div>
                         <label className="block text-gray-700 mb-2">Date of Birth</label>
                         <input
                             type="date"
                             name="dob"
                             value={formData.dob || ''}
                             onChange={handleChange}
-                            disabled={!editMode.dob}
-                            className={`w-full px-4 py-2 rounded-lg border ${editMode.dob ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
+                            disabled={!isEditMode}
+                            className={`w-full px-4 py-2 rounded-lg border ${isEditMode ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
                         />
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer mt-6">
-                        <input type="checkbox" className="sr-only peer" checked={editMode.dob} onChange={() => toggleEdit('dob')} />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
                 </div>
-            </div>
 
-            <button
-                type="submit"
-                disabled={isUpdating}
-                className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300"
-            >
-                {isUpdating ? 'Updating...' : 'Update Profile'}
-            </button>
-        </form>
+                <button
+                    type="submit"
+                    disabled={isUpdating || !isEditMode || isSendingCode}
+                    className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 flex items-center justify-center gap-2"
+                >
+                    {isUpdating ? 'Updating...' : isSendingCode ? (
+                        <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Sending Code...
+                        </>
+                    ) : 'Update Profile'}
+                </button>
+            </form>
+
+            {/* Email Verification Modal */}
+            {showVerificationModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-lg font-semibold mb-4">Verify Your Email</h3>
+                        <p className="text-gray-600 mb-4">
+                            Please enter the verification code sent to your email address.
+                        </p>
+                        <form onSubmit={handleVerificationSubmit}>
+                            <input
+                                type="text"
+                                value={verificationCode}
+                                onChange={(e) => setVerificationCode(e.target.value)}
+                                placeholder="Enter verification code"
+                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none mb-4"
+                            />
+                            <div className="flex justify-end gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowVerificationModal(false)}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-700"
+                                    disabled={isVerifying}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isVerifying}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 flex items-center gap-2"
+                                >
+                                    {isVerifying ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            Verifying...
+                                        </>
+                                    ) : 'Verify & Update'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }

@@ -65,7 +65,7 @@ const SignIn: React.FC = () => {
 
         try {
             const requestData: SignInRequest = {
-                email: formData.email,
+                email: formData.email.toLowerCase().trim(),
                 password: formData.password
             };
 

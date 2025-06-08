@@ -18,16 +18,23 @@ interface SearchResult {
     location?: string;
 }
 
+interface Location {
+    lat: number;
+    lng: number;
+    address: string;
+}
+
 const Navbar: FC = () => {
     const { serviceType, toggleService } = useService()
     const { user, isAuthenticated, logout } = useSession()
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
     const [profilePicture, setProfilePicture] = useState('/profile-placeholder.png')
-    const [searchType, setSearchType] = useState<SearchType>('doctor')
     const [searchQuery, setSearchQuery] = useState('')
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const [searchResults, setSearchResults] = useState<SearchResult[]>([])
     const [isSearching, setIsSearching] = useState(false)
+    const [userLocation, setUserLocation] = useState<Location | null>(null)
+    const [isGettingLocation, setIsGettingLocation] = useState(false)
     const location = useLocation()
     const navigate = useNavigate()
     const isHomePage = location.pathname === '/'
@@ -70,36 +77,63 @@ const Navbar: FC = () => {
         navigate('/signin')
     }
 
+    const getCurrentLocation = () => {
+        setIsGettingLocation(true);
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    // Store coordinates and use a simple format for display
+                    const location = {
+                        lat: latitude,
+                        lng: longitude,
+                        address: `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
+                    };
+                    setUserLocation(location);
+                    setSearchQuery(location.address);
+                    handleSearch(location.address);
+                    setIsGettingLocation(false);
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                    toast.error('Failed to get your location');
+                    setIsGettingLocation(false);
+                }
+            );
+        } else {
+            toast.error('Geolocation is not supported by your browser');
+            setIsGettingLocation(false);
+        }
+    };
+
     const handleSearch = async (query: string) => {
         if (!query.trim()) {
             setSearchResults([]);
             return;
         }
-
         setIsSearching(true);
         try {
             let endpoint = '';
-            switch (searchType) {
-                case 'doctor':
-                    endpoint = `${API_BASE_URL}/search/doctors?name=${encodeURIComponent(query)}`;
-                    break;
-                case 'hospital':
-                    endpoint = `${API_BASE_URL}/search/hospitals?name=${encodeURIComponent(query)}`;
-                    break;
-                case 'lab':
-                    endpoint = `${API_BASE_URL}/search/labs?name=${encodeURIComponent(query)}`;
-                    break;
+            const params = new URLSearchParams();
+            
+            if (userLocation) {
+                params.append('lat', userLocation.lat.toString());
+                params.append('lng', userLocation.lng.toString());
+                params.append('radius', '10'); // 10km radius
             }
-console.log(endpoint);
+            
+            if (serviceType === 'hospitals') {
+                endpoint = `${API_BASE_URL}/search/hospitals?${params.toString()}&location=${encodeURIComponent(query)}`;
+            } else {
+                endpoint = `${API_BASE_URL}/search/labs?${params.toString()}&location=${encodeURIComponent(query)}`;
+            }
 
             const response = await axios.get(endpoint);
-            console.log(response);
             
             const results = response.data.map((item: any) => ({
                 id: item.id,
-                name: searchType === 'doctor' ? item.doctor.user.name : item.name,
-                type: searchType,
-                specialization: searchType === 'doctor' ? item.doctor.specialization : undefined,
+                name: item.name,
+                type: serviceType === 'hospitals' ? 'hospital' : 'lab',
                 location: item.location?.address || item.hospital?.location?.address
             }));
             setSearchResults(results);
@@ -114,17 +148,7 @@ console.log(endpoint);
     const handleResultClick = (result: SearchResult) => {
         setSearchQuery('');
         setSearchResults([]);
-        switch (result.type) {
-            case 'doctor':
-                navigate(`/doctor/${result.id}`);
-                break;
-            case 'hospital':
-                navigate(`/hospital/${result.id}`);
-                break;
-            case 'lab':
-                navigate(`/lab/${result.id}`);
-                break;
-        }
+        navigate(`/${result.type}/${result.id}`);
     };
 
     return (
@@ -144,19 +168,22 @@ console.log(endpoint);
                 {/* Search box */}
                 <div className="relative flex-1 max-w-2xl">
                     <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white">
-                        <select
-                            value={searchType}
-                            onChange={(e) => setSearchType(e.target.value as SearchType)}
-                            className="bg-transparent outline-none text-gray-600 border-r pr-2"
-                            onFocus={() => setIsSearchFocused(true)}
+                        <button 
+                            onClick={getCurrentLocation}
+                            className="text-blue-500 hover:text-blue-600 transition-colors"
+                            title="Use my current location"
                         >
-                            <option value="doctor">Doctors</option>
-                            <option value="hospital">Hospitals</option>
-                            <option value="lab">Labs</option>
-                        </select>
+                            {isGettingLocation ? (
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 100 4z" clipRule="evenodd" />
+                                </svg>
+                            )}
+                        </button>
                         <input
                             type="text"
-                            placeholder={`Search ${searchType}s...`}
+                            placeholder={`Search ${serviceType} in your area...`}
                             value={searchQuery}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);
@@ -184,9 +211,6 @@ console.log(endpoint);
                                     className="w-full px-4 py-3 text-left hover:bg-gray-50 flex flex-col"
                                 >
                                     <span className="font-medium text-gray-900">{result.name}</span>
-                                    {result.specialization && (
-                                        <span className="text-sm text-gray-500">{result.specialization}</span>
-                                    )}
                                     {result.location && (
                                         <span className="text-sm text-gray-500">{result.location}</span>
                                     )}
@@ -313,12 +337,20 @@ console.log(endpoint);
                                 >
                                     Health Records
                                 </Link>
+                                <Link
+                                    to="/help"
+                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                    onClick={() => setIsProfileMenuOpen(false)}
+                                >
+                                    Help & Support
+                                </Link>
                                 <button
                                     onClick={handleLogout}
                                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                                 >
                                     Sign Out
                                 </button>
+                                
                             </motion.div>
                         )}
                     </AnimatePresence>
