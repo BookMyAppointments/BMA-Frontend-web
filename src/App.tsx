@@ -20,6 +20,8 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import Emergency from './pages/Emergency/Emergency'
+import EmergencyBooking from './pages/EmergencyBooking/EmergencyBooking'
 
 function App() {
     const client=new QueryClient()
@@ -32,6 +34,8 @@ function App() {
                         <div className="App">
                             <Routes>
                                 <Route path="/" element={<Home />} />
+                                <Route path="/emergency" element={<Emergency />} />
+                                <Route path="/emergency-booking/:hospitalId" element={<EmergencyBooking />} />
                                 <Route path="/signup" element={<SignUp />} />
                                 <Route path="/verify" element={<Verify />} />
                                 <Route path="/signin" element={<SignIn />} />

@@ -1,4 +1,5 @@
 export const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api/v1';
+console.log('API Base URL:', API_BASE_URL);
 
 export interface Doctor {
     id: string;
@@ -83,9 +84,13 @@ export interface Appointment {
     createdAt: string;
 }
 
-export const fetchDoctors = async (): Promise<DoctorHospitalData[]> => {
+export const fetchDoctors = async (isEmergency?: boolean): Promise<DoctorHospitalData[]> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/search/doctors`);
+        let url = `${API_BASE_URL}/search/doctors`;
+        if (isEmergency) {
+            url += `?isEmergency=true`;
+        }
+        const response = await fetch(url);
         const data = await response.json();
         return data;
     } catch (error) {
@@ -154,6 +159,22 @@ export const createAppointment = async (appointmentData: {
         return data;
     } catch (error) {
         console.error('Error creating appointment:', error);
+        throw error;
+    }
+};
+
+export const fetchDoctorsByHospitalId = async (hospitalId: string): Promise<DoctorHospitalData[]> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/search/doctors?hospitalId=${encodeURIComponent(hospitalId)}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(`Error fetching doctors for hospital ${hospitalId}:`, error);
         throw error;
     }
 };
