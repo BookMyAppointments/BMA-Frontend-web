@@ -115,13 +115,13 @@ const Navbar: FC = () => {
         try {
             let endpoint = '';
             const params = new URLSearchParams();
-            
+
             if (userLocation) {
                 params.append('lat', userLocation.lat.toString());
                 params.append('lng', userLocation.lng.toString());
                 params.append('radius', '10'); // 10km radius
             }
-            
+
             if (serviceType === 'hospitals') {
                 endpoint = `${API_BASE_URL}/search/hospitals?${params.toString()}&location=${encodeURIComponent(query)}`;
             } else {
@@ -129,7 +129,7 @@ const Navbar: FC = () => {
             }
 
             const response = await axios.get(endpoint);
-            
+
             const results = response.data.map((item: any) => ({
                 id: item.id,
                 name: item.name,
@@ -156,19 +156,19 @@ const Navbar: FC = () => {
             <div className="flex items-center">
                 {/* Logo and tagline */}
                 <div className="flex flex-col mr-6">
-                    <div className="text-blue-600 font-semibold">
-                        <Link to="/" className="flex items-center">
-                            Book My
-                            <span className="text-gray-700">Appointments</span>
-                        </Link>
-                    </div>
-                    <span className="text-xs text-gray-500">Making Medical Appointments made easy</span>
+                    <Link to="/" className="flex items-center">
+                        <img
+                            src="/logo.png"
+                            alt="Book My Appointments Logo"
+                            className="h-10 w-auto"
+                        />
+                    </Link>
                 </div>
 
                 {/* Search box */}
-                <div className="relative flex-1 max-w-2xl">
+                <div className="relative flex-1 max-w-sm px-8 pt-2">
                     <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white">
-                        <button 
+                        <button
                             onClick={getCurrentLocation}
                             className="text-blue-500 hover:text-blue-600 transition-colors"
                             title="Use my current location"
@@ -228,7 +228,7 @@ const Navbar: FC = () => {
                                 onClick={toggleService}
                                 className="flex items-center gap-1 px-4 pr-2 py-2 z-10 h-12"
                             >
-                                <motion.div 
+                                <motion.div
                                     className={`flex items-center justify-center ${serviceType === 'hospitals' ? 'bg-blue-500' : ''}`}
                                     initial={false}
                                     animate={{
@@ -248,7 +248,7 @@ const Navbar: FC = () => {
                                 <motion.span
                                     className="text-gray-600"
                                     initial={false}
-                                    animate={{ 
+                                    animate={{
                                         opacity: serviceType !== 'hospitals' ? 1 : 0,
                                         width: serviceType !== 'hospitals' ? 'auto' : 0
                                     }}
@@ -261,7 +261,7 @@ const Navbar: FC = () => {
                                 onClick={toggleService}
                                 className="flex items-center gap-1 px-4 pl-0 py-2 z-10 h-12"
                             >
-                                <motion.div 
+                                <motion.div
                                     className={`flex items-center justify-center ${serviceType === 'labs' ? 'bg-blue-500' : ''}`}
                                     initial={false}
                                     animate={{
@@ -281,7 +281,7 @@ const Navbar: FC = () => {
                                 <motion.span
                                     className="text-gray-600"
                                     initial={false}
-                                    animate={{ 
+                                    animate={{
                                         opacity: serviceType !== 'labs' ? 1 : 0,
                                         width: serviceType !== 'labs' ? 'auto' : 0
                                     }}
@@ -296,13 +296,15 @@ const Navbar: FC = () => {
 
                 {/* Profile Section */}
                 <div className="relative ml-auto">
-                    <button 
+                    <button
                         onClick={handleProfileClick}
-                        className="flex items-center gap-2 bg-[#F3F3F3] rounded-full hover:bg-gray-100 transition-colors"
+                        className="flex items-center gap-2 bg-[#F3F3F3] p-2 rounded-full hover:bg-gray-100 transition-colors"
                     >
+                         {isAuthenticated && (
                         <div className="w-8 h-8 rounded-full bg-gray-200 m-1 overflow-hidden">
                             <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
                         </div>
+                         )}
                         <span className="text-black font-semibold mx-2">
                             {isAuthenticated ? user?.name : 'Sign In'}
                         </span>
@@ -350,7 +352,7 @@ const Navbar: FC = () => {
                                 >
                                     Sign Out
                                 </button>
-                                
+
                             </motion.div>
                         )}
                     </AnimatePresence>

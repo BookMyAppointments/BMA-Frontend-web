@@ -26,7 +26,7 @@ interface SignInRequest {
 }
 
 // Environment configuration
-const API_BASE_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api/v1';
 
 // Bird Logo Component
 const BirdLogo: React.FC = () => (
