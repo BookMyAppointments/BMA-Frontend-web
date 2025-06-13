@@ -29,6 +29,7 @@ const Navbar: FC = () => {
     const { user, isAuthenticated, logout } = useSession()
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
     const [profilePicture, setProfilePicture] = useState('/profile-placeholder.png')
+    const [userName, setUserName] = useState('')
     const [searchQuery, setSearchQuery] = useState('')
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const [searchResults, setSearchResults] = useState<SearchResult[]>([])
@@ -57,6 +58,9 @@ const Navbar: FC = () => {
             );
             if (response.data.profile?.picture) {
                 setProfilePicture(response.data.profile.picture);
+            }
+            if (response.data.name) {
+                setUserName(response.data.name);
             }
         } catch (error) {
             console.error('Failed to fetch profile:', error);
@@ -306,7 +310,7 @@ const Navbar: FC = () => {
                         </div>
                          )}
                         <span className="text-black font-semibold mx-2">
-                            {isAuthenticated ? user?.name : 'Sign In'}
+                            {isAuthenticated ? userName : 'Sign In'}
                         </span>
                     </button>
 
