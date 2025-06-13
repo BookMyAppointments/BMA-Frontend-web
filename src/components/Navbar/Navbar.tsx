@@ -26,7 +26,7 @@ interface Location {
 
 const Navbar: FC = () => {
     const { serviceType, toggleService } = useService()
-    const { user, isAuthenticated, logout } = useSession()
+    const { isAuthenticated, logout } = useSession()
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
     const [profilePicture, setProfilePicture] = useState('/profile-placeholder.png')
     const [userName, setUserName] = useState('')
