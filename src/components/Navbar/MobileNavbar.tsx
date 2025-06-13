@@ -39,12 +39,6 @@ const MobileNavbar: FC = () => {
     const [userLocation, setUserLocation] = useState<Location | null>(null)
     const [isGettingLocation, setIsGettingLocation] = useState(false)
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value)
-        // Optional: Call API or update context
-        // e.g., updateSearchLocation(e.target.value)
-    }
-
     const getCurrentLocation = () => {
         setIsGettingLocation(true);
         if (navigator.geolocation) {
