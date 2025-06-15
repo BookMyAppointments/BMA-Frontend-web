@@ -27,7 +27,7 @@ const Navbar: FC = () => {
     const navigate = (path: string) => {
         window.location.href = path;
     }
-    
+
     useEffect(() => {
         if (isAuthenticated) {
             fetchUserProfile();
@@ -149,8 +149,8 @@ const Navbar: FC = () => {
                 <div className="flex flex-col mr-6">
                     <div className="text-blue-600 font-semibold">
                         <Link href="/" className="flex items-center">
-                            Med
-                            <span className="text-gray-700">Connect</span>
+                            BookMy
+                            <span className="text-gray-700">Appointments</span>
                         </Link>
                     </div>
                     <span className="text-xs text-gray-500">Making Medical Appointments made easy</span>

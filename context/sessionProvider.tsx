@@ -17,7 +17,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         fetchUserProfile();
-    }, [user]);
+    }, []);
 
     const fetchUserProfile = async () => {
         const token = localStorage.getItem("token");

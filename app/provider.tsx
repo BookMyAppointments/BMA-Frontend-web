@@ -1,23 +1,13 @@
-'use client';
 import { SessionProvider } from '@/context/sessionProvider';
 import { ThemeProvider } from '@/context/themeProvider';
-import ReactQueryProvider from "@/context/queryProvider"
+import { ServiceProvider } from '@/context/serviceProvider';
+import { ReactQueryProvider } from "@/context/queryProvider"
 
 import Navbar from '@/components/layout/navbar';
 import MobileNavbar from '@/components/layout/mobile-navbar';
-import { ServiceProvider } from '@/context/serviceProvider';
-import { useState } from 'react';
-import Chatbot from '@/components/chatbot/ChatBot';
-import ChatbotIcon from '@/components/chatbot/ChatBotIcon';
+import Footer from '@/components/layout/footer';
 
 export default function Provider({ children }: { children: React.ReactNode }) {
-
-    const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-
-    const toggleChatbot = () => {
-        setIsChatbotOpen(!isChatbotOpen);
-    };
-
     return (
         <ReactQueryProvider >
             <SessionProvider>
@@ -36,9 +26,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
                                 <Navbar />
                             </div>
                             {children}
-
-                            {isChatbotOpen && <Chatbot onClose={() => setIsChatbotOpen(false)} />}
-                            <ChatbotIcon onClick={toggleChatbot} />
+                            <Footer />
                         </div>
                     </ThemeProvider>
                 </ServiceProvider>

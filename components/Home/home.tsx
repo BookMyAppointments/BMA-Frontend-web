@@ -3,6 +3,7 @@ import { useState, type FC } from 'react';
 // import Banner from '../../components/Banner/Banner'
 import Categories from '../dash/hospital/Categories';
 import HospitalList from '../dash/hospital/HospitalList';
+import Banner from '../layout/Banner';
 
 const Home: FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>('Cardiology');
@@ -20,10 +21,10 @@ const Home: FC = () => {
                         onCategoryChange={handleCategoryChange}
                         initialCategory={selectedCategory}
                     />
-                    {/* <Banner /> */}
+                    <Banner />
                 </div>
                 <div className="hidden lg:block">
-                    {/* <Banner /> */}
+                    <Banner />
                     <Categories
                         onCategoryChange={handleCategoryChange}
                         initialCategory={selectedCategory}
