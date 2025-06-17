@@ -5,6 +5,7 @@ import { BirdLogo } from '../icons/bird';
 import { ApiResponse, SignInFormData, SignInRequest } from '@/types/auth';
 import { API_BASE_URL } from '@/services/api';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
 
 const SignIn: React.FC = () => {
     const [formData, setFormData] = useState<SignInFormData>({
@@ -48,6 +49,7 @@ const SignIn: React.FC = () => {
             if (response.ok) {
                 console.log('Login successful:', data);
                 window.localStorage.setItem('token', data?.token || '');
+                toast.success('Login successful! Redirecting...');
                 window.location.href = '/';
             } else {
                 setError(data.message || 'Login failed');

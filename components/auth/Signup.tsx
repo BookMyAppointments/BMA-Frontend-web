@@ -113,7 +113,7 @@ const SignUp: React.FC = () => {
             if (response.ok) {
                 console.log('Signup successful:', data);
                 localStorage.setItem('email', formData.email);
-                window.location.href = '/verify';
+                window.location.href = '/auth/verify';
             } else {
                 setError(data.message || 'Signup failed');
             }

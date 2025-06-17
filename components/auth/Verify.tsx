@@ -110,7 +110,7 @@ const Verify: React.FC = () => {
                 console.log('Verification successful:', data);
                 setSuccess('Email verified successfully!');
                 window.localStorage.removeItem('email');
-                window.location.href = '/signin';
+                window.location.href = '/auth/signin';
             } else {
                 setError(data.message || 'Verification failed. Please try again.');
             }

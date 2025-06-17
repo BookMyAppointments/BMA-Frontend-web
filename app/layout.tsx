@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 // import { metadata as siteMetadata } from '@/config/metadata';
 // import CustomHead from "@/components/head";
 import Provider from "./provider";
+import { ToastContainer } from "react-toastify";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title : "",
+  title: "",
   description: "",
 };
 
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Provider >
+          <ToastContainer />
           {children}
         </Provider>
       </body>
