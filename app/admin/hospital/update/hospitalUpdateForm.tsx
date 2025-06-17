@@ -1,11 +1,11 @@
 'use client';
 import { toast } from 'react-toastify';
-import React, { useState } from 'react';
-import { Building, Users, Wrench, Heart, Save, Loader2 } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Building, Users, Wrench, Heart, Save, Loader2, Delete } from 'lucide-react';
 import { HospitalFormErrors, HospitalDataRequest } from '../create/types';
 import { ArraySection, BasicInfoSection, HoursSection, LocationSection } from '../components';
 
-const HospitalForm = () => {
+const HospitalUpdateForm = ({ id }: { id: string }) => {
     const [errors, setErrors] = useState<HospitalFormErrors>({});
     const [formData, setFormData] = useState<HospitalDataRequest>({
         name: '',
@@ -29,6 +29,7 @@ const HospitalForm = () => {
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const validateForm = () => {
         const newErrors: HospitalFormErrors = {};
@@ -63,8 +64,8 @@ const HospitalForm = () => {
         setIsSubmitting(true);
         try {
             console.log('Submitting hospital data:', formData);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/create`, {
-                method: 'POST',
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/update/${id}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -95,7 +96,7 @@ const HospitalForm = () => {
                     }
                 });
             } else {
-                throw new Error(data.message || 'Failed to create hospital');
+                throw new Error(data.message || 'Failed to update hospital');
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
@@ -105,11 +106,60 @@ const HospitalForm = () => {
         }
     };
 
+
+    const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        if (!window.confirm('Are you sure you want to delete this hospital? This action cannot be undone.')) {
+            return;
+        }
+        try {
+            setIsDeleting(true);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/delete/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'authorization': `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete hospital');
+            }
+            toast.success('Hospital deleted successfully');
+        } catch (error) {
+            console.error('Error deleting hospital:', error);
+            toast.error('Failed to delete hospital. Please try again later.');
+        } finally {
+            setIsDeleting(false);
+        }
+    }
+
+    const getHostpitalData = useCallback(async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/get/${id}`, {
+                method: 'GET',
+                headers: {
+                    'authorization': `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+            if (!response.ok) {
+                toast.error('Failed to fetch hospital data. Please check the ID and try again.');
+                return;
+            }
+            const data = await response.json();
+            setFormData(data);
+        } catch (error) {
+            console.error('Error fetching hospital data:', error);
+            toast.error('Failed to fetch hospital data. Please try again later.');
+        }
+    }, [id]);
+
+    useEffect(() => {
+        getHostpitalData();
+    }, [getHostpitalData]);
+
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white rounded-lg shadow-lg p-8">
-                    {/* Header */}
                     <div className="border-b border-gray-200 pb-6 mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                             <Building className="text-blue-600" size={32} />
@@ -119,19 +169,17 @@ const HospitalForm = () => {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-8">
-                        {/* Basic Information */}
                         <BasicInfoSection
                             formData={formData}
                             setFormData={setFormData}
                             errors={errors}
                         />
 
-                        {/* Location Section */}
                         <LocationSection
                             formData={formData}
                             setFormData={setFormData}
                             errors={errors}
-                        />                        {/* Departments Section */}
+                        />
                         <ArraySection
                             title="Departments"
                             icon={<Users className="text-green-600" size={20} />}
@@ -139,7 +187,7 @@ const HospitalForm = () => {
                             onItemsChange={(departments: string[]) => setFormData(prev => ({ ...prev, departments }))}
                             placeholder="Enter department name"
                             error={errors.departments}
-                        />                        {/* Facilities Section */}
+                        />
                         <ArraySection
                             title="Facilities"
                             icon={<Wrench className="text-purple-600" size={20} />}
@@ -149,7 +197,6 @@ const HospitalForm = () => {
                             error={undefined}
                         />
 
-                        {/* Services Section */}
                         <ArraySection
                             title="Services"
                             icon={<Heart className="text-red-600" size={20} />}
@@ -180,7 +227,26 @@ const HospitalForm = () => {
                                 ) : (
                                     <>
                                         <Save size={20} />
-                                        Create Hospital
+                                        Update Hospital
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                        <div className="pt-6 border-t border-gray-200">
+                            <button
+                                disabled={isDeleting}
+                                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                onClick={handleDelete}
+                            >
+                                {isDeleting ? (
+                                    <>
+                                        <Loader2 className="animate-spin" size={20} />
+                                        Deleting Hospital...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Delete size={20} />
+                                        Delete Hospital
                                     </>
                                 )}
                             </button>
@@ -192,4 +258,4 @@ const HospitalForm = () => {
     );
 };
 
-export default HospitalForm;
+export default HospitalUpdateForm;
