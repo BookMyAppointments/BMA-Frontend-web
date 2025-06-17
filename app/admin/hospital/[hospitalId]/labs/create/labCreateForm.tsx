@@ -1,13 +1,12 @@
 'use client';
 import { toast } from 'react-toastify';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Building, Heart, Save, Loader2 } from 'lucide-react';
 import { LabDataRequest, LabFormErrors } from '../types';
 import { LabArraySection, LabBasicInfoSection, LabLocationSection } from '../components';
 
-export default function LabEditForm({ id }: { id: string }) {
+export default function LabCreateForm({ id }: { id: string }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
     const [errors, setErrors] = useState<LabFormErrors>({});
     const [formData, setFormData] = useState<LabDataRequest>({
         name: '',
@@ -18,7 +17,7 @@ export default function LabEditForm({ id }: { id: string }) {
         },
         services: [] as string[]
     });
-    
+
 
     const validateForm = () => {
         const newErrors: LabFormErrors = {};
@@ -52,8 +51,8 @@ export default function LabEditForm({ id }: { id: string }) {
 
         setIsSubmitting(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/update/${id}`, {
-                method: 'PUT',
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/create/${id}`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -81,52 +80,6 @@ export default function LabEditForm({ id }: { id: string }) {
             setIsSubmitting(false);
         }
     };
-
-    const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        try {
-            e.preventDefault();
-            setIsDeleting(true);
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/delete/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || 'Failed to delete lab');
-            }
-
-            toast.success('Lab deleted successfully!');
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to delete lab';
-            toast.error(errorMessage);
-        } finally {
-            setIsDeleting(false);
-        }
-    }
-
-    const getLabData = useCallback(async () => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/find/${id}`);
-            if (!response.ok) {
-                toast.error('Failed to fetch lab data');
-                return;
-            }
-            const data = await response.json();
-            setFormData(data);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch lab data';
-            toast.error(errorMessage);
-        }
-    }, [id]);
-
-    useEffect(() => {
-        getLabData();
-    }, [getLabData]);
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -177,25 +130,6 @@ export default function LabEditForm({ id }: { id: string }) {
                                     <>
                                         <Save size={20} />
                                         Create Lab
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                        <div className="pt-6 border-t border-gray-200">
-                            <button
-                                disabled={isDeleting}
-                                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                onClick={handleDelete}
-                            >
-                                {isDeleting ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={20} />
-                                        Deleting Lab...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save size={20} />
-                                        Delete Lab
                                     </>
                                 )}
                             </button>
