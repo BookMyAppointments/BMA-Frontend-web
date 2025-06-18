@@ -1,18 +1,21 @@
 'use client';
 import { useParams } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import { Stethoscope, Plus, Loader2, Star } from "lucide-react";
+import { Stethoscope, Loader2, Star, Search, User } from "lucide-react";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import Image from "next/image";
 import { Doctor } from "@/types/doctor";
+import { SearchUser } from "./types";
 
 export default function DoctorsPage() {
     const { hospitalId } = useParams<{ hospitalId: string }>();
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [loading, setLoading] = useState(true);
-
-    const fetchDoctors = useCallback(async () => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<SearchUser | null>(null);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showSearchResults, setShowSearchResults] = useState(false); const fetchDoctors = useCallback(async () => {
         try {
             setLoading(true);
             const response = await fetch(
@@ -27,12 +30,10 @@ export default function DoctorsPage() {
             if (!response.ok) {
                 toast.error('Failed to fetch doctors');
                 return;
-            }            const data = await response.json();
+            } const data = await response.json();
             // Extract doctor objects from the nested structure
             const doctorData = data.doctors?.map((item: any) => item.doctor) || [];
             setDoctors(doctorData);
-            console.log('Fetched doctors:', data.doctors);
-            console.log('Mapped doctors:', doctorData);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to fetch doctors';
             toast.error(errorMessage);
@@ -41,9 +42,71 @@ export default function DoctorsPage() {
         }
     }, [hospitalId]);
 
+    const searchUsers = async (email: string) => {
+        if (!email.trim()) {
+            setSearchResults(null);
+            setShowSearchResults(false);
+            return;
+        }
+
+        try {
+            setIsSearching(true);
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/search?email=${encodeURIComponent(email)}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                toast.error('Failed to search users');
+                return;
+            }
+
+            const data = await response.json();
+            console.log('Search results:', data);
+            setSearchResults(data);
+            setShowSearchResults(true);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to search users';
+            toast.error(errorMessage);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            searchUsers(searchQuery);
+        }
+    };
+
+    const handleUserSelect = (userId: string) => {
+        setSearchQuery('');
+        setSearchResults(null);
+        setShowSearchResults(false);
+        window.location.href = `/admin/hospital/${hospitalId}/doctors/create/${userId}`;
+    };
     useEffect(() => {
         fetchDoctors();
     }, [fetchDoctors]);
+
+    // Close search results when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Element;
+            if (!target.closest('.search-container')) {
+                setShowSearchResults(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     if (loading) {
         return (
@@ -71,13 +134,50 @@ export default function DoctorsPage() {
                                 Manage all doctors associated with this hospital
                             </p>
                         </div>
-                        <Link
-                            href={`/admin/hospital/${hospitalId}/doctors/create`}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                        >
-                            <Plus size={20} />
-                            Add New Doctor
-                        </Link>
+                        {/* Search Box for Adding New Doctor */}
+                        <div className="relative search-container">
+                            <div className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white min-w-80">
+                                <Search className="text-gray-400" size={20} />
+                                <input
+                                    type="text"
+                                    placeholder="Search user by email to add as doctor..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyPress={handleSearchKeyPress}
+                                    className="bg-transparent outline-none flex-1 text-gray-600 placeholder-gray-400"
+                                />
+                                {isSearching && (
+                                    <Loader2 className="animate-spin text-blue-600" size={16} />
+                                )}
+                            </div>
+
+                            {/* Search Results Dropdown */}
+                            {showSearchResults && searchResults && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-50">
+                                    <button
+                                        onClick={() => handleUserSelect(searchResults.id)}
+                                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-b-0"
+                                    >
+                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <User className="text-blue-600" size={20} />
+                                        </div>
+                                        <div>
+                                            <div className="font-medium text-gray-900">{searchResults.name}</div>
+                                            <div className="text-sm text-gray-500">{searchResults.email}</div>
+                                        </div>
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* No Results Message */}
+                            {showSearchResults && !searchResults && !isSearching && searchQuery && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                                    <div className="px-4 py-3 text-gray-500 text-center">
+                                        No users found with this email
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {doctors.length === 0 ? (<div className="text-center py-12 bg-gray-50 rounded-lg">

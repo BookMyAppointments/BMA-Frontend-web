@@ -26,3 +26,9 @@ export interface DoctorArraySectionProps {
     placeholder: string;
     error?: string;
 }
+
+export interface SearchUser {
+    id: string;
+    name: string;
+    email: string;
+}

@@ -2,10 +2,10 @@
 import { toast } from 'react-toastify';
 import React, { useState } from 'react';
 import { UserCheck, Stethoscope, GraduationCap, Save, Loader2 } from 'lucide-react';
-import { DoctorDataRequest, DoctorFormErrors } from '../types';
-import { DoctorArraySection, DoctorBasicInfoSection } from '../components';
+import { DoctorDataRequest, DoctorFormErrors } from '../../types';
+import { DoctorArraySection, DoctorBasicInfoSection } from '../../components';
 
-export default function DoctorCreateForm() {
+export default function DoctorCreateForm({ userId, hospitalId }: { userId: string, hospitalId: string }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<DoctorFormErrors>({});
     const [formData, setFormData] = useState<DoctorDataRequest>({
@@ -47,7 +47,7 @@ export default function DoctorCreateForm() {
 
         setIsSubmitting(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/create`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/create/${hospitalId}/${userId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
