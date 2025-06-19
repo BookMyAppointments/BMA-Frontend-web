@@ -1,55 +1,46 @@
 'use client';
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Building, Plus, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import Link from "next/link";
-
-interface Lab {
-    id: string;
-    name: string;
-    location: {
-        address: string;
-        lat: string;
-        lng: string;
-    };
-    services: string[];
-}
+import { Lab } from "@/types/doctor";
 
 export default function LabsPage() {
     const { hospitalId } = useParams<{ hospitalId: string }>();
     const [labs, setLabs] = useState<Lab[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchLabs = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/get/${hospitalId}`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
+    const fetchLabs = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/get/${hospitalId}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
-                );
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch labs');
                 }
+            );
 
-                const data = await response.json();
-                setLabs(data);
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Failed to fetch labs';
-                toast.error(errorMessage);
-            } finally {
-                setLoading(false);
+            if (!response.ok) {
+                toast.error('Failed to fetch labs');
+                return;
             }
-        };
 
-        fetchLabs();
+            const data = await response.json();
+            setLabs(data);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch labs';
+            toast.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
     }, [hospitalId]);
+
+    useEffect(() => {
+        fetchLabs();
+    }, [fetchLabs]);
 
     if (loading) {
         return (
@@ -111,7 +102,7 @@ export default function LabsPage() {
                                         </div>
                                         <Building className="text-blue-600" size={20} />
                                     </div>
-                                    
+
                                     <div className="mt-4">
                                         <h4 className="text-sm font-medium text-gray-700 mb-2">Services</h4>
                                         <div className="flex flex-wrap gap-2">
