@@ -25,7 +25,7 @@ const Banner = () => {
         }, 5000)
 
         return () => clearInterval(timer)
-    }, [])
+    }, [bannerImages.length])
 
     return (
         <div className="w-full flex flex-col items-center py-2 lg:py-3 px-3 lg:px-6">

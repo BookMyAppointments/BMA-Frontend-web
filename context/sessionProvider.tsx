@@ -1,7 +1,8 @@
 'use client';
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import axios from "axios";
-import { SessionContextType, User } from "@/types/session";
+import { SessionContextType } from "@/types/session";
+import { User } from "@/types/doctor";
 
 const SessionContext = createContext<SessionContextType>({
     user: null,

@@ -8,8 +8,5 @@ export interface SearchResult {
     location?: string;
 }
 
-export interface Location {
-    lat: number;
-    lng: number;
-    address: string;
-}
+// Re-export Location from the main schema
+export type { Location } from './doctor';

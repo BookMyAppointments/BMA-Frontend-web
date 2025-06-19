@@ -3,25 +3,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/services/api';
 import { toast } from 'react-toastify';
 import Image from 'next/image';
-
-interface Profile {
-    id: string;
-    userId: string;
-    gender: string;
-    dob: string | null;
-    address: string;
-    picture?: string;
-}
-
-interface User {
-    id: string;
-    email: string;
-    name: string;
-    phone: string;
-    role: string;
-    verified: boolean;
-    profile: Profile;
-}
+import { User } from '@/types/doctor';
 
 export default function Personal() {
     const [, setUser] = useState<User | null>(null);
@@ -64,21 +46,19 @@ export default function Personal() {
                     }
                 }
             );
-            console.log(response.data.profile);
-
-            setUser(response.data);
+            console.log(response.data.profile);            setUser(response.data);
             const newFormData = {
                 name: response.data.name || '',
                 email: response.data.email || '',
                 phone: response.data.phone || '',
-                address: response.data.profile?.address || '',
-                gender: response.data.profile?.gender || '',
-                dob: response.data.profile?.dob ? new Date(response.data.profile.dob).toISOString().split('T')[0] : ''
+                address: response.data.address || '',
+                gender: response.data.gender || '',
+                dob: response.data.dob ? new Date(response.data.dob).toISOString().split('T')[0] : ''
             };
 
             setFormData(newFormData);
             setInitialFormData(newFormData);
-            setImageUrl(response.data.profile?.picture || '/profile-placeholder.png');
+            setImageUrl(response.data.picture || '/profile-placeholder.png');
         } catch (error) {
             console.error('Failed to fetch profile:', error);
         }

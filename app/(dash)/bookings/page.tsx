@@ -1,6 +1,6 @@
 
 "use client"
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { FC } from 'react'
 import { API_BASE_URL } from '@/services/api'
 import Image from 'next/image';
@@ -60,7 +60,7 @@ const BookingsList: FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchBookings = async () => {
+    const fetchBookings = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -100,7 +100,7 @@ const BookingsList: FC = () => {
                             id: appointment.id,
                             type: 'doctor',
                             doctorName: appointment.doctor.user.name,
-                            doctorImage: appointment.doctor.user.profile?.picture || '/doctors/doctor1.png',
+                            doctorImage: appointment.doctor.user?.picture || '/doctors/doctor1.png',
                             qualification: appointment.doctor.qualifications.join(', '),
                             specialization: appointment.doctor.specialization.join(', '),
                             hospital: hospital?.name || 'Hospital not assigned',
@@ -157,11 +157,11 @@ const BookingsList: FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [activeTab]);
 
     useEffect(() => {
         fetchBookings();
-    }, [activeTab]);
+    }, [fetchBookings]);
 
     const handleReschedule = async (booking: Booking) => {
         try {

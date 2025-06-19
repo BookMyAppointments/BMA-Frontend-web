@@ -108,8 +108,8 @@ const Navbar: FC = () => {
             const params = new URLSearchParams();
 
             if (userLocation) {
-                params.append('lat', userLocation.lat.toString());
-                params.append('lng', userLocation.lng.toString());
+                params.append('lat', userLocation?.lat?.toString() ?? '0');
+                params.append('lng', userLocation?.lng?.toString() ?? '0');
                 params.append('radius', '10'); // 10km radius
             }
 

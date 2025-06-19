@@ -81,12 +81,10 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const selectDate = (e: DateChangeEvent): void => {
+    };    const selectDate = (e: DateChangeEvent): void => {
         const day: string = dates[new Date(e.target.value).getDay()];
         setSelectedDate(e.target.value);
-        const filteredDoctorData: Availability[] = doctorData.availability.filter(
+        const filteredDoctorData: Availability[] = (doctorData.availability || []).filter(
             (aval: Availability) => aval.day === day
         );
 
@@ -120,19 +118,18 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
         <div className="w-[97%] mx-auto mt-6">
             <div className="bg-white rounded-lg p-6">
                 {/* Doctor Info Section */}
-                <div className="flex items-center gap-4 pb-6 border-b">
-                    <Image
+                <div className="flex items-center gap-4 pb-6 border-b">                    <Image
                         width={80}
                         height={80}
                         unoptimized
-                        src={doctorData.user.profile || '/default-doctor.png'}
-                        alt={doctorData.user.name}
+                        src={doctorData.user?.picture || '/default-doctor.png'}
+                        alt={doctorData.user?.name || 'Doctor'}
                         className="w-auto h-20 rounded-full object-fit"
                     />
                     <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Dr. {doctorData.user.name}</h2>
-                        <p className="text-gray-600">{doctorData.qualifications.join(', ')}</p>
-                        <p className="text-gray-500 text-sm">{doctorData.specialization.join(', ')}</p>
+                        <h2 className="text-xl font-semibold text-gray-800">Dr. {doctorData.user?.name || doctorData.name}</h2>
+                        <p className="text-gray-600">{doctorData.qualifications?.join(', ') || 'No qualifications listed'}</p>
+                        <p className="text-gray-500 text-sm">{doctorData.specialization?.join(', ') || 'No specializations listed'}</p>
                     </div>
                 </div>
 

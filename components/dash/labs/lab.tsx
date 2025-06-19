@@ -46,7 +46,7 @@ export default function LabDetails() {
 
     const labData = selectedLab ? {
         name: selectedLab.name,
-        description: `${selectedLab.name} is part of ${selectedLab.hospital.name}. Located at ${selectedLab.location.address}, we provide comprehensive diagnostic services with state-of-the-art technology and experienced technicians.`,
+        description: `${selectedLab.name} is Located at ${selectedLab.location.address}, we provide comprehensive diagnostic services with state-of-the-art technology and experienced technicians.`,
         metrics: {
             rating: 4.8,
             patientsCount: '5000+',

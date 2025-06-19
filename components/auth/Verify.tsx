@@ -7,14 +7,20 @@ import { BirdLogo } from '../icons/bird';
 
 const Verify: React.FC = () => {
     const [code, setCode] = useState<string[]>(['', '', '', '', '', '']);
-    const [email,] = useState<string>(localStorage.getItem('email') || '');
+    const [email, setEmail] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [resendLoading, setResendLoading] = useState<boolean>(false);
     const [resendCooldown, setResendCooldown] = useState<number>(0);
     const [success, setSuccess] = useState<string>('');
 
-    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);    // Initialize email from localStorage on client side
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedEmail = localStorage.getItem('email') || '';
+            setEmail(storedEmail);
+        }
+    }, []);
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -41,12 +47,14 @@ const Verify: React.FC = () => {
         // Clear error when user starts typing
         if (error) {
             setError('');
-        }
-    };
+        }    };
 
+    // Save email to localStorage when it changes (client-side only)
     useEffect(() => {
-        localStorage.setItem('email', email);
-    })
+        if (typeof window !== 'undefined' && email) {
+            localStorage.setItem('email', email);
+        }
+    }, [email]);
 
     const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>): void => {
         if (e.key === 'Backspace' && !code[index] && index > 0) {
@@ -83,12 +91,8 @@ const Verify: React.FC = () => {
         if (verificationCode.length !== 6) {
             setError('Please enter the complete 6-digit code');
             return;
-        }
-
-        setLoading(true);
+        }        setLoading(true);
         setError('');
-
-        const email = localStorage.getItem('email') || '';
 
         try {
             const requestData: VerifyRequest = {
@@ -104,12 +108,12 @@ const Verify: React.FC = () => {
                 body: JSON.stringify(requestData),
             });
 
-            const data: ApiResponse = await response.json();
-
-            if (response.ok) {
+            const data: ApiResponse = await response.json();            if (response.ok) {
                 console.log('Verification successful:', data);
                 setSuccess('Email verified successfully!');
-                window.localStorage.removeItem('email');
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('email');
+                }
                 window.location.href = '/auth/signin';
             } else {
                 setError(data.message || 'Verification failed. Please try again.');

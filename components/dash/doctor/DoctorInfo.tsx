@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FC } from 'react'
 import BookingForm from '../booking/BookingForm';
-import { Doctor, Review, AvailabilitySlot } from '@/types/doctor';
+import { Doctor, Review, Availability } from '@/types/doctor';
 
 const DoctorInfo: FC<{ doctor: Doctor }> = ({ doctor }) => {
     console.log(doctor);
@@ -52,12 +52,10 @@ const DoctorInfo: FC<{ doctor: Doctor }> = ({ doctor }) => {
                                     </ul>
                                 </div>
                             </div>
-                        )}
-
-                        {activeTab === 'reviews' && (
+                        )}                        {activeTab === 'reviews' && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-800">Patient Reviews</h3>
-                                {doctor.reviews.map((review: Review) => (
+                                {doctor.reviews && doctor.reviews.length > 0 ? doctor.reviews.map((review: Review) => (
                                     <div key={review.id} className="bg-gray-50 p-4 rounded-lg">
                                         <div className="flex items-center gap-2">
                                             <span className="text-yellow-400">{'★'.repeat(review.rating)}</span>
@@ -65,18 +63,22 @@ const DoctorInfo: FC<{ doctor: Doctor }> = ({ doctor }) => {
                                         </div>
                                         <p className="text-sm text-gray-500 mt-1">- {review.user?.name || 'Anonymous'}</p>
                                     </div>
-                                ))}
+                                )) : (
+                                    <p className="text-gray-600">No reviews available.</p>
+                                )}
                             </div>
                         )}
 
                         {activeTab === 'others' && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-800">Availability</h3>
-                                {doctor.availability.map((slot: AvailabilitySlot) => (
+                                {doctor.availability && doctor.availability.length > 0 ? doctor.availability.map((slot: Availability) => (
                                     <div key={slot.id} className="text-gray-600">
                                         {slot.day}: {slot.startTime} - {slot.endTime}
                                     </div>
-                                ))}
+                                )) : (
+                                    <p className="text-gray-600">No availability information.</p>
+                                )}
                             </div>
                         )}
                     </div>

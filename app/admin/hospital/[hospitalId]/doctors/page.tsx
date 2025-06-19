@@ -192,12 +192,11 @@ export default function DoctorsPage() {
                                     href={`/admin/hospital/${hospitalId}/doctors/${doctor.id}`}
                                     key={doctor.id}
                                     className="block border border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-md transition-all"
-                                >
-                                    <div className="flex items-start justify-between mb-4">
+                                >                                    <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            {doctor.user.profile ? (
+                                            {doctor.user?.picture ? (
                                                 <Image
-                                                    src={doctor.user.profile}
+                                                    src={doctor.user.picture}
                                                     alt={doctor.user.name}
                                                     width={48}
                                                     height={48}
@@ -210,11 +209,11 @@ export default function DoctorsPage() {
                                             )}
                                             <div>
                                                 <h3 className="text-lg font-semibold text-gray-900">
-                                                    {doctor.user.name}
+                                                    {doctor.user?.name || doctor.name}
                                                 </h3>
                                                 <div className="flex items-center gap-1 mt-1">
                                                     <Star className="text-yellow-400 fill-current" size={16} />
-                                                    <span className="text-sm text-gray-600">{doctor.ratings}</span>
+                                                    <span className="text-sm text-gray-600">{doctor.ratings || 0}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -222,7 +221,7 @@ export default function DoctorsPage() {
 
                                     <div className="mb-4">
                                         <p className="text-gray-600 text-sm mb-2">
-                                            Patients: {doctor.patientsCount}
+                                            Patients: {doctor.noOfPatients || 0}
                                         </p>
                                         <p className="text-green-600 font-semibold text-sm">
                                             ${doctor.price}/session
@@ -232,7 +231,7 @@ export default function DoctorsPage() {
                                     <div className="mt-4">
                                         <h4 className="text-sm font-medium text-gray-700 mb-2">Specializations</h4>
                                         <div className="flex flex-wrap gap-2">
-                                            {doctor.specialization.slice(0, 2).map((spec, index) => (
+                                            {doctor.specialization?.slice(0, 2).map((spec, index) => (
                                                 <span
                                                     key={index}
                                                     className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full"
@@ -240,7 +239,7 @@ export default function DoctorsPage() {
                                                     {spec}
                                                 </span>
                                             ))}
-                                            {doctor.specialization.length > 2 && (
+                                            {doctor.specialization && doctor.specialization.length > 2 && (
                                                 <span className="inline-block px-2 py-1 bg-gray-50 text-gray-600 text-xs rounded-full">
                                                     +{doctor.specialization.length - 2} more
                                                 </span>

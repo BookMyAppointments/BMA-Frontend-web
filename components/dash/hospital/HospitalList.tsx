@@ -62,13 +62,15 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         const newDistances: { [key: string]: string } = {};
         data.pages.forEach(page => {
             page.items.forEach(item => {
-                const distance = calculateDistance(
-                    userLocation.lat,
-                    userLocation.long,
-                    item.hospital.location.lat,
-                    item.hospital.location.lng
-                );
-                newDistances[item.hospital.id] = distance;
+                if (item.hospital.location.lat && item.hospital.location.lng) {
+                    const distance = calculateDistance(
+                        userLocation.lat,
+                        userLocation.long,
+                        item.hospital.location.lat,
+                        item.hospital.location.lng
+                    );
+                    newDistances[item.hospital.id] = distance;
+                }
             });
         });
         setDistances(newDistances);
@@ -110,10 +112,10 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
                 description: `Located at ${item.hospital.location.address}`,
                 specialties: item.hospital.departments.slice(0, 4),
                 distance: distances[item.hospital.id] || 'Calculating...',
-                isTopRated: item.doctor.ratings >= 4,
+                isTopRated: (item?.doctor?.ratings ?? 0) >= 4,
                 departmentsCount: item.hospital.departments.length,
                 doctor: {
-                    name: item.doctor.user.name,
+                    name: item.doctor.name,
                     specialization: item.doctor.specialization,
                     price: item.doctor.price,
                     rating: item.doctor.ratings

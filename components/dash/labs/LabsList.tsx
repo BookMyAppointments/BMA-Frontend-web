@@ -124,9 +124,6 @@ const LabsList: FC<LabsListProps> = ({ selectedService, labs: providedLabs }) =>
                                 <h3 className="text-base font-semibold text-gray-800 line-clamp-1">
                                     {lab.name}
                                 </h3>
-                                <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">
-                                    {lab.hospital.name}
-                                </p>
                                 <p className="text-xs text-gray-500 mt-1 line-clamp-1">
                                     📍 {lab.location.address}
                                 </p>

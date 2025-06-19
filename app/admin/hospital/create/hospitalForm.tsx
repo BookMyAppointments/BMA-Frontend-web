@@ -4,34 +4,36 @@ import React, { useEffect, useState } from 'react';
 import { Building, Users, Wrench, Heart, Save, Loader2 } from 'lucide-react';
 import { HospitalFormErrors, HospitalDataRequest } from '../create/types';
 import { ArraySection, BasicInfoSection, HoursSection, LocationSection } from '../components';
-import { useParams, useSearchParams } from 'next/navigation';
-import { unique } from 'next/dist/build/utils';
+import { useSearchParams } from 'next/navigation';
 import UnAuthorized from '@/components/miscellaneous/UnAuthorized';
 
 const HospitalForm = () => {
-    useEffect(()=>{
-        const uniqueCode=useSearchParams().get("uniqueCode")
-        if(!uniqueCode){
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const uniqueCode = searchParams.get("uniqueCode")
+        if (!uniqueCode) {
             setAuthorized(false)
             return;
         }
-        const verifyCode=async()=>{
-            const response=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/admin-verify-code/${uniqueCode}`,{
+        const verifyCode = async () => {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/admin-verify-code/${uniqueCode}`, {
                 headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
             })
-            if(!response.ok){setAuthorized(false);return;}
-            const data=await response.json()
-            if(!data.success){
+            if (!response.ok) { setAuthorized(false); return; }
+            const data = await response.json()
+            if (!data.success) {
                 setAuthorized(false)
             }
         }
         verifyCode()
 
-    },[])
+    }, [searchParams]);
+    
     const [errors, setErrors] = useState<HospitalFormErrors>({});
-    const [Authorized,setAuthorized]=useState<Boolean>(true);
+    const [Authorized, setAuthorized] = useState<boolean>(true);
     const [formData, setFormData] = useState<HospitalDataRequest>({
         name: '',
         location: {
@@ -129,9 +131,9 @@ const HospitalForm = () => {
             setIsSubmitting(false);
         }
     };
-if(!Authorized){
-    return <UnAuthorized/>
-}
+    if (!Authorized) {
+        return <UnAuthorized />
+    }
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-4xl mx-auto">
