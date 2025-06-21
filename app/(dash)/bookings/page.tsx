@@ -58,6 +58,7 @@ const BookingsList: FC = () => {
     });
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
+    const [rescheduleLoading, setRescheduleLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const fetchBookings = useCallback(async () => {
@@ -99,8 +100,8 @@ const BookingsList: FC = () => {
                         return {
                             id: appointment.id,
                             type: 'doctor',
-                            doctorName: appointment.doctor.user.name,
-                            doctorImage: appointment.doctor.user?.picture || '/doctors/doctor1.png',
+                            doctorName: appointment.doctor.name,
+                            doctorImage: appointment.doctor?.picture || '/doctors/doctor1.png',
                             qualification: appointment.doctor.qualifications.join(', '),
                             specialization: appointment.doctor.specialization.join(', '),
                             hospital: hospital?.name || 'Hospital not assigned',
@@ -164,36 +165,39 @@ const BookingsList: FC = () => {
     }, [fetchBookings]);
 
     const handleReschedule = async (booking: Booking) => {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('No authentication token found');
-            }
-
-            const newDateTime = new Date(`${rescheduleData.date}T${rescheduleData.time}`);
-            const response = await fetch(`${API_BASE_URL}/appointments/reschedule/${booking.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    newTime: newDateTime.toISOString()
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to reschedule booking');
-            }
-
-            // Refresh bookings after successful reschedule
-            await fetchBookings();
-            setIsRescheduleModalOpen(false);
-        } catch (err) {
-            console.error('Error rescheduling booking:', err);
-            setError(err instanceof Error ? err.message : 'Failed to reschedule booking');
+    try {
+        setRescheduleLoading(true); // Start loading
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
         }
-    };
+
+        const newDateTime = new Date(`${rescheduleData.date}T${rescheduleData.time}`);
+        const response = await fetch(`${API_BASE_URL}/appointments/reschedule/${booking.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                newTime: newDateTime.toISOString()
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to reschedule booking');
+        }
+
+        // Refresh bookings after successful reschedule
+        await fetchBookings();
+        setIsRescheduleModalOpen(false);
+    } catch (err) {
+        console.error('Error rescheduling booking:', err);
+        setError(err instanceof Error ? err.message : 'Failed to reschedule booking');
+    } finally {
+        setRescheduleLoading(false); // Stop loading
+    }
+};
 
     const handleCancel = async (bookingId: string) => {
         try {
@@ -203,7 +207,7 @@ const BookingsList: FC = () => {
             }
 
             const response = await fetch(`${API_BASE_URL}/appointments/cancel/${bookingId}`, {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -440,54 +444,63 @@ const BookingsList: FC = () => {
             </div>
 
             {/* Reschedule Modal */}
-            {isRescheduleModalOpen && selectedBooking && (
-                <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-                        <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-semibold">Reschedule Appointment</h3>
-                            <button onClick={() => setIsRescheduleModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-gray-700 mb-2">Date</label>
-                                <input
-                                    type="date"
-                                    value={rescheduleData.date}
-                                    onChange={(e) => setRescheduleData({ ...rescheduleData, date: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-gray-700 mb-2">Time</label>
-                                <input
-                                    type="time"
-                                    value={rescheduleData.time}
-                                    onChange={(e) => setRescheduleData({ ...rescheduleData, time: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
-                                />
-                            </div>
-                        </div>
-                        <div className="mt-6 flex justify-end gap-3">
-                            <button
-                                onClick={() => setIsRescheduleModalOpen(false)}
-                                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={() => handleReschedule(selectedBooking)}
-                                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                            >
-                                Confirm Reschedule
-                            </button>
-                        </div>
-                    </div>
+           {isRescheduleModalOpen && selectedBooking && (
+    <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-semibold">Reschedule Appointment</h3>
+                <button onClick={() => setIsRescheduleModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-gray-700 mb-2">Date</label>
+                    <input
+                        type="date"
+                        value={rescheduleData.date}
+                        onChange={(e) => setRescheduleData({ ...rescheduleData, date: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                    />
                 </div>
-            )}
+                <div>
+                    <label className="block text-gray-700 mb-2">Time</label>
+                    <input
+                        type="time"
+                        value={rescheduleData.time}
+                        onChange={(e) => setRescheduleData({ ...rescheduleData, time: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                    />
+                </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+                <button
+                    onClick={() => setIsRescheduleModalOpen(false)}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                    disabled={rescheduleLoading}
+                >
+                    Cancel
+                </button>
+                <button
+                    onClick={() => handleReschedule(selectedBooking)}
+                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                    disabled={rescheduleLoading}
+                >
+                    {rescheduleLoading ? (
+                        <span className="flex items-center gap-2">
+                            <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                            Rescheduling...
+                        </span>
+                    ) : (
+                        'Confirm Reschedule'
+                    )}
+                </button>
+            </div>
+        </div>
+    </div>
+)}
         </>
     );
 }
