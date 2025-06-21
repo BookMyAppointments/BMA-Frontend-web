@@ -15,6 +15,8 @@ export const fetchDoctors = async (): Promise<DoctorHospitalData[]> => {
 
 export const fetchDoctorsBySpecialization = async (specialization: string): Promise<DoctorHospitalData[]> => {
     try {
+        console.log(API_BASE_URL);
+        
         const response = await fetch(`${API_BASE_URL}/search/doctors?specialization=${encodeURIComponent(specialization)}`);
 
         if (!response.ok) {

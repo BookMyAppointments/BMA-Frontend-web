@@ -43,7 +43,7 @@ const HospitalDetails: FC = () => {
             const data = await fetchDoctorsBySpecialization(selectedCategory);
             const hospitalDoctors = data.filter(doc => doc.hospitalId === hospitalId);
 
-            return hospitalDoctors.map(doc => doc.doctor);
+            return hospitalDoctors
         },
         enabled: !!hospitalId && !!selectedCategory
     });

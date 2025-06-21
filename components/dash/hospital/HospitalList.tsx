@@ -115,10 +115,10 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
                 isTopRated: (item?.doctor?.ratings ?? 0) >= 4,
                 departmentsCount: item.hospital.departments.length,
                 doctor: {
-                    name: item.doctor.name,
-                    specialization: item.doctor.specialization,
-                    price: item.doctor.price,
-                    rating: item.doctor.ratings
+                    name: item.name,
+                    specialization: item.specialization,
+                    price: item.price,
+                    rating: item.ratings
                 }
             }))
         ) || [], [data, distances]);

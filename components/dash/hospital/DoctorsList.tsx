@@ -33,11 +33,11 @@ const DoctorsList = ({ doctors }: Props) => {
                                 width={80}
                                 height={80}
                                 unoptimized
-                                src={doctor.user?.picture || '/images/placeholder.png'}
-                                alt={doctor.user?.name || 'Doctor Image'}
+                                src={doctor?.picture || '/images/placeholder.png'}
+                                alt={doctor?.name || 'Doctor Image'}
                                 className="w-16 h-16 lg:w-20 lg:h-20 rounded-lg object-cover"
                             />                            <div className="flex-1">
-                                <h3 className="text-gray-800 font-semibold text-base lg:text-lg">{doctor.user?.name || doctor.name}</h3>
+                                <h3 className="text-gray-800 font-semibold text-base lg:text-lg">{ doctor?.name}</h3>
                                 <p className="text-gray-500 text-xs lg:text-sm mt-0.5">
                                     {doctor.qualifications?.join(', ') || 'No qualifications listed'}
                                 </p>

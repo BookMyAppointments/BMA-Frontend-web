@@ -10,7 +10,7 @@ export const DoctorBanner: FC<{ doctor: Doctor }> = ({ doctor }) => {
                 <div className="flex-1 sm:pr-[300px] z-10">
                     <span className="text-gray-500 text-sm">{doctor.specialization?.join(', ')}</span>
                     <h1 className="text-2xl font-semibold text-gray-800 mt-1">
-                        Dr. {doctor?.user?.name}
+                         {doctor?.name}
                     </h1>
                     <p className="text-gray-600 mt-1">{doctor.qualifications?.join(', ')}</p>
 
