@@ -4,7 +4,6 @@ export interface DoctorHospitalData {
     hospitalId: string;
     doctor: Doctor;
     hospital: Hospital;
-
 }
 
 export enum Role {
@@ -22,7 +21,7 @@ export enum Status {
 }
 
 export enum AppointmentStatus {
-    SCHEDULED = 'SCHEDULED',
+    PENDING = 'PENDING',
     CONFIRMED = 'CONFIRMED',
     COMPLETED = 'COMPLETED',
     CANCELLED = 'CANCELLED',
@@ -146,20 +145,25 @@ export interface Appointment {
     userId: string;
     doctorId?: string;
     testId?: string;
-    hospitalId?: string;
     labId?: string;
-    appointmentDate: Date;
-    startTime: string;
-    endTime: string;
+    scheduledAt: Date;
+    rescheduledAt?: Date;
+    cancelledAt?: Date;
     status: AppointmentStatus;
-    notes?: string;
     user: User;
     doctor?: Doctor;
     test?: MedicalTest;
-    hospital?: Hospital;
     lab?: Lab;
-    createdAt: Date;
-    updatedAt: Date;
+    
+    // Computed fields for backward compatibility
+    appointmentDate?: Date;
+    startTime?: string;
+    endTime?: string;
+    hospitalId?: string;
+    hospital?: Hospital;
+    notes?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface Lab {
@@ -170,16 +174,19 @@ export interface Lab {
     banner?: string;
     address?: string;
     services: string[];
-    hours: any; // JSON type
-    noOfPatients: number;
+    hours?: any; // JSON type
+    noOfPatients?: number;
     reviews?: Review[];
-    tests: MedicalTest[];
+    tests?: MedicalTest[];
     appointments?: Appointment[];
-    status: Status;
+    availability?: Availability[];
+    status?: Status;
     locationId: string;
     location: Location;
-    createdAt: Date;
-    updatedAt: Date;
+    hospitalId?: string;
+    hospital?: Hospital;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface MedicalTest {

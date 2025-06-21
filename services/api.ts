@@ -22,6 +22,7 @@ export const fetchDoctorsBySpecialization = async (specialization: string): Prom
         }
 
         const data = await response.json();
+        console.log("Fetched doctors by specialization:", data);
         return data;
     } catch (error) {
         console.error('Error fetching doctors:', error);
@@ -74,6 +75,92 @@ export const createAppointment = async (appointmentData: {
         return data;
     } catch (error) {
         console.error('Error creating appointment:', error);
+        throw error;
+    }
+};
+
+export const fetchUserAppointments = async (status?: string, page: number = 1, limit: number = 10): Promise<{
+    appointments: Appointment[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+    };
+}> => {
+    try {
+        let url = `${API_BASE_URL}/appointments/user/all?page=${page}&limit=${limit}`;
+        if (status) {
+            url += `&status=${encodeURIComponent(status)}`;
+        }
+
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching user appointments:', error);
+        throw error;
+    }
+};
+
+export const fetchDoctorAppointments = async (status?: string, page: number = 1, limit: number = 10): Promise<{
+    appointments: Appointment[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+    };
+}> => {
+    try {
+        let url = `${API_BASE_URL}/appointments/doctor/all?page=${page}&limit=${limit}`;
+        if (status) {
+            url += `&status=${encodeURIComponent(status)}`;
+        }
+
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching doctor appointments:', error);
+        throw error;
+    }
+};
+
+export const fetchAppointmentById = async (appointmentId: string): Promise<Appointment> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/appointments/get/${appointmentId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching appointment:', error);
         throw error;
     }
 };
