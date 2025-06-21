@@ -104,10 +104,30 @@ const HealthRecordsList: FC = () => {
         }
     };
 
-    const filteredRecords = records.filter(record =>
+    const createMedicalRecord = async () => {
+    try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        await axios.post(
+            `${API_BASE_URL}/auth/documents/create`,
+            {},
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        toast.success('Medical record created!');
+         fetchMedicalRecords();
+    } catch (error) {
+        console.error('Error creating medical record:', error);
+        toast.error('Failed to create medical record');
+    } finally {
+        setLoading(false);
+    }
+};
+    const filteredRecords = searchQuery?records.filter(record =>
         record.history.some(entry => entry.toLowerCase().includes(searchQuery.toLowerCase())) ||
         record.documents.some(doc => doc.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    ):records;
 
     useEffect(() => {
         fetchMedicalRecords();
@@ -202,11 +222,37 @@ const HealthRecordsList: FC = () => {
                         </div>
                     ))}
 
-                    {filteredRecords.length === 0 && (
-                        <div className="text-center py-8">
-                            <p className="text-gray-500">No medical records found</p>
-                        </div>
-                    )}
+   <div className="space-y-6">
+    {filteredRecords.length === 0 ? (
+        <div className="text-center py-8">
+            <p className="text-gray-500 mb-4">No medical records found</p>
+        </div>
+    ) : (
+        filteredRecords.map((record) => (
+            <div key={record.id} className="border border-gray-100 rounded-lg p-4 hover:border-gray-200">
+                {/* ...record display code... */}
+            </div>
+        ))
+    )}
+
+    {/* Always show the create button at the bottom */}
+    <div className="text-center py-8">
+        <button
+            onClick={createMedicalRecord}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            disabled={loading}
+        >
+            {loading ? (
+                <span className="flex items-center gap-2">
+                    <Loader2 className="animate-spin" size={18} />
+                    Creating...
+                </span>
+            ) : (
+                "Create Medical Record"
+            )}
+        </button>
+    </div>
+</div>
                 </div>
             </div>
 
