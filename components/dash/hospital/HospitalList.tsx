@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, type FC } from 'react';
 import { useService } from '@/context/serviceProvider';
 import { fetchDoctorsBySpecialization } from '@/services/api';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { type DoctorHospitalData } from '@/types/doctor';
+import { type Doctor } from '@/types/doctor';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -11,7 +11,7 @@ interface HospitalListProps {
 }
 
 interface PageData {
-    items: DoctorHospitalData[];
+    items: Doctor[];
     nextPage: number | undefined;
 }
 
@@ -53,16 +53,14 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         getNextPageParam: (lastPage) => lastPage.nextPage,
         enabled: serviceType === 'hospitals' && !!selectedCategory,
         initialPageParam: 1
-    });
-
-    // Calculate distances whenever data or userLocation changes
+    });    // Calculate distances whenever data or userLocation changes
     useEffect(() => {
         if (!data?.pages || !userLocation.lat || !userLocation.long) return;
 
         const newDistances: { [key: string]: string } = {};
         data.pages.forEach(page => {
-            page.items.forEach(item => {
-                if (item.hospital.location.lat && item.hospital.location.lng) {
+            page.items.forEach((item: Doctor) => {
+                if (item.hospital?.location.lat && item.hospital?.location.lng) {
                     const distance = calculateDistance(
                         userLocation.lat,
                         userLocation.long,
@@ -101,26 +99,26 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distance = R * c;
         return `${distance.toFixed(1)} Kms`;
-    };
-
-    const transformedHospitals = useMemo(() =>
+    };    const transformedHospitals = useMemo(() =>
         data?.pages.flatMap(page =>
-            page.items.map((item: DoctorHospitalData) => ({
-                id: item.hospital.id,
-                name: item.hospital.name,
-                logo: '/logos/default.png',
-                description: `Located at ${item.hospital.location.address}`,
-                specialties: item.hospital.departments.slice(0, 4),
-                distance: distances[item.hospital.id] || 'Calculating...',
-                isTopRated: (item?.doctor?.ratings ?? 0) >= 4,
-                departmentsCount: item.hospital.departments.length,
-                doctor: {
-                    name: item.name,
-                    specialization: item.specialization,
-                    price: item.price,
-                    rating: item.ratings
-                }
-            }))
+            page.items
+                .filter((item: Doctor) => item.hospital) // Only include doctors with hospital data
+                .map((item: Doctor) => ({
+                    id: item.hospital!.id,
+                    name: item.hospital!.name,
+                    logo: '/logos/default.png',
+                    description: `Located at ${item.hospital!.location.address}`,
+                    specialties: item.hospital!.departments.slice(0, 4),
+                    distance: distances[item.hospital!.id] || 'Calculating...',
+                    isTopRated: (item?.ratings ?? 0) >= 4,
+                    departmentsCount: item.hospital!.departments.length,
+                    doctor: {
+                        name: item.name,
+                        specialization: item.specialization,
+                        price: item.price,
+                        rating: item.ratings
+                    }
+                }))
         ) || [], [data, distances]);
 
     const facilities = serviceType === 'hospitals' ? transformedHospitals : staticLabs;

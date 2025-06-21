@@ -62,6 +62,7 @@ export interface Doctor {
     qualifications: string[];
     ratings?: number;
     about?: string;
+    picture?: string;
     price: number;
     noOfPatients: number;
     reviews?: Review[];

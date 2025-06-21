@@ -1,4 +1,4 @@
-import { Appointment, DoctorHospitalData, Lab } from "@/types/doctor";
+import { Appointment, Doctor, DoctorHospitalData, Lab } from "@/types/doctor";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1';
 
@@ -13,7 +13,7 @@ export const fetchDoctors = async (): Promise<DoctorHospitalData[]> => {
     }
 };
 
-export const fetchDoctorsBySpecialization = async (specialization: string): Promise<DoctorHospitalData[]> => {
+export const fetchDoctorsBySpecialization = async (specialization: string): Promise<Doctor[]> => {
     try {
         console.log(API_BASE_URL);
         
