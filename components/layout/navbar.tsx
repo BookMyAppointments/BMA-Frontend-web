@@ -15,7 +15,7 @@ const Navbar: FC = () => {
     const { serviceType, toggleService } = useService()
     const { user, isAuthenticated, logout } = useSession()
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
-    const [profilePicture, setProfilePicture] = useState('/profile-placeholder.png')
+    const [profilePicture, setProfilePicture] = useState('/images/cat.jpg')
     const [searchQuery, setSearchQuery] = useState('')
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const [searchResults, setSearchResults] = useState<SearchResult[]>([])

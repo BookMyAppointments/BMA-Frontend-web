@@ -17,7 +17,10 @@ const HospitalForm = () => {
 
   useEffect(() => {
     const uniqueCode = searchParams.get("uniqueCode");
-
+    if (!uniqueCode) {
+      setAuthorized(false);
+      return;
+    }
     const verifyCode = async () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/admin-verify-code/${uniqueCode}`,

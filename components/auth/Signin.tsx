@@ -156,7 +156,7 @@ const SignIn: React.FC = () => {
                                 Remember me
                             </label>
                         </div>
-                        <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+                        <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
                             Forgot password?
                         </Link>
                     </div>

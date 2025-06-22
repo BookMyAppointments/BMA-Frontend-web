@@ -112,7 +112,7 @@ const ResetVerify: React.FC<RequestProp> = ({ email }) => {
                 console.log('Verification successful:', data);
                 setSuccess('Password changed successfully!');
                 window.localStorage.removeItem('email');
-                window.location.href = '/signin';
+                window.location.href = '/auth/signin';
             } else {
                 setError(data.message || 'Verification failed. Please try again.');
             }

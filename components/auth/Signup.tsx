@@ -352,7 +352,7 @@ const SignUp: React.FC = () => {
                     <button
                         onClick={() => window.location.href = '/auth/signin'}
                         type="button"
-                        className="text-blue-600 hover:text-blue-500 font-medium"
+                        className="text-blue-600 hover:text-blue-500 font-medium cursor-pointer"
                     >
                         Log in
                     </button>

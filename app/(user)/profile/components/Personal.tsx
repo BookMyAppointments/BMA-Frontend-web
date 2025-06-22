@@ -47,7 +47,8 @@ export default function Personal() {
                     }
                 }
             );
-            console.log(response.data.profile);            setUser(response.data);
+            console.log(response.data.profile);
+            setUser(response.data);
             const newFormData = {
                 name: response.data.name || '',
                 email: response.data.email || '',
@@ -98,7 +99,8 @@ export default function Personal() {
             );
 
             setImageUrl(response.data.url);
-            fetchUserProfile(); // Refresh user data after image upload
+            fetchUserProfile();
+            toast.success('Image uploaded successfully');
         } catch (error) {
             console.error('Upload failed:', error);
             toast.error('Failed to upload image');
