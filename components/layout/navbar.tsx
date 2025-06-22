@@ -46,8 +46,8 @@ const Navbar: FC = () => {
                     }
                 }
             );
-            if (response.data.profile?.picture) {
-                setProfilePicture(response.data.profile.picture);
+            if (response.data.picture) {
+                setProfilePicture(response.data.picture);
             }
         } catch (error) {
             console.error('Failed to fetch profile:', error);

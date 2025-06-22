@@ -81,7 +81,9 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
         } finally {
             setIsLoading(false);
         }
-    };    const selectDate = (e: DateChangeEvent): void => {
+    };
+
+    const selectDate = (e: DateChangeEvent): void => {
         const day: string = dates[new Date(e.target.value).getDay()];
         setSelectedDate(e.target.value);
         const filteredDoctorData: Availability[] = (doctorData.availability || []).filter(
@@ -102,7 +104,6 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
         }
     }
 
-    // Helper function to get doctor data
     const getDoctorData = () => {
         if ('doctor' in doctor) {
             return doctor.doctor;
@@ -113,12 +114,12 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
     const doctorData = getDoctorData();
     console.log(doctorData);
 
-
     return (
         <div className="w-[97%] mx-auto mt-6">
             <div className="bg-white rounded-lg p-6">
                 {/* Doctor Info Section */}
-                <div className="flex items-center gap-4 pb-6 border-b">                    <Image
+                <div className="flex items-center gap-4 pb-6 border-b">
+                    <Image
                         width={80}
                         height={80}
                         unoptimized
