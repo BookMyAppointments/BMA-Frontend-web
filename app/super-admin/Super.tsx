@@ -6,14 +6,10 @@ import { toast } from 'react-toastify';
 
 interface Request {
     id: string;
-    userId: string;
+    userEmail: string;
     type: string;
-    status: 'pending' | 'approved' | 'rejected';
-    createdAt: string;
-    userDetails?: {
-        name: string;
-        email: string;
-    };
+    status: 'PENDING' | 'ACTIVE' | 'SUSPENDED';
+    expiryTime : Date;
 }
 
 interface SuperAdmin {
@@ -41,6 +37,7 @@ export default function Super() {
                 }
 
                 const data = await response.json();
+                console.log('Super Admin Data:', data);
                 setSuperAdmin(data);
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to fetch profile';
@@ -53,7 +50,7 @@ export default function Super() {
         fetchProfile();
     }, []);
 
-    const handleRequestAction = async (requestId: string, action: 'approve' | 'reject') => {
+    const handleRequestAction = async (requestId: string, action: 'ACTIVE' | 'SUSPENDED') => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/requests/${requestId}/${action}`, {
                 method: 'GET',
@@ -72,7 +69,7 @@ export default function Super() {
                     ...prev,
                     requests: prev.requests.map(req => 
                         req.id === requestId 
-                            ? { ...req, status: action === 'approve' ? 'approved' : 'rejected' }
+                            ? { ...req, status: action === 'ACTIVE' ? 'ACTIVE' : 'SUSPENDED' }
                             : req
                     )
                 };
@@ -126,9 +123,8 @@ export default function Super() {
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
@@ -137,35 +133,31 @@ export default function Super() {
                                         <tr key={request.id}>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div>
-                                                    <div className="text-sm font-medium text-gray-900">{request.userDetails?.name}</div>
-                                                    <div className="text-sm text-gray-500">{request.userDetails?.email}</div>
+                                                    <div className="text-sm font-medium text-gray-900">{request?.userEmail}</div>
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {request.type}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                    ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                                    request.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                                                    ${request.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
+                                                    request.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 
                                                     'bg-red-100 text-red-800'}`}>
                                                     {request.status}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {new Date(request.createdAt).toLocaleDateString()}
+                                                {new Date(request.expiryTime).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                {request.status === 'pending' && (
+                                                {request.status === 'PENDING' && (
                                                     <div className="flex gap-2">
                                                         <button
-                                                            onClick={() => handleRequestAction(request.id, 'approve')}
+                                                            onClick={() => handleRequestAction(request.id, 'ACTIVE')}
                                                             className="text-green-600 hover:text-green-900"
                                                         >
                                                             <CheckCircle size={20} />
                                                         </button>
                                                         <button
-                                                            onClick={() => handleRequestAction(request.id, 'reject')}
+                                                            onClick={() => handleRequestAction(request.id, 'SUSPENDED')}
                                                             className="text-red-600 hover:text-red-900"
                                                         >
                                                             <XCircle size={20} />

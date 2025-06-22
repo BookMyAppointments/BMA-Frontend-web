@@ -10,7 +10,7 @@ const UnAuthorized = () => {
         try {
             setIsRequesting(true);
             const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/admin-request-create`, {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
