@@ -46,7 +46,8 @@ export default function Personal() {
                     }
                 }
             );
-            console.log(response.data.profile);            setUser(response.data);
+            console.log(response.data.profile);
+            setUser(response.data);
             const newFormData = {
                 name: response.data.name || '',
                 email: response.data.email || '',
@@ -323,20 +324,20 @@ export default function Personal() {
                     </div>
 
                     <div>
-    <label className="block text-gray-700 mb-2">Gender</label>
-    <select
-        name="gender"
-        value={formData.gender}
-        onChange={handleChange}
-        disabled={!isEditMode}
-        className={`w-full px-4 py-2 rounded-lg border ${isEditMode ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
-    >
-        <option value="">Select Gender</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-        <option value="other">Other</option>
-    </select>
-</div>
+                        <label className="block text-gray-700 mb-2">Gender</label>
+                        <select
+                            name="gender"
+                            value={formData.gender}
+                            onChange={handleChange}
+                            disabled={!isEditMode}
+                            className={`w-full px-4 py-2 rounded-lg border ${isEditMode ? 'border-gray-200 focus:border-blue-500' : 'border-gray-200 bg-gray-50'} focus:outline-none`}
+                        >
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
 
                     <div>
                         <label className="block text-gray-700 mb-2">Date of Birth</label>
