@@ -121,25 +121,9 @@ const HospitalForm = () => {
       );
 
       const data = await response.json();
-      console.log(data);
-
-      const hospitalForm = new FormData();
-      hospitalForm.append("hospitalId", data.hospital.id);
-      const resp = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/admin-request-create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: hospitalForm,
-        }
-      );
-
-      if (response.ok && resp.ok) {
+      console.log(response.status, data);
+      if (data.success) {
         toast.success("Hospital created successfully!");
-        // Reset form
         setFormData({
           name: "",
           location: { lat: "", lng: "", address: "" },
@@ -160,18 +144,17 @@ const HospitalForm = () => {
         throw new Error(data.message || "Failed to create hospital");
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Network error. Please try again.";
-      toast.error(errorMessage);
+      console.error("Error creating hospital:", error);
+      toast.error('Failed to create hospital. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
   if (!Authorized) {
     return <UnAuthorized />;
   }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
