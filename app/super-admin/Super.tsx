@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Loader2, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
+import UserSearchBox from '@/components/miscellaneous/makeAdmin';
 
 interface Request {
     id: string;
     userEmail: string;
     type: string;
     status: 'PENDING' | 'ACTIVE' | 'SUSPENDED';
-    expiryTime : Date;
+    expiryTime: Date;
 }
 
 interface SuperAdmin {
@@ -37,7 +38,10 @@ export default function Super() {
                 }
 
                 const data = await response.json();
-                console.log('Super Admin Data:', data);
+
+                if (data.role != 'SUPERADMIN') {
+                    window.location.href = '/';
+                }
                 setSuperAdmin(data);
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to fetch profile';
@@ -67,8 +71,8 @@ export default function Super() {
                 if (!prev) return null;
                 return {
                     ...prev,
-                    requests: prev.requests.map(req => 
-                        req.id === requestId 
+                    requests: prev.requests.map(req =>
+                        req.id === requestId
                             ? { ...req, status: action === 'ACTIVE' ? 'ACTIVE' : 'SUSPENDED' }
                             : req
                     )
@@ -113,6 +117,8 @@ export default function Super() {
                         </div>
                     </div>
 
+                    <UserSearchBox />
+
                     {superAdmin.requests.length === 0 ? (
                         <div className="text-center py-12 bg-gray-50 rounded-lg">
                             <p className="text-gray-600">No pending requests found.</p>
@@ -138,9 +144,9 @@ export default function Super() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                    ${request.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
-                                                    request.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 
-                                                    'bg-red-100 text-red-800'}`}>
+                                                    ${request.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                        request.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                                                            'bg-red-100 text-red-800'}`}>
                                                     {request.status}
                                                 </span>
                                             </td>

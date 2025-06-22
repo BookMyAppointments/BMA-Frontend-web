@@ -1,36 +1,7 @@
-import { ShieldAlert, Loader2 } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
-import { toast } from 'react-toastify';
 
 const UnAuthorized = () => {
-    const [isRequesting, setIsRequesting] = useState(false);
-
-    const handleRequestInvitation = async () => {
-        try {
-            setIsRequesting(true);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/admin-request-create`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to request invitation');
-            }
-
-            toast.success('Invitation request sent successfully! We will notify you once approved.');
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to request invitation';
-            toast.error(errorMessage);
-        } finally {
-            setIsRequesting(false);
-        }
-    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -46,26 +17,12 @@ const UnAuthorized = () => {
                 </p>
 
                 <div className="space-y-4">
-                    <button
-                        onClick={handleRequestInvitation}
-                        disabled={isRequesting}
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                        {isRequesting ? (
-                            <>
-                                <Loader2 className="animate-spin" size={20} />
-                                Requesting...
-                            </>
-                        ) : (
-                            'Request Creation'
-                        )}
-                    </button>
 
                     <Link
-                        href="/admin/dashboard"
+                        href="/"
                         className="block w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                        Return to Dashboard
+                        Return to HomaPage
                     </Link>
 
                     <Link

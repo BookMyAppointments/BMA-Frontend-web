@@ -1,19 +1,26 @@
 'use client';
 import { useState, useEffect } from "react";
-import { Loader2, Search, User } from "lucide-react";
+import { Loader2, Search, User, Check, Phone, Mail, UserCheck } from "lucide-react";
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 interface SearchUser {
     id: string;
     name: string;
     email: string;
+    picture: string;
+    role: string;
+    phone: string;
 }
 
-export default function Page() {
+export default function UserSearchBox() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<SearchUser | null>(null);
     const [isSearching, setIsSearching] = useState(false);
     const [showSearchResults, setShowSearchResults] = useState(false);
+    const [isMakingAdmin, setIsMakingAdmin] = useState(false);
+    const [adminLink, setAdminLink] = useState<string | null>(null);
+    const [showAdminLink, setShowAdminLink] = useState(false);
 
     const searchUsers = async (email: string) => {
         if (!email.trim()) {
@@ -25,7 +32,7 @@ export default function Page() {
         try {
             setIsSearching(true);
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/search?email=${encodeURIComponent(email)}`,
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/user?email=${encodeURIComponent(email)}`,
                 {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -56,15 +63,45 @@ export default function Page() {
         }
     };
 
-    const handleUserSelect = (userId: string) => {
-        setSearchQuery('');
-        setSearchResults(null);
-        setShowSearchResults(false);
-        // Add your logic here for what to do when a user is selected
-        console.log('Selected user ID:', userId);
+    const makeAdmin = async (email: string) => {
+        try {
+            setIsMakingAdmin(true);
+            setShowAdminLink(false);
+            setAdminLink(null);
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/make-admin?email=${encodeURIComponent(email)}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                toast.error('Failed to make user admin');
+                return;
+            }
+
+            const data = await response.json();
+            console.log('Make admin response:', data);
+
+            if (data.link) {
+                setAdminLink(data.link);
+                setShowAdminLink(true);
+                toast.success('Admin link generated successfully!');
+            }
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to make user admin';
+            toast.error(errorMessage);
+        } finally {
+            setIsMakingAdmin(false);
+        }
     };
 
-    // Close search results when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Element;
@@ -96,27 +133,69 @@ export default function Page() {
                     {isSearching && (
                         <Loader2 className="animate-spin text-blue-600" size={16} />
                     )}
-                </div>
-
-                {/* Search Results Dropdown */}
+                </div>                {/* Search Results Dropdown */}
                 {showSearchResults && searchResults && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                        <button
-                            onClick={() => handleUserSelect(searchResults.id)}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3"
-                        >
-                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                <User className="text-blue-600" size={20} />
+                        <div className="p-4 border-b border-gray-100">
+                            <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0">
+                                    {searchResults.picture ? (
+                                        <Image
+                                            src={searchResults.picture}
+                                            alt={searchResults.name}
+                                            width={48}
+                                            height={48}
+                                            className="w-12 h-12 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <User className="text-blue-600" size={24} />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="font-medium text-gray-900 text-lg">{searchResults.name}</div>
+                                    <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                                        <Mail className="w-4 h-4" />
+                                        <span>{searchResults.email}</span>
+                                    </div>
+                                    {searchResults.phone && (
+                                        <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                                            <Phone className="w-4 h-4" />
+                                            <span>{searchResults.phone}</span>
+                                        </div>
+                                    )}
+                                    <div className="mt-2">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            <UserCheck className="w-3 h-3 mr-1" />
+                                            {searchResults.role}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex-shrink-0">
+                                    <button
+                                        onClick={() => makeAdmin(searchResults.email)}
+                                        disabled={isMakingAdmin}
+                                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isMakingAdmin ? (
+                                            <>
+                                                <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Check className="w-4 h-4 mr-2" />
+                                                Make Admin
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
-                            <div>
-                                <div className="font-medium text-gray-900">{searchResults.name}</div>
-                                <div className="text-sm text-gray-500">{searchResults.email}</div>
-                            </div>
-                        </button>
+                        </div>
                     </div>
                 )}
 
-                {/* No Results Message */}
                 {showSearchResults && !searchResults && !isSearching && searchQuery && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                         <div className="px-4 py-3 text-gray-500 text-center">
@@ -125,6 +204,24 @@ export default function Page() {
                     </div>
                 )}
             </div>
+
+            {showAdminLink && adminLink && (
+                <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-green-800 mb-2">Admin Link Generated!</h3>
+                    <p className="text-sm text-green-700 mb-3">
+                        Share this link with the user to complete their admin setup:
+                    </p>
+                    <div className="bg-white border border-green-300 rounded-md p-3 break-all">
+                        <code className="text-sm text-gray-800">{adminLink}</code>
+                    </div>
+                    <button
+                        onClick={() => navigator.clipboard.writeText(adminLink)}
+                        className="mt-3 inline-flex items-center px-3 py-2 border border-green-300 shadow-sm text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    >
+                        Copy Link
+                    </button>
+                </div>
+            )}
         </div>
     )
 }

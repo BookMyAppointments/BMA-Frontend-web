@@ -17,28 +17,29 @@ const HospitalForm = () => {
 
   useEffect(() => {
     const uniqueCode = searchParams.get("uniqueCode");
+    console.log("Unique Code:", uniqueCode);
     if (!uniqueCode) {
       setAuthorized(false);
       return;
     }
     const verifyCode = async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/admin-verify-code/${uniqueCode}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/admin-verify-code/${uniqueCode}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      if (!response.ok) {
+
+      const data = await response.json();
+      console.log("Response:", data);
+      if (!response.status || response.status !== 201) {
         setAuthorized(false);
         return;
       }
-      const data = await response.json();
-      if (!data.success) {
-        setAuthorized(false);
-      }
     };
+
     if (uniqueCode) verifyCode();
   }, [searchParams]);
 
