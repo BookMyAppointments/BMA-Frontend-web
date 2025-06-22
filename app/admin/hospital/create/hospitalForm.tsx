@@ -17,26 +17,31 @@ const HospitalForm = () => {
 
   useEffect(() => {
     const uniqueCode = searchParams.get("uniqueCode");
-    console.log("Unique Code:", uniqueCode);
     if (!uniqueCode) {
       setAuthorized(false);
       return;
     }
-    const verifyCode = async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/admin-verify-code/${uniqueCode}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
 
-      const data = await response.json();
-      console.log("Response:", data);
-      if (!response.status || response.status !== 201) {
+    const verifyCode = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/admin-verify-code/${uniqueCode}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+        console.log("Response:", data);
+        if (!response.status || response.status !== 201) {
+          setAuthorized(false);
+          return;
+        }
+      } catch (error) {
+        console.error("Error verifying code:", error);
         setAuthorized(false);
-        return;
       }
     };
 
@@ -104,7 +109,7 @@ const HospitalForm = () => {
     try {
       console.log("Submitting hospital data:", formData);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/create`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/create?uniqueCode=${searchParams.get("uniqueCode")}`,
         {
           method: "POST",
           headers: {

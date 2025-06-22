@@ -22,7 +22,7 @@ const UnAuthorized = () => {
                         href="/"
                         className="block w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                        Return to HomaPage
+                        Return to HomePage
                     </Link>
 
                     <Link
