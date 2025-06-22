@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/services/api';
+import ProfilePlaceHolder from '../../../../public/images/cat.jpg'
 import { toast } from 'react-toastify';
 import Image from 'next/image';
 import { User } from '@/types/doctor';
 
 export default function Personal() {
     const [, setUser] = useState<User | null>(null);
-    const [imageUrl, setImageUrl] = useState('/profile-placeholder.png');
+    const [imageUrl, setImageUrl] = useState(ProfilePlaceHolder);
     const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -46,14 +47,13 @@ export default function Personal() {
                     }
                 }
             );
-            console.log(response.data.profile);
-            setUser(response.data);
+            console.log(response.data.profile);            setUser(response.data);
             const newFormData = {
                 name: response.data.name || '',
                 email: response.data.email || '',
                 phone: response.data.phone || '',
                 address: response.data.address || '',
-                gender: response.data.gender || '',
+                gender: response.data.gender.toLowerCase() || '',
                 dob: response.data.dob ? new Date(response.data.dob).toISOString().split('T')[0] : ''
             };
 
