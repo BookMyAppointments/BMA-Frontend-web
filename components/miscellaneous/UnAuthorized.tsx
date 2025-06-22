@@ -47,7 +47,7 @@ const UnAuthorized = () => {
 
                 <div className="space-y-4">
                     <button
-                        onClick={handleRequestInvitation}
+                        onClick={()=>window.location.href='/admin/hospital/create'}
                         disabled={isRequesting}
                         className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
@@ -57,7 +57,7 @@ const UnAuthorized = () => {
                                 Requesting...
                             </>
                         ) : (
-                            'Request Invitation'
+                            'Request Creation'
                         )}
                     </button>
 
@@ -69,7 +69,7 @@ const UnAuthorized = () => {
                     </Link>
                     
                     <Link 
-                        href="/support"
+                        href="/help"
                         className="block w-full text-blue-600 hover:text-blue-700 transition-colors"
                     >
                         Contact Support
