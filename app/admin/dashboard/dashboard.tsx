@@ -5,13 +5,11 @@ import Image from 'next/image';
 import { Hospital } from './types';
 import { toast } from 'react-toastify';
 import { Loader2 } from 'lucide-react';
-import { useSession } from '@/context/sessionProvider';
 import Link from 'next/link';
 
 export default function Dashboard() {
     const [hospital, setHospital] = useState<Hospital | null>(null);
     const [loading, setLoading] = useState(true);
-    const { user } = useSession();
 
     useEffect(() => {
         const fetchHospitalDetails = async () => {
@@ -38,18 +36,6 @@ export default function Dashboard() {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <Loader2 className="animate-spin text-blue-600" size={32} />
-            </div>
-        );
-    }
-
-    if (!user?.role || user.role !== 'ADMIN') {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
-                    <p className="text-gray-600">You do not have admin privileges.</p>
-                    <Link href={'/'} className='text-blue-500 hover:text-blue-600 cursor-pointer'>Home Page</Link>
-                </div>
             </div>
         );
     }

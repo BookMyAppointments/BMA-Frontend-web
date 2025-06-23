@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { DoctorArraySectionProps, DoctorBasicInfoSectionProps, DoctorDataRequest } from "./types";
-import { User, Plus, X, DollarSign, FileText, Mail, Phone } from "lucide-react";
+import { DoctorArraySectionProps, DoctorBasicInfoSectionProps, DoctorDataRequest, AvailabilitySlot } from "./types";
+import { User, Plus, X, DollarSign, FileText, Mail, Phone, Clock, Calendar } from "lucide-react";
 
 export const DoctorArraySection: React.FC<DoctorArraySectionProps> = ({ title, icon, items, onItemsChange, placeholder, error }) => {
     const [inputValue, setInputValue] = useState('');
@@ -172,3 +172,161 @@ export const DoctorBasicInfoSection: React.FC<DoctorBasicInfoSectionProps> = ({ 
         </div>
     </div>
 );
+
+export const DoctorAvailabilitySection: React.FC<{
+    availability: AvailabilitySlot[];
+    setFormData: React.Dispatch<React.SetStateAction<DoctorDataRequest>>;
+    error?: string;
+}> = ({ availability, setFormData, error }) => {
+    const [selectedDay, setSelectedDay] = useState('');
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
+
+    const daysOfWeek = [
+        'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    ];
+
+    const addAvailabilitySlot = () => {
+        if (selectedDay && startTime && endTime) {
+            // Check if this day already exists
+            const existingSlotIndex = availability.findIndex(slot => slot.day === selectedDay);
+            
+            const newSlot: AvailabilitySlot = {
+                day: selectedDay,
+                startTime,
+                endTime
+            };
+
+            let updatedAvailability;
+            if (existingSlotIndex >= 0) {
+                // Update existing slot
+                updatedAvailability = availability.map((slot, index) => 
+                    index === existingSlotIndex ? newSlot : slot
+                );
+            } else {
+                // Add new slot
+                updatedAvailability = [...availability, newSlot];
+            }
+
+            setFormData(prev => ({
+                ...prev,
+                availability: updatedAvailability
+            }));
+
+            // Reset form
+            setSelectedDay('');
+            setStartTime('');
+            setEndTime('');
+        }
+    };
+
+    const removeAvailabilitySlot = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            availability: availability.filter((_, i) => i !== index)
+        }));
+    };
+
+    // Sort availability by day order
+    const sortedAvailability = [...availability].sort((a, b) => {
+        return daysOfWeek.indexOf(a.day) - daysOfWeek.indexOf(b.day);
+    });
+
+    return (
+        <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                <Calendar className="text-blue-600" size={20} />
+                Doctor Availability *
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Day of Week
+                    </label>
+                    <select
+                        value={selectedDay}
+                        onChange={(e) => setSelectedDay(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        <option value="">Select Day</option>
+                        {daysOfWeek.map(day => (
+                            <option key={day} value={day}>{day}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Start Time
+                    </label>
+                    <input
+                        type="time"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        End Time
+                    </label>
+                    <input
+                        type="time"
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                </div>
+
+                <div className="flex items-end">
+                    <button
+                        type="button"
+                        onClick={addAvailabilitySlot}
+                        disabled={!selectedDay || !startTime || !endTime}
+                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                        <Plus size={16} />
+                        Add Slot
+                    </button>
+                </div>
+            </div>
+
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            <div className="space-y-2">
+                <h3 className="text-lg font-medium text-gray-700 flex items-center gap-2">
+                    <Clock size={16} />
+                    Weekly Schedule
+                </h3>
+                {sortedAvailability.length === 0 ? (
+                    <p className="text-gray-500 italic">No availability slots added yet</p>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {sortedAvailability.map((slot, index) => (
+                            <div
+                                key={index}
+                                className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                            >
+                                <div>
+                                    <span className="font-medium text-gray-800">{slot.day}</span>
+                                    <p className="text-sm text-gray-600">
+                                        {slot.startTime} - {slot.endTime}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => removeAvailabilitySlot(index)}
+                                    className="text-gray-400 hover:text-red-500 transition-colors"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};

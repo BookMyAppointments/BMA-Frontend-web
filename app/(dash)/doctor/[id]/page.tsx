@@ -18,7 +18,6 @@ const DoctorDetails: FC = () => {
             try {
                 const res = await fetch(`${API_BASE_URL}/doctors/get/${id}`);
                 const data = await res.json();
-                console.log(data);
 
                 setDoctor(data);
             } catch (err) {

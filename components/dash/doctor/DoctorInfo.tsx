@@ -8,9 +8,11 @@ const DoctorInfo: FC<{ doctor: Doctor }> = ({ doctor }) => {
 
     const [activeTab, setActiveTab] = useState<'about' | 'reviews' | 'others'>('about');
     const [pageShow, setPageShow] = useState(false);
+
     if (pageShow) {
         return <BookingForm doctor={doctor} />
     }
+
     return (
         <div className="w-[97%] mx-auto mt-6">
             <div className="flex flex-col lg:flex-row gap-6 min-h-[600px]">
@@ -52,7 +54,8 @@ const DoctorInfo: FC<{ doctor: Doctor }> = ({ doctor }) => {
                                     </ul>
                                 </div>
                             </div>
-                        )}                        {activeTab === 'reviews' && (
+                        )}
+                        {activeTab === 'reviews' && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-800">Patient Reviews</h3>
                                 {doctor.reviews && doctor.reviews.length > 0 ? doctor.reviews.map((review: Review) => (

@@ -6,6 +6,13 @@ export interface DoctorFormErrors {
     qualifications?: string;
     price?: string;
     about?: string;
+    availability?: string;
+}
+
+export interface AvailabilitySlot {
+    day: string;
+    startTime: string;
+    endTime: string;
 }
 
 export interface DoctorDataRequest {
@@ -16,6 +23,7 @@ export interface DoctorDataRequest {
     qualifications: string[];
     price: number | string;
     about: string;
+    availability: AvailabilitySlot[];
 }
 
 export interface DoctorBasicInfoSectionProps {

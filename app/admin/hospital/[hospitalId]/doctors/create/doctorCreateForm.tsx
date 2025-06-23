@@ -3,19 +3,19 @@ import { toast } from 'react-toastify';
 import React, { useState } from 'react';
 import { UserCheck, Stethoscope, GraduationCap, Save, Loader2 } from 'lucide-react';
 import { DoctorDataRequest, DoctorFormErrors } from '../types';
-import { DoctorArraySection, DoctorBasicInfoSection } from '../components';
+import { DoctorArraySection, DoctorBasicInfoSection, DoctorAvailabilitySection } from '../components';
 
 export default function DoctorCreateForm({ hospitalId }: { hospitalId: string }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errors, setErrors] = useState<DoctorFormErrors>({});
-    const [formData, setFormData] = useState<DoctorDataRequest>({
+    const [errors, setErrors] = useState<DoctorFormErrors>({});    const [formData, setFormData] = useState<DoctorDataRequest>({
         name: '',
         email: '',
         phone: '',
         specialization: [] as string[],
         qualifications: [] as string[],
         price: '',
-        about: ''
+        about: '',
+        availability: []
     });
 
     const validateForm = () => {
@@ -45,10 +45,12 @@ export default function DoctorCreateForm({ hospitalId }: { hospitalId: string })
 
         if (!formData.price || Number(formData.price) <= 0) {
             newErrors.price = 'Price must be greater than 0';
+        }        if (!formData.about.trim()) {
+            newErrors.about = 'About section is required';
         }
 
-        if (!formData.about.trim()) {
-            newErrors.about = 'About section is required';
+        if (formData.availability.length === 0) {
+            newErrors.availability = 'At least one availability slot is required';
         }
 
         setErrors(newErrors);
@@ -56,34 +58,33 @@ export default function DoctorCreateForm({ hospitalId }: { hospitalId: string })
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-        e.preventDefault();
-
-        if (!validateForm()) {
+        e.preventDefault();        if (!validateForm()) {
             return;
-        } setIsSubmitting(true);
+        }
+        
+        setIsSubmitting(true);
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/create?hospitalId=${hospitalId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({
+                },                body: JSON.stringify({
                     name: formData.name,
                     email: formData.email,
                     phone: formData.phone,
                     specialization: formData.specialization,
                     qualifications: formData.qualifications,
                     price: Number(formData.price),
-                    about: formData.about
+                    about: formData.about,
+                    availability: formData.availability
                 }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                toast.success('Doctor profile created successfully!');
-                // Reset form
+                toast.success('Doctor profile created successfully!');                // Reset form
                 setFormData({
                     name: '',
                     email: '',
@@ -91,7 +92,8 @@ export default function DoctorCreateForm({ hospitalId }: { hospitalId: string })
                     specialization: [],
                     qualifications: [],
                     price: '',
-                    about: ''
+                    about: '',
+                    availability: []
                 });
             } else {
                 throw new Error(data.message || 'Failed to create doctor profile');
@@ -130,15 +132,19 @@ export default function DoctorCreateForm({ hospitalId }: { hospitalId: string })
                             onItemsChange={(specialization: string[]) => setFormData(prev => ({ ...prev, specialization }))}
                             placeholder="Enter specialization (e.g., Cardiology, Neurology)"
                             error={errors.specialization}
-                        />
-
-                        <DoctorArraySection
+                        />                        <DoctorArraySection
                             title="Qualifications"
                             icon={<GraduationCap className="text-green-600" size={20} />}
                             items={formData.qualifications}
                             onItemsChange={(qualifications: string[]) => setFormData(prev => ({ ...prev, qualifications }))}
                             placeholder="Enter qualification (e.g., MD, MBBS, MS)"
                             error={errors.qualifications}
+                        />
+
+                        <DoctorAvailabilitySection
+                            availability={formData.availability}
+                            setFormData={setFormData}
+                            error={errors.availability}
                         />
 
                         <div className="pt-6 border-t border-gray-200">
