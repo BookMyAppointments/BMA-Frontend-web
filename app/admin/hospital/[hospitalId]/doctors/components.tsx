@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DoctorArraySectionProps, DoctorBasicInfoSectionProps, DoctorDataRequest } from "./types";
-import { User, Plus, X, DollarSign, FileText } from "lucide-react";
+import { User, Plus, X, DollarSign, FileText, Mail, Phone } from "lucide-react";
 
 export const DoctorArraySection: React.FC<DoctorArraySectionProps> = ({ title, icon, items, onItemsChange, placeholder, error }) => {
     const [inputValue, setInputValue] = useState('');
@@ -75,7 +75,65 @@ export const DoctorBasicInfoSection: React.FC<DoctorBasicInfoSectionProps> = ({ 
             <User className="text-blue-600" size={20} />
             Doctor Information
         </h2>
-          <div>
+
+        <div>
+            <label className="flex text-sm font-medium text-gray-700 mb-2 items-center gap-2">
+                <User size={16} />
+                Full Name *
+            </label>
+            <input
+                type="text"
+                value={formData.name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev: DoctorDataRequest) => ({
+                    ...prev,
+                    name: e.target.value
+                }))}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                placeholder="Enter doctor's full name"
+            />
+            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+        </div>
+
+        <div>
+            <label className="flex text-sm font-medium text-gray-700 mb-2 items-center gap-2">
+                <Mail size={16} />
+                Email Address *
+            </label>
+            <input
+                type="email"
+                value={formData.email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev: DoctorDataRequest) => ({
+                    ...prev,
+                    email: e.target.value
+                }))}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                placeholder="Enter doctor's email address"
+            />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+        </div>
+
+        <div>
+            <label className="flex text-sm font-medium text-gray-700 mb-2 items-center gap-2">
+                <Phone size={16} />
+                Phone Number *
+            </label>
+            <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev: DoctorDataRequest) => ({
+                    ...prev,
+                    phone: e.target.value
+                }))}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                placeholder="Enter doctor's phone number"
+            />
+            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+        </div>
+
+        <div>
             <label className="flex text-sm font-medium text-gray-700 mb-2 items-center gap-2">
                 <DollarSign size={16} />
                 Consultation Price *
@@ -85,13 +143,12 @@ export const DoctorBasicInfoSection: React.FC<DoctorBasicInfoSectionProps> = ({ 
                 min="0"
                 step="0.01"
                 value={formData.price}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev: DoctorDataRequest) => ({ 
-                    ...prev, 
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev: DoctorDataRequest) => ({
+                    ...prev,
                     price: e.target.value === '' ? '' : Number(e.target.value)
                 }))}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.price ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.price ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 placeholder="Enter consultation price"
             />
             {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
@@ -102,13 +159,12 @@ export const DoctorBasicInfoSection: React.FC<DoctorBasicInfoSectionProps> = ({ 
             </label>
             <textarea
                 value={formData.about}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData((prev: DoctorDataRequest) => ({ 
-                    ...prev, 
-                    about: e.target.value 
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData((prev: DoctorDataRequest) => ({
+                    ...prev,
+                    about: e.target.value
                 }))}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.about ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.about ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 placeholder="Tell us about the doctor's experience and expertise..."
                 rows={4}
             />

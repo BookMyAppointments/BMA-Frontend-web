@@ -2,13 +2,16 @@
 import { toast } from 'react-toastify';
 import React, { useState } from 'react';
 import { UserCheck, Stethoscope, GraduationCap, Save, Loader2 } from 'lucide-react';
-import { DoctorDataRequest, DoctorFormErrors } from '../../types';
-import { DoctorArraySection, DoctorBasicInfoSection } from '../../components';
+import { DoctorDataRequest, DoctorFormErrors } from '../types';
+import { DoctorArraySection, DoctorBasicInfoSection } from '../components';
 
-export default function DoctorCreateForm({ userId, hospitalId }: { userId: string, hospitalId: string }) {
+export default function DoctorCreateForm({ hospitalId }: { hospitalId: string }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<DoctorFormErrors>({});
     const [formData, setFormData] = useState<DoctorDataRequest>({
+        name: '',
+        email: '',
+        phone: '',
         specialization: [] as string[],
         qualifications: [] as string[],
         price: '',
@@ -17,6 +20,20 @@ export default function DoctorCreateForm({ userId, hospitalId }: { userId: strin
 
     const validateForm = () => {
         const newErrors: DoctorFormErrors = {};
+
+        if (!formData.name.trim()) {
+            newErrors.name = 'Doctor name is required';
+        }
+
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email address is required';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Email address is invalid';
+        }
+
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+        }
 
         if (formData.specialization.length === 0) {
             newErrors.specialization = 'At least one specialization is required';
@@ -43,19 +60,22 @@ export default function DoctorCreateForm({ userId, hospitalId }: { userId: strin
 
         if (!validateForm()) {
             return;
-        }
-
-        setIsSubmitting(true);
+        } setIsSubmitting(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/create/${hospitalId}/${userId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/create?hospitalId=${hospitalId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify({
-                    ...formData,
-                    price: Number(formData.price)
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    specialization: formData.specialization,
+                    qualifications: formData.qualifications,
+                    price: Number(formData.price),
+                    about: formData.about
                 }),
             });
 
@@ -65,6 +85,9 @@ export default function DoctorCreateForm({ userId, hospitalId }: { userId: strin
                 toast.success('Doctor profile created successfully!');
                 // Reset form
                 setFormData({
+                    name: '',
+                    email: '',
+                    phone: '',
                     specialization: [],
                     qualifications: [],
                     price: '',

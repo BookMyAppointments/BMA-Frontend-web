@@ -1,4 +1,7 @@
 export interface DoctorFormErrors {
+    name?: string;
+    email?: string;
+    phone?: string;
     specialization?: string;
     qualifications?: string;
     price?: string;
@@ -6,6 +9,9 @@ export interface DoctorFormErrors {
 }
 
 export interface DoctorDataRequest {
+    name: string;
+    email: string;
+    phone: string;
     specialization: string[];
     qualifications: string[];
     price: number | string;

@@ -1,12 +1,14 @@
 'use client';
 import { toast } from 'react-toastify';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Building, Users, Wrench, Heart, Save, Loader2, Delete } from 'lucide-react';
+import { Building, Users, Wrench, Heart, Save, Loader2 } from 'lucide-react';
 import { HospitalFormErrors, HospitalDataRequest } from '../create/types';
 import { ArraySection, BasicInfoSection, HoursSection, LocationSection } from '../components';
+import { useSession } from '@/context/sessionProvider';
 
 const HospitalUpdateForm = ({ id }: { id: string }) => {
     const [errors, setErrors] = useState<HospitalFormErrors>({});
+    const { user } = useSession();
     const [formData, setFormData] = useState<HospitalDataRequest>({
         name: '',
         location: {
@@ -64,7 +66,7 @@ const HospitalUpdateForm = ({ id }: { id: string }) => {
         setIsSubmitting(true);
         try {
             console.log('Submitting hospital data:', formData);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/update/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/update?id=${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -99,8 +101,9 @@ const HospitalUpdateForm = ({ id }: { id: string }) => {
                 throw new Error(data.message || 'Failed to update hospital');
             }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
-            toast.error(errorMessage);
+            console.error('Error updating hospital:', error);
+            toast.error(error instanceof Error ? error.message : 'Failed to update hospital. Please try again later.');
+            setErrors(prev => ({ ...prev, form: error instanceof Error ? error.message : 'An unexpected error occurred.' }));
         } finally {
             setIsSubmitting(false);
         }
@@ -109,24 +112,24 @@ const HospitalUpdateForm = ({ id }: { id: string }) => {
 
     const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        if (!window.confirm('Are you sure you want to delete this hospital? This action cannot be undone.')) {
+        if (!window.confirm('Are you sure you want to suspened this hospital?')) {
             return;
         }
         try {
             setIsDeleting(true);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/delete/${id}`, {
-                method: 'DELETE',
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/suspend?id=${id}`, {
+                method: 'PUT',
                 headers: {
                     'authorization': `Bearer ${localStorage.getItem('token')}`,
                 }
             });
             if (!response.ok) {
-                throw new Error('Failed to delete hospital');
+                throw new Error('Failed to suspend hospital');
             }
-            toast.success('Hospital deleted successfully');
+            toast.success('Hospital suspended successfully');
         } catch (error) {
-            console.error('Error deleting hospital:', error);
-            toast.error('Failed to delete hospital. Please try again later.');
+            console.error('Error suspending hospital:', error);
+            toast.error('Failed to suspend hospital. Please try again later.');
         } finally {
             setIsDeleting(false);
         }
@@ -163,9 +166,8 @@ const HospitalUpdateForm = ({ id }: { id: string }) => {
                     <div className="border-b border-gray-200 pb-6 mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                             <Building className="text-blue-600" size={32} />
-                            Create New Hospital
+                            Edit Hospital
                         </h1>
-                        <p className="text-gray-600 mt-2">Add a new hospital to the system with all required details</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-8">
@@ -233,23 +235,24 @@ const HospitalUpdateForm = ({ id }: { id: string }) => {
                             </button>
                         </div>
                         <div className="pt-6 border-t border-gray-200">
-                            <button
-                                disabled={isDeleting}
-                                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                onClick={handleDelete}
-                            >
-                                {isDeleting ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={20} />
-                                        Deleting Hospital...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Delete size={20} />
-                                        Delete Hospital
-                                    </>
-                                )}
-                            </button>
+                            {user?.role === 'SUPERADMIN' && (
+                                <button
+                                    disabled={isDeleting}
+                                    className="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    onClick={handleDelete}
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <Loader2 className="animate-spin" size={20} />
+                                            Deleting Hospital...
+                                        </>
+                                    ) : (
+                                        <>
+                                            Suspend Hospital
+                                        </>
+                                    )}
+                                </button>
+                            )}
                         </div>
                     </form>
                 </div>

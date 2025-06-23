@@ -9,14 +9,65 @@ export default function DoctorEditForm({ id }: { id: string }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<DoctorFormErrors>({});
     const [formData, setFormData] = useState<DoctorDataRequest>({
+        name: '',
+        email: '',
+        phone: '',
         specialization: [] as string[],
         qualifications: [] as string[],
         price: '',
         about: ''
-    });
+    }); const fetchDoctorData = useCallback(async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/get/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            const data = await response.json();
+            console.log('API Response:', data);
+
+            if (response.ok) {
+                const doctorData = data.doctor || data;
+
+                setFormData({
+                    name: doctorData.name || '',
+                    email: doctorData.email || '',
+                    phone: doctorData.phone || '',
+                    specialization: Array.isArray(doctorData.specialization) ? doctorData.specialization : [],
+                    qualifications: Array.isArray(doctorData.qualifications) ? doctorData.qualifications : [],
+                    price: doctorData.price || '',
+                    about: doctorData.about || ''
+                });
+            } else {
+                throw new Error(data.message || 'Failed to fetch doctor data');
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
+            toast.error(errorMessage);
+        }
+    }, [id]);
+
+    useEffect(() => {
+        fetchDoctorData();
+    }, [fetchDoctorData]);
 
     const validateForm = () => {
         const newErrors: DoctorFormErrors = {};
+
+        if (!formData.name.trim()) {
+            newErrors.name = 'Doctor name is required';
+        }
+
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email address is required';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Email address is invalid';
+        }
+
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+        }
 
         if (formData.specialization.length === 0) {
             newErrors.specialization = 'At least one specialization is required';
@@ -43,35 +94,29 @@ export default function DoctorEditForm({ id }: { id: string }) {
 
         if (!validateForm()) {
             return;
-        }
-
-        setIsSubmitting(true);
+        } setIsSubmitting(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/create`, {
-                method: 'POST',
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/update?doctorId=${id}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify({
-                    ...formData,
-                    price: Number(formData.price)
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    specialization: formData.specialization,
+                    qualifications: formData.qualifications,
+                    price: Number(formData.price),
+                    about: formData.about
                 }),
             });
 
-            const data = await response.json();
-
-            if (response.ok) {
-                toast.success('Doctor profile created successfully!');
-                // Reset form
-                setFormData({
-                    specialization: [],
-                    qualifications: [],
-                    price: '',
-                    about: ''
-                });
+            const data = await response.json(); if (response.ok) {
+                toast.success('Doctor profile updated successfully!');
             } else {
-                throw new Error(data.message || 'Failed to create doctor profile');
+                throw new Error(data.message || 'Failed to update doctor profile');
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
@@ -81,25 +126,6 @@ export default function DoctorEditForm({ id }: { id: string }) {
         }
     };
 
-    const fetchDoctorData = useCallback(async () => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/doctors/get/${id}`);
-            if (!res.ok) {
-                toast.error('Failed to fetch doctor data');
-                return;
-            }
-            const data = await res.json();
-            setFormData(data);
-        } catch (err) {
-            toast.error('Error fetching doctor data');
-            console.error('Error fetching doctor data:', err);
-        }
-    }, [id]);
-
-    useEffect(() => {
-        fetchDoctorData();
-    }, [fetchDoctorData]);
-
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-4xl mx-auto">
@@ -107,9 +133,9 @@ export default function DoctorEditForm({ id }: { id: string }) {
                     <div className="border-b border-gray-200 pb-6 mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                             <UserCheck className="text-blue-600" size={32} />
-                            Create Doctor Profile
+                            Edit Doctor Profile
                         </h1>
-                        <p className="text-gray-600 mt-2">Add a new doctor profile with all required details</p>
+                        <p className="text-gray-600 mt-2">Update doctor profile information</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-8">
@@ -142,18 +168,17 @@ export default function DoctorEditForm({ id }: { id: string }) {
                                 type="submit"
                                 disabled={isSubmitting}
                                 className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={20} />
-                                        Creating Doctor Profile...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save size={20} />
-                                        Create Doctor Profile
-                                    </>
-                                )}
+                            >                                {isSubmitting ? (
+                                <>
+                                    <Loader2 className="animate-spin" size={20} />
+                                    Updating Doctor Profile...
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={20} />
+                                    Update Doctor Profile
+                                </>
+                            )}
                             </button>
                         </div>
                     </form>
