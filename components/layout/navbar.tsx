@@ -136,6 +136,18 @@ const Navbar: FC = () => {
         }
     };
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (isProfileMenuOpen && !target.closest('.relative.ml-auto')) {
+                setIsProfileMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isProfileMenuOpen]);
+
     const handleResultClick = (result: SearchResult) => {
         setSearchQuery('');
         setSearchResults([]);
@@ -213,7 +225,7 @@ const Navbar: FC = () => {
 
                 {/* Toggle buttons - only show on home page */}
                 {isHomePage && (
-                    <div className="flex items-center bg-white rounded-full shadow-sm mr-6">
+                    <div className="flex items-center bg-white rounded-full shadow-sm mr-6 cursor-pointer">
                         <motion.div className="relative flex items-center rounded-full">
                             <button
                                 onClick={toggleService}
@@ -286,7 +298,7 @@ const Navbar: FC = () => {
                 )}
 
                 {/* Profile Section */}
-                <div className="relative ml-auto">
+                <div className="relative ml-auto cursor-pointer">
                     <button
                         onClick={handleProfileClick}
                         className="flex items-center gap-2 bg-[#F3F3F3] rounded-full hover:bg-gray-100 transition-colors"
