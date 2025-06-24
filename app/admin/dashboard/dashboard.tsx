@@ -105,7 +105,12 @@ export default function Dashboard() {
 
             {/* Doctors */}
             <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">Doctors</h2>
+                <div className='flex items-center justify-between mb-4'>
+                    <h2 className="text-xl font-semibold mb-4">Doctors</h2>
+                    <Link href={`/admin/hospital/${hospital?.id}/doctors/create`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                        Create New Doctor
+                    </Link>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {hospital?.doctors.map((doctor) => (
                         <Link href={`/admin/hospital/${hospital.id}/doctors/${doctor.id}`} key={doctor.id} className="bg-white p-4 rounded-lg shadow cursor-pointer">
@@ -126,10 +131,15 @@ export default function Dashboard() {
 
             {/* Labs */}
             <div>
-                <h2 className="text-xl font-semibold mb-4">Laboratory Facilities</h2>
+                <div className='flex items-center justify-between mb-4'>
+                    <h2 className="text-xl font-semibold mb-4">Laboratory Facilities</h2>
+                    <Link href={`/admin/hospital/${hospital?.id}/labs/create`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                        Create New Lab
+                    </Link>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {hospital?.labs.map((lab) => (
-                        <div key={lab.id} className="bg-white p-4 rounded-lg shadow">
+                        <Link href={`/admin/hospital/${hospital.id}/labs/${lab.id}`} key={lab.id} className="bg-white p-4 rounded-lg shadow cursor-pointer">
                             <Image
                                 width={300}
                                 height={200}
@@ -140,7 +150,7 @@ export default function Dashboard() {
                             />
                             <h3 className="font-medium">{lab.name}</h3>
                             <p className="text-sm text-gray-600">{lab.location.address}</p>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

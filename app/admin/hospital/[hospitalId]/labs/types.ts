@@ -3,15 +3,26 @@ export interface LabFormErrors {
     address?: string;
     coordinates?: string;
     services?: string;
+    description?: string;
+    hours?: string;
 }
+
+export interface OperatingHours {
+    day: string;
+    startTime: string;
+    endTime: string;
+}
+
 export interface LabDataRequest {
     name: string;
+    description?: string;
     location: {
-        lat: string;
-        lng: string;
+        lat: string | number;
+        lng: string | number;
         address: string;
     };
     services: string[];
+    hours?: OperatingHours[];
 }
 
 export interface LabBasicInfoSectionProps {

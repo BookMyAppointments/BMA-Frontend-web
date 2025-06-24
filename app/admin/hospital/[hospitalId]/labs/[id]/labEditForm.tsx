@@ -3,22 +3,22 @@ import { toast } from 'react-toastify';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Building, Heart, Save, Loader2 } from 'lucide-react';
 import { LabDataRequest, LabFormErrors } from '../types';
-import { LabArraySection, LabBasicInfoSection, LabLocationSection } from '../components';
+import { LabArraySection, LabBasicInfoSection, LabLocationSection, LabOperatingHoursSection } from '../components';
 
 export default function LabEditForm({ id }: { id: string }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [errors, setErrors] = useState<LabFormErrors>({});
-    const [formData, setFormData] = useState<LabDataRequest>({
+    const [errors, setErrors] = useState<LabFormErrors>({}); const [formData, setFormData] = useState<LabDataRequest>({
         name: '',
+        description: '',
         location: {
             lat: '',
             lng: '',
             address: ''
         },
-        services: [] as string[]
+        services: [] as string[],
+        hours: []
     });
-    
+
 
     const validateForm = () => {
         const newErrors: LabFormErrors = {};
@@ -48,11 +48,9 @@ export default function LabEditForm({ id }: { id: string }) {
 
         if (!validateForm()) {
             return;
-        }
-
-        setIsSubmitting(true);
+        } setIsSubmitting(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/update/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/update?labId=${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -64,15 +62,9 @@ export default function LabEditForm({ id }: { id: string }) {
             const data = await response.json();
 
             if (response.ok) {
-                toast.success('Lab created successfully!');
-                // Reset form
-                setFormData({
-                    name: '',
-                    location: { lat: '', lng: '', address: '' },
-                    services: []
-                });
+                toast.success('Lab updated successfully!');
             } else {
-                throw new Error(data.message || 'Failed to create lab');
+                throw new Error(data.message || 'Failed to update lab');
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
@@ -81,37 +73,10 @@ export default function LabEditForm({ id }: { id: string }) {
             setIsSubmitting(false);
         }
     };
-
-    const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        try {
-            e.preventDefault();
-            setIsDeleting(true);
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/delete/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || 'Failed to delete lab');
-            }
-
-            toast.success('Lab deleted successfully!');
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to delete lab';
-            toast.error(errorMessage);
-        } finally {
-            setIsDeleting(false);
-        }
-    }
-
+    
     const getLabData = useCallback(async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/find/${id}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/get/${id}`);
             if (!response.ok) {
                 toast.error('Failed to fetch lab data');
                 return;
@@ -131,14 +96,13 @@ export default function LabEditForm({ id }: { id: string }) {
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-4xl mx-auto">
-                <div className="bg-white rounded-lg shadow-lg p-8">
-                    <div className="border-b border-gray-200 pb-6 mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                            <Building className="text-blue-600" size={32} />
-                            Create New Lab
-                        </h1>
-                        <p className="text-gray-600 mt-2">Add a new lab to the hospital with all required details</p>
-                    </div>
+                <div className="bg-white rounded-lg shadow-lg p-8">                    <div className="border-b border-gray-200 pb-6 mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                        <Building className="text-blue-600" size={32} />
+                        Edit Lab
+                    </h1>
+                    <p className="text-gray-600 mt-2">Update lab details and information</p>
+                </div>
 
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <LabBasicInfoSection
@@ -151,9 +115,7 @@ export default function LabEditForm({ id }: { id: string }) {
                             formData={formData}
                             setFormData={setFormData}
                             errors={errors}
-                        />
-
-                        <LabArraySection
+                        />                        <LabArraySection
                             title="Services"
                             icon={<Heart className="text-red-600" size={20} />}
                             items={formData.services}
@@ -162,43 +124,32 @@ export default function LabEditForm({ id }: { id: string }) {
                             error={errors.services}
                         />
 
+                        <LabOperatingHoursSection
+                            hours={formData.hours || []}
+                            setFormData={setFormData}
+                            error={errors.hours}
+                        />
+
                         <div className="pt-6 border-t border-gray-200">
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
                                 className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={20} />
-                                        Creating Lab...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save size={20} />
-                                        Create Lab
-                                    </>
-                                )}
+                            >                                {isSubmitting ? (
+                                <>
+                                    <Loader2 className="animate-spin" size={20} />
+                                    Updating Lab...
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={20} />
+                                    Update Lab
+                                </>
+                            )}
                             </button>
                         </div>
                         <div className="pt-6 border-t border-gray-200">
-                            <button
-                                disabled={isDeleting}
-                                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                onClick={handleDelete}
-                            >
-                                {isDeleting ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={20} />
-                                        Deleting Lab...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save size={20} />
-                                        Delete Lab
-                                    </>
-                                )}
-                            </button>
+
                         </div>
                     </form>
                 </div>
