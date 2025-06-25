@@ -1,15 +1,49 @@
 'use client';
 import { toast } from 'react-toastify';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Building, Heart, Save, Loader2 } from 'lucide-react';
-import { LabDataRequest, LabFormErrors } from '../types';
-import { LabArraySection, LabBasicInfoSection, LabLocationSection, LabOperatingHoursSection } from '../components';
+import { LabDataRequest, LabFormErrors } from "@/app/admin/hospital/[hospitalId]/labs/types";
+import { LabArraySection, LabBasicInfoSection, LabLocationSection, LabOperatingHoursSection } from "@/app/admin/hospital/[hospitalId]/labs/components";
+import { useSearchParams } from 'next/navigation';
+import UnAuthorized from '@/components/miscellaneous/UnAuthorized';
 
-interface LabCreateFormProps {
-    hospitalId?: string;
-}
+export default function StandAloneLabCreateForm() {
+    const searchParams = useSearchParams();
+    const [Authorized, setAuthorized] = useState<boolean>(true);
 
-export default function LabCreateForm({ hospitalId }: LabCreateFormProps) {
+    useEffect(() => {
+        const uniqueCode = searchParams.get("uniqueCode");
+        if (!uniqueCode) {
+            setAuthorized(false);
+            return;
+        }
+
+        const verifyCode = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/admin-verify-code/${uniqueCode}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        },
+                    }
+                );
+
+                const data = await response.json();
+                console.log("Response:", data);
+                if (!response.status || response.status !== 201) {
+                    setAuthorized(false);
+                    return;
+                }
+            } catch (error) {
+                console.error("Error verifying code:", error);
+                setAuthorized(false);
+            }
+        };
+
+        if (uniqueCode) verifyCode();
+    }, [searchParams]);
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<LabFormErrors>({});
     const [formData, setFormData] = useState<LabDataRequest>({
@@ -56,7 +90,7 @@ export default function LabCreateForm({ hospitalId }: LabCreateFormProps) {
 
         setIsSubmitting(true);
         try {
-            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/create?hospitalId=${hospitalId}`
+            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/create?uniqueCode=${searchParams.get('uniqueCode') || ''}`;
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -89,6 +123,10 @@ export default function LabCreateForm({ hospitalId }: LabCreateFormProps) {
         }
     };
 
+    if (!Authorized) {
+        return <UnAuthorized />;
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-4xl mx-auto">
@@ -99,10 +137,7 @@ export default function LabCreateForm({ hospitalId }: LabCreateFormProps) {
                             Create New Lab
                         </h1>
                         <p className="text-gray-600 mt-2">
-                            {hospitalId
-                                ? "Add a new lab to the hospital with all required details"
-                                : "Create a new standalone lab with all required details"
-                            }
+                            Create a new standalone lab with all required details
                         </p>
                     </div>
 

@@ -19,8 +19,8 @@ export default function UserSearchBox() {
     const [isSearching, setIsSearching] = useState(false);
     const [showSearchResults, setShowSearchResults] = useState(false);
     const [isMakingAdmin, setIsMakingAdmin] = useState(false);
-    const [adminLink, setAdminLink] = useState<string | null>(null);
-    const [showAdminLink, setShowAdminLink] = useState(false);
+    const [adminLinks, setAdminLinks] = useState<{hospital: string, lab: string} | null>(null);
+    const [showAdminLinks, setShowAdminLinks] = useState(false);
 
     const searchUsers = async (email: string) => {
         if (!email.trim()) {
@@ -66,8 +66,8 @@ export default function UserSearchBox() {
     const makeAdmin = async (email: string) => {
         try {
             setIsMakingAdmin(true);
-            setShowAdminLink(false);
-            setAdminLink(null);
+            setShowAdminLinks(false);
+            setAdminLinks(null);
 
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/make-admin?email=${encodeURIComponent(email)}`,
@@ -88,10 +88,16 @@ export default function UserSearchBox() {
             const data = await response.json();
             console.log('Make admin response:', data);
 
-            if (data.link) {
-                setAdminLink(data.link);
-                setShowAdminLink(true);
-                toast.success('Admin link generated successfully!');
+            if (data.code) {
+                const hospitalLink = `${process.env.NEXT_PUBLIC_APP_URL}/admin/hospital/create?uniqueCode=${data.code}`;
+                const labLink = `${process.env.NEXT_PUBLIC_APP_URL}/admin/labs/create?uniqueCode=${data.code}`;
+                
+                setAdminLinks({
+                    hospital: hospitalLink,
+                    lab: labLink
+                });
+                setShowAdminLinks(true);
+                toast.success('Admin links generated successfully!');
             }
 
         } catch (error) {
@@ -205,21 +211,40 @@ export default function UserSearchBox() {
                 )}
             </div>
 
-            {showAdminLink && adminLink && (
+            {showAdminLinks && adminLinks && (
                 <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-green-800 mb-2">Admin Link Generated!</h3>
+                    <h3 className="text-lg font-semibold text-green-800 mb-2">Admin Links Generated!</h3>
                     <p className="text-sm text-green-700 mb-3">
-                        Share this link with the user to complete their admin setup:
+                        Share these links with the user to complete their admin setup:
                     </p>
-                    <div className="bg-white border border-green-300 rounded-md p-3 break-all">
-                        <code className="text-sm text-gray-800">{adminLink}</code>
+                    
+                    {/* Hospital Admin Link */}
+                    <div className="mb-4">
+                        <h4 className="text-md font-medium text-green-800 mb-2">Hospital Admin Link:</h4>
+                        <div className="bg-white border border-green-300 rounded-md p-3 break-all">
+                            <code className="text-sm text-gray-800">{adminLinks.hospital}</code>
+                        </div>
+                        <button
+                            onClick={() => navigator.clipboard.writeText(adminLinks.hospital)}
+                            className="mt-2 inline-flex items-center px-3 py-2 border border-green-300 shadow-sm text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        >
+                            Copy Hospital Link
+                        </button>
                     </div>
-                    <button
-                        onClick={() => navigator.clipboard.writeText(adminLink)}
-                        className="mt-3 inline-flex items-center px-3 py-2 border border-green-300 shadow-sm text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    >
-                        Copy Link
-                    </button>
+
+                    {/* Lab Admin Link */}
+                    <div>
+                        <h4 className="text-md font-medium text-green-800 mb-2">Lab Admin Link:</h4>
+                        <div className="bg-white border border-green-300 rounded-md p-3 break-all">
+                            <code className="text-sm text-gray-800">{adminLinks.lab}</code>
+                        </div>
+                        <button
+                            onClick={() => navigator.clipboard.writeText(adminLinks.lab)}
+                            className="mt-2 inline-flex items-center px-3 py-2 border border-green-300 shadow-sm text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        >
+                            Copy Lab Link
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
