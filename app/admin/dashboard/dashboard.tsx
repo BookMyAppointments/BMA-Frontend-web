@@ -144,7 +144,7 @@ export default function Dashboard() {
                                 width={300}
                                 height={200}
                                 unoptimized
-                                src={lab.picture}
+                                src={lab.picture || "/placeholder.png"}
                                 alt={lab.name}
                                 className="w-full h-40 object-cover rounded-lg mb-4"
                             />

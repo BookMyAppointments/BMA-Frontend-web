@@ -4,8 +4,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Building, Heart, Save, Loader2 } from 'lucide-react';
 import { LabDataRequest, LabFormErrors } from '../types';
 import { LabArraySection, LabBasicInfoSection, LabLocationSection, LabOperatingHoursSection } from '../components';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
-export default function LabEditForm({ id }: { id: string }) {
+export default function LabEditForm() {
+    
+    const params = useParams<{ hospitalId: string; id: string }>();
+  const { hospitalId, id } = params;
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<LabFormErrors>({}); const [formData, setFormData] = useState<LabDataRequest>({
         name: '',
@@ -149,7 +155,20 @@ export default function LabEditForm({ id }: { id: string }) {
                             </button>
                         </div>
                         <div className="pt-6 border-t border-gray-200">
-
+                            <div className="flex gap-3 mt-4">
+                                <Link
+                                    href={`/admin/hospital/${hospitalId}/labs/${id}/tests`}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    View All Tests
+                                </Link>
+                                <Link
+                                    href={`/admin/hospital/${hospitalId}/labs/${id}/tests/add`}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                >
+                                    Add Test
+                                </Link>
+                            </div>
                         </div>
                     </form>
                 </div>
