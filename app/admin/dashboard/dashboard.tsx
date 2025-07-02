@@ -113,18 +113,38 @@ export default function Dashboard() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {hospital?.doctors.map((doctor) => (
-                        <Link href={`/admin/hospital/${hospital.id}/doctors/${doctor.id}`} key={doctor.id} className="bg-white p-4 rounded-lg shadow cursor-pointer">
+                        <div
+                            key={doctor.id}
+                            className="bg-white p-4 rounded-lg shadow cursor-pointer flex flex-col items-center"
+                        >
                             <Image
                                 width={100}
                                 height={100}
-                                src={doctor.picture}
+                                src={doctor.picture || '/placeholder.png'}
                                 alt={doctor.name}
                                 className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                             />
                             <h3 className="font-medium text-center">{doctor.name}</h3>
                             <p className="text-sm text-gray-600 text-center">{doctor.email}</p>
                             <p className="text-sm text-gray-600 text-center">{doctor.phone}</p>
-                        </Link>
+                            
+                           <div className="flex gap-2 mt-4 w-full">
+                              <Link
+                                href={`/admin/hospital/${hospital.id}/doctors/${doctor.id}`}
+                                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center font-semibold"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                Edit
+                            </Link>
+                            <Link
+                                href={`/admin/hospital/${hospital.id}/doctors/${doctor.id}/appointments`}
+                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center font-semibold"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                View Appointments
+                            </Link>
+                           </div>
+                        </div>
                     ))}
                 </div>
             </div>

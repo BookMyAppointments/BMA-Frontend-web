@@ -31,9 +31,10 @@ export default function DoctorsPage() {
                 toast.error('Failed to fetch doctors');
                 return;
             } const data = await response.json();
-            // Extract doctor objects from the nested structure
-            const doctorData = data.doctors?.map((item: any) => item.doctor) || [];
-            setDoctors(doctorData);
+            console.log(data);
+            
+            
+            setDoctors(data.doctors || []);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to fetch doctors';
             toast.error(errorMessage);
