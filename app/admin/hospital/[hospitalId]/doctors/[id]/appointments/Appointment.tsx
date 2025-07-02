@@ -236,9 +236,9 @@ export default function DoctorAppointmentsPage() {
                     onClick={async () => {
                       try {
                         const res = await fetch(
-                          `${process.env.NEXT_PUBLIC_BACKEND_URL}/appointments/${selected.id}/approve`,
+                          `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/${selected.id}/confirm`,
                           {
-                            method: "POST",
+                            method: "GET",
                             headers: {
                               Authorization: `Bearer ${localStorage.getItem("token")}`,
                             },
@@ -260,20 +260,20 @@ export default function DoctorAppointmentsPage() {
                     onClick={async () => {
                       try {
                         const res = await fetch(
-                          `${process.env.NEXT_PUBLIC_BACKEND_URL}/appointments/${selected.id}/reject`,
+                          `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/${selected.id}/cancel`,
                           {
-                            method: "POST",
+                            method: "GET",
                             headers: {
                               Authorization: `Bearer ${localStorage.getItem("token")}`,
                             },
                           }
                         );
-                        if (!res.ok) throw new Error("Failed to reject");
-                        toast.success("Appointment rejected");
+                        if (!res.ok) throw new Error("Failed to cancel");
+                        toast.success("Appointment cancelled");
                         setSelected(null);
                         window.location.reload();
                       } catch {
-                        toast.error("Could not reject");
+                        toast.error("Could not cancel");
                       }
                     }}
                     className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
