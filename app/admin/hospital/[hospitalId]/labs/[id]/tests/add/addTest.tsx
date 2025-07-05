@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Loader2 } from 'lucide-react';
 
-
 export default function AddTestPage() {
-  const { hospitalId, id, tid } = useParams<{
+  const { hospitalId, id, } = useParams<{
     hospitalId: string;
     id: string;
     tid: string;
@@ -51,7 +50,7 @@ export default function AddTestPage() {
             category: form.category,
             price: parseFloat(form.price),
             homeSample: form.homeSample,
-            labId:id,
+            labId: id,
           }),
         }
       );
@@ -65,7 +64,7 @@ export default function AddTestPage() {
     }
   };
 
-  
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 flex items-center justify-center">

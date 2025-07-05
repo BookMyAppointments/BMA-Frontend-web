@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Loader2, CalendarCheck, XCircle, CheckCircle, UserCircle2 } from "lucide-react";
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 interface Appointment {
   id: string;
@@ -78,7 +79,7 @@ export default function DoctorAppointmentsPage() {
     const fetchUsers = async () => {
       const uniqueUserIds = Array.from(new Set(appointments.map((a) => a.userId)));
       console.log(uniqueUserIds);
-      
+
       const userMap: Record<string, User> = {};
       await Promise.all(
         uniqueUserIds.map(async (userId) => {
@@ -89,14 +90,14 @@ export default function DoctorAppointmentsPage() {
           if (res.ok) {
             const user = await res.json();
             console.log(user);
-            
+
             userMap[userId] = user;
           }
-          
+
         })
       );
       console.log(userMap);
-      
+
       setUsers(userMap);
     };
     if (appointments.length > 0) fetchUsers();
@@ -125,7 +126,9 @@ export default function DoctorAppointmentsPage() {
         {/* Doctor Info Card */}
         <div className="flex items-center gap-4 bg-white rounded-lg shadow p-6 mb-8">
           {doctor.picture ? (
-            <img
+            <Image
+              width={200}
+              height={200}
               src={doctor.picture}
               alt={doctor.name}
               className="w-16 h-16 rounded-full object-cover border-2 border-blue-500"
@@ -175,17 +178,16 @@ export default function DoctorAppointmentsPage() {
                     </div>
                     <div className="mt-2 md:mt-0">
                       <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                          status === "PENDING"
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status === "PENDING"
                             ? "bg-yellow-100 text-yellow-800"
                             : status === "CONFIRMED"
-                            ? "bg-green-100 text-green-800"
-                            : status === "COMPLETED"
-                            ? "bg-blue-100 text-blue-800"
-                            : status === "CANCELLED"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
+                              ? "bg-green-100 text-green-800"
+                              : status === "COMPLETED"
+                                ? "bg-blue-100 text-blue-800"
+                                : status === "CANCELLED"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                          }`}
                       >
                         {status}
                       </span>
@@ -214,17 +216,16 @@ export default function DoctorAppointmentsPage() {
                 </div>
                 <div className="mt-2">
                   <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                      selected.status === "PENDING"
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${selected.status === "PENDING"
                         ? "bg-yellow-100 text-yellow-800"
                         : selected.status === "CONFIRMED"
-                        ? "bg-green-100 text-green-800"
-                        : selected.status === "COMPLETED"
-                        ? "bg-blue-100 text-blue-800"
-                        : selected.status === "CANCELLED"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
+                          ? "bg-green-100 text-green-800"
+                          : selected.status === "COMPLETED"
+                            ? "bg-blue-100 text-blue-800"
+                            : selected.status === "CANCELLED"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800"
+                      }`}
                   >
                     {selected.status}
                   </span>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Loader2, FlaskConical, Plus } from 'lucide-react';
+import { Loader2, FlaskConical } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 
@@ -36,6 +36,7 @@ export default function LabTestsPage() {
         const data = await res.json();
         setTests(data);
       } catch (err) {
+        console.log(err);
         toast.error('Could not load tests');
       } finally {
         setLoading(false);
@@ -60,7 +61,7 @@ export default function LabTestsPage() {
             <FlaskConical className="text-blue-600" size={28} />
             Lab Tests
           </h1>
-         
+
         </div>
         {tests.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
@@ -71,23 +72,23 @@ export default function LabTestsPage() {
         ) : (
           <div className="space-y-4">
             {tests.map((test) => (
-             <Link href={`/admin/hospital/${hospitalId}/labs/${id}/tests/${test.id}`}>
-              <div
-                className="bg-white rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between"
-              >
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">{test.name}</h2>
-                  <p className="text-gray-600 text-sm">{test.description}</p>
-                  <div className="flex gap-4 mt-2 text-sm text-gray-700">
-                    <span>Sample: {test.sampleType}</span>
-                    <span>Duration: {test.duration}</span>
+              <Link key={test.id} href={`/admin/hospital/${hospitalId}/labs/${id}/tests/${test.id}`}>
+                <div
+                  className="bg-white rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">{test.name}</h2>
+                    <p className="text-gray-600 text-sm">{test.description}</p>
+                    <div className="flex gap-4 mt-2 text-sm text-gray-700">
+                      <span>Sample: {test.sampleType}</span>
+                      <span>Duration: {test.duration}</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 md:mt-0">
+                    <span className="text-blue-600 font-bold text-lg">₹{test.price}</span>
                   </div>
                 </div>
-                <div className="mt-2 md:mt-0">
-                  <span className="text-blue-600 font-bold text-lg">₹{test.price}</span>
-                </div>
-              </div>
-             </Link>
+              </Link>
             ))}
           </div>
         )}
