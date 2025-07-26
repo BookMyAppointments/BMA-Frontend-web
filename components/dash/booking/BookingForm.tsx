@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FC } from 'react'
 import SuccessPopup from '@/components/ui/SuccessPopup'
-import type { DoctorHospitalData, Doctor } from "@/types/doctor"
+import type { Doctor } from "@/types/doctor"
 import { createAppointment } from '@/services/api'
 import { toast } from 'react-toastify';
 import Image from 'next/image'
@@ -17,7 +17,7 @@ interface DateChangeEvent extends React.ChangeEvent<HTMLInputElement> {
 }
 
 interface BookingFormProps {
-    doctor: DoctorHospitalData | Doctor;
+    doctor: Doctor;
 }
 
 const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
@@ -67,7 +67,7 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
             setIsLoading(true);
             const formattedTime = formatTimeTo24Hour(selectedTime);
             const bookingData = {
-                doctorId: 'doctorId' in doctor ? doctor.doctorId : doctor.id,
+                doctorId: ('doctorId' in doctor ? doctor.doctorId : doctor.id) as string,
                 scheduledAt: new Date(`${selectedDate}T${formattedTime}`).toISOString(),
             };
             console.log(bookingData);
@@ -86,29 +86,46 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
     const selectDate = (e: DateChangeEvent): void => {
         const day: string = dates[new Date(e.target.value).getDay()];
         setSelectedDate(e.target.value);
-        const filteredDoctorData: Availability[] = (doctorData.availability || []).filter(
+        const filteredDoctorData: Availability[] = (doctorData?.availability || []).filter(
             (aval: Availability) => aval.day === day
         );
 
         // Generate time slots based on availability
         if (filteredDoctorData.length > 0) {
             const slots: string[] = [];
-            const start: number = parseInt(filteredDoctorData[0].startTime.split(':')[0]);
-            const end: number = parseInt(filteredDoctorData[0].endTime.split(':')[0]);
+            const startTime = filteredDoctorData[0].startTime; // e.g., "09:00"
+            const endTime = filteredDoctorData[0].endTime; // e.g., "17:00"
+            
+            const [startHour] = startTime.split(':').map(Number);
+            const [endHour] = endTime.split(':').map(Number);
 
-            for (let hour: number = start; hour <= end; hour++) {
-                const time: string = hour <= 12 ? `${hour}:00 AM` : `${hour - 12}:00 PM`;
+            for (let hour = startHour; hour < endHour; hour++) {
+                let displayHour = hour;
+                let period = 'AM';
+                
+                if (hour === 0) {
+                    displayHour = 12;
+                } else if (hour === 12) {
+                    period = 'PM';
+                } else if (hour > 12) {
+                    displayHour = hour - 12;
+                    period = 'PM';
+                }
+                
+                const time = `${displayHour}:00 ${period}`;
                 slots.push(time);
             }
             setTimeSlots(slots);
+        } else {
+            setTimeSlots([]);
         }
     }
 
-    const getDoctorData = () => {
+    const getDoctorData = (): Doctor => {
         if ('doctor' in doctor) {
-            return doctor.doctor;
+            return doctor.doctor as Doctor;
         }
-        return doctor;
+        return doctor as Doctor;
     };
 
     const doctorData = getDoctorData();
@@ -123,14 +140,14 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
                         width={80}
                         height={80}
                         unoptimized
-                        src={doctorData.user?.picture || '/default-doctor.png'}
-                        alt={doctorData.user?.name || 'Doctor'}
+                        src={doctorData?.picture || '/default-doctor.png'}
+                        alt={doctorData?.name || 'Doctor'}
                         className="w-auto h-20 rounded-full object-fit"
                     />
                     <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Dr. {doctorData.user?.name || doctorData.name}</h2>
-                        <p className="text-gray-600">{doctorData.qualifications?.join(', ') || 'No qualifications listed'}</p>
-                        <p className="text-gray-500 text-sm">{doctorData.specialization?.join(', ') || 'No specializations listed'}</p>
+                        <h2 className="text-xl font-semibold text-gray-800">Dr. {doctorData?.name || 'Unknown'}</h2>
+                        <p className="text-gray-600">{doctorData?.qualifications?.join(', ') || 'No qualifications listed'}</p>
+                        <p className="text-gray-500 text-sm">{doctorData?.specialization?.join(', ') || 'No specializations listed'}</p>
                     </div>
                 </div>
 
@@ -201,7 +218,7 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
 
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Consultation Fee</span>
-                                    <span className="font-medium">₹{doctorData.price}</span>
+                                    <span className="font-medium">₹{doctorData?.price || 0}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Platform Fee</span>
@@ -209,13 +226,13 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Taxes</span>
-                                    <span className="font-medium">₹{(doctorData.price * 0.18).toFixed(1)}</span>
+                                    <span className="font-medium">₹{((doctorData?.price || 0) * 0.18).toFixed(1)}</span>
                                 </div>
                                 <div className="border-t border-gray-200 pt-4">
                                     <div className="flex justify-between">
                                         <span className="font-medium">Total Amount</span>
                                         <span className="font-medium text-blue-600">
-                                            ₹{(doctorData.price + 2 + (doctorData.price * 0.18)).toFixed(1)}
+                                            ₹{((doctorData?.price || 0) + 2 + ((doctorData?.price || 0) * 0.18)).toFixed(1)}
                                         </span>
                                     </div>
                                 </div>

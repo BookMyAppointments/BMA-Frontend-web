@@ -32,8 +32,8 @@ export default function DoctorsPage() {
                 return;
             } const data = await response.json();
             console.log(data);
-            
-            
+
+
             setDoctors(data.doctors || []);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to fetch doctors';
@@ -195,10 +195,10 @@ export default function DoctorsPage() {
                                     className="block border border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-md transition-all"
                                 >                                    <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            {doctor.user?.picture ? (
+                                            {doctor?.picture ? (
                                                 <Image
-                                                    src={doctor.user.picture}
-                                                    alt={doctor.user.name}
+                                                    src={doctor.picture}
+                                                    alt={doctor.name}
                                                     width={48}
                                                     height={48}
                                                     className="w-12 h-12 rounded-full object-cover"
@@ -210,7 +210,7 @@ export default function DoctorsPage() {
                                             )}
                                             <div>
                                                 <h3 className="text-lg font-semibold text-gray-900">
-                                                    {doctor.user?.name || doctor.name}
+                                                    {doctor?.name}
                                                 </h3>
                                                 <div className="flex items-center gap-1 mt-1">
                                                     <Star className="text-yellow-400 fill-current" size={16} />

@@ -1,8 +1,8 @@
-import { Appointment, Doctor, DoctorHospitalData, Lab } from "@/types/doctor";
+import { Appointment, Doctor, Lab } from "@/types/doctor";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1';
 
-export const fetchDoctors = async (): Promise<DoctorHospitalData[]> => {
+export const fetchDoctors = async (): Promise<Doctor[]> => {
     try {
         const response = await fetch(`${API_BASE_URL}/search/doctors`);
         const data = await response.json();
