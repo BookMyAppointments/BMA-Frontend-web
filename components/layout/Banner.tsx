@@ -1,25 +1,81 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
+import { BannerImages } from '@/types/doctor'
+import { API_BASE_URL } from '@/services/api'
+
+interface BannerImage {
+    url: string;
+    alt: string;
+}
+
+// Static fallback images
+const staticBannerImages: BannerImage[] = [
+    {
+        url: '/banners/banner1.jpg',
+        alt: 'Wellness Festival - 25% off on select products'
+    },
+    {
+        url: '/banners/banner2.jpg',
+        alt: 'Comprehensive Health Checkup'
+    },
+    {
+        url: '/banners/banner3.jpg',
+        alt: 'Special Medical Offers'
+    }
+]
 
 const Banner = () => {
     const [currentIndex, setCurrentIndex] = useState(0)
-
-    const bannerImages = [
-        {
-            url: '/banners/banner1.jpg',
-            alt: 'Wellness Festival - 25% off on select products'
-        },
-        {
-            url: '/banners/banner2.jpg',
-            alt: 'Comprehensive Health Checkup'
-        },
-        {
-            url: '/banners/banner3.jpg',
-            alt: 'Special Medical Offers'
-        }
-    ]
+    const [bannerImages, setBannerImages] = useState<BannerImage[]>(staticBannerImages)
 
     useEffect(() => {
+        const fetchBannerImages = async () => {
+            try {
+                // Try to get token from localStorage for authenticated requests
+                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+                
+                const headers: HeadersInit = {
+                    'Content-Type': 'application/json'
+                }
+                
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/admin/get-banner-images`, {
+                    headers
+                })
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch banner images')
+                }
+                
+                const data: BannerImages[] = await response.json()
+                
+                // Filter only active images and transform to our format
+                const activeImages: BannerImage[] = data
+                    .filter(img => img.isActive)
+                    .map(img => ({
+                        url: img.imageUrl,
+                        alt: 'Medical Services Banner'
+                    }))
+                
+                // Use fetched images if available, otherwise keep static fallback
+                if (activeImages.length > 0) {
+                    setBannerImages(activeImages)
+                }
+            } catch (error) {
+                console.error('Error fetching banner images:', error)
+                // Keep static images on error (already set as initial state)
+            }
+        }
+
+        fetchBannerImages()
+    }, [])
+
+    useEffect(() => {
+        if (bannerImages.length === 0) return
+
         const timer = setInterval(() => {
             setCurrentIndex((prevIndex) => (prevIndex + 1) % bannerImages.length)
         }, 5000)

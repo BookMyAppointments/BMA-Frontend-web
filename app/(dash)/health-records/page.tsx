@@ -49,7 +49,7 @@ const HealthRecordsList: FC = () => {
             try {
                 setLoading(true)
                 await axios.post(
-                    `${API_BASE_URL}/file-upload/upload`,
+                    `${API_BASE_URL}/file-upload/upload-record`,
                     formData,
                     {
                         headers: {
