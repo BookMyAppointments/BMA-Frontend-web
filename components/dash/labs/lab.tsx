@@ -1,15 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react'
 import { FacilityBanner } from '../hospital/FacilityBanner'
-import Categories from '../hospital/Categories'
+import LabCategories from './LabCategories' // Changed from Categories to LabCategories
 import LabsList from './LabsList'
 import { useLabById } from '@/hooks/useLabs'
 import { fetchLabs } from '@/services/api'
 import type { Lab } from '@/types/doctor'
-import { useParams } from 'next/navigation'
 
-export default function LabDetails() {
-    const { labId } = useParams<{ labId?: string }>();
+export default function LabDetails({ labId }: { labId?: string }) {
     const [selectedService, setSelectedService] = useState<string>('Blood Test');
     const { lab: selectedLab, loading: singleLabLoading } = useLabById(labId || '');
     const [labs, setLabs] = useState<Lab[]>([]);
@@ -35,29 +33,30 @@ export default function LabDetails() {
         }
     }, [labId, selectedService]);
 
-    const handleCategoryChange = (category: string) => {
-        setSelectedService(category);
+    const handleServiceChange = (service: string) => { // Changed from handleCategoryChange
+        setSelectedService(service);
         if (!labId) {
-            loadLabs(category);
+            loadLabs(service);
         }
     };
 
     const isLoading = labId ? singleLabLoading : loading;
 
+    // Updated lab data structure with proper lab-specific content
     const labData = selectedLab ? {
         name: selectedLab.name,
-        description: `${selectedLab.name} is Located at ${selectedLab.location.address}, we provide comprehensive diagnostic services with state-of-the-art technology and experienced technicians.`,
-        bannerImage: selectedLab.banner || '/banners/banner2.jpg', // Use lab banner or fallback
+        description: `${selectedLab.name} is located at ${selectedLab.location?.address || 'your area'}. We provide comprehensive diagnostic services with state-of-the-art technology and experienced technicians.`,
+        bannerImage: selectedLab.banner || '/banners/banner2.jpg',
         metrics: {
             rating: 4.8,
-            patientsCount: '5000+',
-            doctorsCount: '25+',
-            testsCount: selectedLab.services.length.toString() + '+'
+            patientsCount: selectedLab.noOfPatients?.toString() + '+' || '500+',
+            doctorsCount: '25+', // You might want to get actual technician count
+            testsCount: selectedLab.services?.length?.toString() + '+' || '50+'
         }
     } : {
         name: 'All Diagnostic Centers',
         description: 'Find and book diagnostic tests from the best labs in your area. Compare prices, read reviews, and book appointments online.',
-        bannerImage: '/banners/banner3.jpg', // Default fallback for all labs view
+        bannerImage: '/banners/banner3.jpg',
         metrics: {
             rating: 4.8,
             patientsCount: '5000+',
@@ -69,7 +68,6 @@ export default function LabDetails() {
     if (isLoading) {
         return (
             <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
-
                 <main className="flex-1 w-full">
                     <div className="animate-pulse">
                         <div className="h-64 bg-gray-200 mx-6 rounded-xl mb-6"></div>
@@ -90,7 +88,6 @@ export default function LabDetails() {
     if (error && !labId) {
         return (
             <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
-
                 <main className="flex-1 w-full">
                     <div className="text-center py-8">
                         <div className="text-red-500 text-lg mb-2">⚠️</div>
@@ -109,28 +106,23 @@ export default function LabDetails() {
 
     return (
         <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
-
-
             <main className="flex-1 w-full">
                 <FacilityBanner {...labData} />
 
-                <div className="">
-                    <div className="">
-                        <Categories
-                            onCategoryChange={handleCategoryChange}
-                            initialCategory={selectedService}
-                        />
-                    </div>
+                <div className="space-y-4">
+                    {/* Lab Categories */}
+                    <LabCategories
+                        onServiceChange={handleServiceChange}
+                        initialService={selectedService}
+                    />
 
-                    <div className="">
-                        {labId ? (
-                            <LabsList selectedService={selectedService} labId={labId} />
-                        ) : (
-                            <LabsList selectedService={selectedService} labs={labs} />
-                        )}
-                    </div>
+                    {/* Labs List */}
+                    <LabsList 
+                        selectedService={selectedService}
+                        {...(labId ? { labId } : { labs })}
+                    />
                 </div>
             </main>
         </div>
-    )
+    );
 }

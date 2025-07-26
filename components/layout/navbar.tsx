@@ -87,7 +87,7 @@ const Navbar: FC = () => {
                     setUserLocation(location);
 
                     // Get city name from coordinates
-                    await getCityFromCoordinates(latitude, longitude);
+                    // await getCityFromCoordinates(latitude, longitude);
                     setIsGettingLocation(false);
                 },
                 (error) => {
