@@ -36,6 +36,10 @@ const Navbar: FC = () => {
         if (window.location.pathname !== '/') setIsHomePage(false);
     }, [isAuthenticated]);
 
+    useEffect(() => {
+        getCurrentLocationOnLoad();
+    }, [])
+
     const fetchUserProfile = async () => {
         try {
             const response = await axios.get(
@@ -68,21 +72,56 @@ const Navbar: FC = () => {
         navigate('/auth/signin')
     }
 
-    const getCurrentLocation = () => {
+    // Function to get location on page load
+    const getCurrentLocationOnLoad = () => {
         setIsGettingLocation(true);
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                (position) => {
+                async (position) => {
                     const { latitude, longitude } = position.coords;
-                    // Store coordinates and use a simple format for display
                     const location = {
                         lat: latitude,
                         lng: longitude,
                         address: `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
                     };
                     setUserLocation(location);
-                    setSearchQuery(location.address);
-                    handleSearch(location.address);
+                    
+                    // Get city name from coordinates
+                    await getCityFromCoordinates(latitude, longitude);
+                    setIsGettingLocation(false);
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                    // Set a default city or leave empty
+                    setSearchQuery('Enter your location...');
+                    setIsGettingLocation(false);
+                }
+            );
+        } else {
+            setSearchQuery('Enter your location...');
+            setIsGettingLocation(false);
+        }
+    };
+
+    // Function specifically for the location button click
+    const getCurrentLocation = () => {
+        setIsGettingLocation(true);
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const location = {
+                        lat: latitude,
+                        lng: longitude,
+                        address: `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
+                    };
+                    setUserLocation(location);
+                    
+                    // Get city name and perform search
+                    const cityName = await getCityFromCoordinates(latitude, longitude);
+                    if (cityName) {
+                        handleSearch(cityName);
+                    }
                     setIsGettingLocation(false);
                 },
                 (error) => {
@@ -95,6 +134,30 @@ const Navbar: FC = () => {
             toast.error('Geolocation is not supported by your browser');
             setIsGettingLocation(false);
         }
+    };
+
+    // Function to get city name from coordinates
+    const getCityFromCoordinates = async (lat: number, lng: number): Promise<string | null> => {
+        try {
+            // const response = await axios.get(
+            //     `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${process.env.NEXT_PUBLIC_OPENCAGE_API_KEY}`
+            // );
+            const response = await axios.get(
+                `https://us1.locationiq.com/v1/reverse?key=${process.env.NEXT_PUBLIC_OPENCAGE_API_KEY}&lat=${lat}&lon=${lng}&format=json`
+            );
+            const data = response.data;
+            console.log('Location data:', data);
+            
+            if (data.address && data.address.city) {
+                const city = data.address.city + (data.address.state ? `, ${data.address.state}` : '') + (data.address.country ? `, ${data.address.country}` : '');
+                console.log('City found:', city);
+                setSearchQuery(city);
+                return city;
+            }
+        } catch (error) {
+            console.error('Error getting city from coordinates:', error);
+        }
+        return null;
     };
 
     const handleSearch = async (query: string) => {
@@ -180,7 +243,7 @@ const Navbar: FC = () => {
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
                             ) : (
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 100 4z" clipRule="evenodd" />
+                                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                                 </svg>
                             )}
                         </button>
