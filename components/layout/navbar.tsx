@@ -85,7 +85,7 @@ const Navbar: FC = () => {
                         address: `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
                     };
                     setUserLocation(location);
-                    
+
                     // Get city name from coordinates
                     await getCityFromCoordinates(latitude, longitude);
                     setIsGettingLocation(false);
@@ -116,7 +116,7 @@ const Navbar: FC = () => {
                         address: `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
                     };
                     setUserLocation(location);
-                    
+
                     // Get city name and perform search
                     const cityName = await getCityFromCoordinates(latitude, longitude);
                     if (cityName) {
@@ -136,18 +136,14 @@ const Navbar: FC = () => {
         }
     };
 
-    // Function to get city name from coordinates
     const getCityFromCoordinates = async (lat: number, lng: number): Promise<string | null> => {
         try {
-            // const response = await axios.get(
-            //     `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${process.env.NEXT_PUBLIC_OPENCAGE_API_KEY}`
-            // );
             const response = await axios.get(
                 `https://us1.locationiq.com/v1/reverse?key=${process.env.NEXT_PUBLIC_OPENCAGE_API_KEY}&lat=${lat}&lon=${lng}&format=json`
             );
             const data = response.data;
             console.log('Location data:', data);
-            
+
             if (data.address && data.address.city) {
                 const city = data.address.city + (data.address.state ? `, ${data.address.state}` : '') + (data.address.country ? `, ${data.address.country}` : '');
                 console.log('City found:', city);

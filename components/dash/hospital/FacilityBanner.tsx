@@ -4,21 +4,21 @@ import { useService } from '@/context/serviceProvider'
 import Image from 'next/image';
 import { FacilityBannerProps } from '@/types/dash';
 
-export const FacilityBanner: FC<FacilityBannerProps> = ({ name, description, metrics }) => {
+export const FacilityBanner: FC<FacilityBannerProps> = ({ name, description, metrics, bannerImage }) => {
     const { serviceType } = useService()
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
         <div className={`relative transition-all duration-300 w-full px-3 sm:px-4 lg:px-6 ${isExpanded
-                ? 'h-[240px] sm:h-[260px] md:h-[300px] lg:h-[340px]'
-                : 'h-[180px] sm:h-[200px] md:h-[240px] lg:h-[280px]'
+            ? 'h-[240px] sm:h-[260px] md:h-[300px] lg:h-[340px]'
+            : 'h-[180px] sm:h-[200px] md:h-[240px] lg:h-[280px]'
             }`}>
             <div className="absolute inset-0 mx-3 sm:mx-4 lg:mx-6">
                 <Image
                     width={1920}
                     height={1080}
                     unoptimized
-                    src={serviceType === 'hospitals' ? '/banners/hospital-banner.jpg' : '/banners/lab-banner.jpg'}
+                    src={bannerImage || '/banners/banner1.jpg'}
                     alt={`${serviceType === 'hospitals' ? 'Hospital' : 'Lab'} Banner`}
                     className="w-full h-full object-cover rounded-xl sm:rounded-2xl lg:rounded-3xl"
                 />

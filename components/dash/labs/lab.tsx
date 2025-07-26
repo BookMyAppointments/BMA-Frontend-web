@@ -47,6 +47,7 @@ export default function LabDetails() {
     const labData = selectedLab ? {
         name: selectedLab.name,
         description: `${selectedLab.name} is Located at ${selectedLab.location.address}, we provide comprehensive diagnostic services with state-of-the-art technology and experienced technicians.`,
+        bannerImage: selectedLab.banner || '/banners/banner2.jpg', // Use lab banner or fallback
         metrics: {
             rating: 4.8,
             patientsCount: '5000+',
@@ -56,6 +57,7 @@ export default function LabDetails() {
     } : {
         name: 'All Diagnostic Centers',
         description: 'Find and book diagnostic tests from the best labs in your area. Compare prices, read reviews, and book appointments online.',
+        bannerImage: '/banners/banner3.jpg', // Default fallback for all labs view
         metrics: {
             rating: 4.8,
             patientsCount: '5000+',

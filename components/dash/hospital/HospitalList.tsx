@@ -78,14 +78,13 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         {
             id: '1',
             name: 'LifeCare Diagnostics',
-            logo: '/logos/lifecare.png',
+            picture: '/logos/lifecare.png',
             description: 'Advanced diagnostic center with state-of-the-art equipment.',
             specialties: ['Blood Tests', 'Imaging', 'Pathology'],
             distance: '2.8 Kms',
             isTopRated: true,
             departmentsCount: 5
         },
-        // ... other static labs
     ];
 
     const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): string => {
@@ -99,14 +98,15 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distance = R * c;
         return `${distance.toFixed(1)} Kms`;
-    };    const transformedHospitals = useMemo(() =>
+    };
+    const transformedHospitals = useMemo(() =>
         data?.pages.flatMap(page =>
             page.items
-                .filter((item: Doctor) => item.hospital) // Only include doctors with hospital data
+                .filter((item: Doctor) => item.hospital)
                 .map((item: Doctor) => ({
                     id: item.hospital!.id,
                     name: item.hospital!.name,
-                    logo: '/logos/default.png',
+                    picture: item.hospital!.picture || '/logos/default.png',
                     description: `Located at ${item.hospital!.location.address}`,
                     specialties: item.hospital!.departments.slice(0, 4),
                     distance: distances[item.hospital!.id] || 'Calculating...',
@@ -167,7 +167,7 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
                                             width={64}
                                             height={64}
                                             unoptimized
-                                            src={facility.logo}
+                                            src={facility.picture}
                                             alt={facility.name}
                                             className="w-14 h-14 lg:w-16 lg:h-16 object-contain"
                                         />

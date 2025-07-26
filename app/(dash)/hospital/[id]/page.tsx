@@ -26,6 +26,7 @@ const HospitalDetails: FC = () => {
             return {
                 name: data.name,
                 description: data?.description || 'No description available.',
+                bannerImage: data.banner || '/banners/banner1.jpg', // Use hospital banner or fallback
                 metrics: {
                     rating: 4.5,
                     patientsCount: '1500+',
