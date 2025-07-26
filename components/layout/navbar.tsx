@@ -282,79 +282,77 @@ const Navbar: FC = () => {
                     )}
                 </div>
 
-                {/* Toggle buttons - only show on home page */}
-                {isHomePage && (
-                    <div className="flex items-center bg-white rounded-full shadow-sm mr-6 cursor-pointer">
-                        <motion.div className="relative flex items-center rounded-full">
-                            <button
-                                onClick={toggleService}
-                                className="flex items-center gap-1 px-4 pr-2 py-2 z-10 h-12"
+                {/* Toggle buttons - show on all pages */}
+                <div className="flex items-center bg-white rounded-full shadow-sm mr-6 cursor-pointer">
+                    <motion.div className="relative flex items-center rounded-full">
+                        <button
+                            onClick={toggleService}
+                            className="flex items-center gap-1 px-4 pr-2 py-2 z-10 h-12"
+                        >
+                            <motion.div
+                                className={`flex items-center justify-center ${serviceType === 'hospitals' ? 'bg-blue-500' : ''}`}
+                                initial={false}
+                                animate={{
+                                    padding: serviceType === 'hospitals' ? 8 : 0,
+                                    borderRadius: serviceType === 'hospitals' ? 9999 : 0
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                             >
-                                <motion.div
-                                    className={`flex items-center justify-center ${serviceType === 'hospitals' ? 'bg-blue-500' : ''}`}
-                                    initial={false}
-                                    animate={{
-                                        padding: serviceType === 'hospitals' ? 8 : 0,
-                                        borderRadius: serviceType === 'hospitals' ? 9999 : 0
-                                    }}
+                                <motion.img
+                                    src={serviceType === 'hospitals' ? '/icons/hospital-white.png' : '/icons/hospital-gray.png'}
+                                    alt="Hospital"
+                                    className="w-5 h-5"
+                                    animate={{ scale: serviceType === 'hospitals' ? 1.1 : 1 }}
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                >
-                                    <motion.img
-                                        src={serviceType === 'hospitals' ? '/icons/hospital-white.png' : '/icons/hospital-gray.png'}
-                                        alt="Hospital"
-                                        className="w-5 h-5"
-                                        animate={{ scale: serviceType === 'hospitals' ? 1.1 : 1 }}
-                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    />
-                                </motion.div>
-                                <motion.span
-                                    className="text-gray-600"
-                                    initial={false}
-                                    animate={{
-                                        opacity: serviceType !== 'hospitals' ? 1 : 0,
-                                        width: serviceType !== 'hospitals' ? 'auto' : 0
-                                    }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    Hospitals
-                                </motion.span>
-                            </button>
-                            <button
-                                onClick={toggleService}
-                                className="flex items-center gap-1 px-4 pl-0 py-2 z-10 h-12"
+                                />
+                            </motion.div>
+                            <motion.span
+                                className="text-gray-600"
+                                initial={false}
+                                animate={{
+                                    opacity: serviceType !== 'hospitals' ? 1 : 0,
+                                    width: serviceType !== 'hospitals' ? 'auto' : 0
+                                }}
+                                transition={{ duration: 0.2 }}
                             >
-                                <motion.div
-                                    className={`flex items-center justify-center ${serviceType === 'labs' ? 'bg-blue-500' : ''}`}
-                                    initial={false}
-                                    animate={{
-                                        padding: serviceType === 'labs' ? 8 : 0,
-                                        borderRadius: serviceType === 'labs' ? 9999 : 0
-                                    }}
+                                Hospitals
+                            </motion.span>
+                        </button>
+                        <button
+                            onClick={toggleService}
+                            className="flex items-center gap-1 px-4 pl-0 py-2 z-10 h-12"
+                        >
+                            <motion.div
+                                className={`flex items-center justify-center ${serviceType === 'labs' ? 'bg-blue-500' : ''}`}
+                                initial={false}
+                                animate={{
+                                    padding: serviceType === 'labs' ? 8 : 0,
+                                    borderRadius: serviceType === 'labs' ? 9999 : 0
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            >
+                                <motion.img
+                                    src={serviceType === 'labs' ? '/icons/lab-white.png' : '/icons/lab-gray.png'}
+                                    alt="Lab"
+                                    className="w-5 h-5"
+                                    animate={{ scale: serviceType === 'labs' ? 1.1 : 1 }}
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                >
-                                    <motion.img
-                                        src={serviceType === 'labs' ? '/icons/lab-white.png' : '/icons/lab-gray.png'}
-                                        alt="Lab"
-                                        className="w-5 h-5"
-                                        animate={{ scale: serviceType === 'labs' ? 1.1 : 1 }}
-                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    />
-                                </motion.div>
-                                <motion.span
-                                    className="text-gray-600"
-                                    initial={false}
-                                    animate={{
-                                        opacity: serviceType !== 'labs' ? 1 : 0,
-                                        width: serviceType !== 'labs' ? 'auto' : 0
-                                    }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    Labs
-                                </motion.span>
-                            </button>
-                        </motion.div>
-                    </div>
-                )}
+                                />
+                            </motion.div>
+                            <motion.span
+                                className="text-gray-600"
+                                initial={false}
+                                animate={{
+                                    opacity: serviceType !== 'labs' ? 1 : 0,
+                                    width: serviceType !== 'labs' ? 'auto' : 0
+                                }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                Labs
+                            </motion.span>
+                        </button>
+                    </motion.div>
+                </div>
 
                 {/* Profile Section */}
                 <div className="relative ml-auto cursor-pointer">
