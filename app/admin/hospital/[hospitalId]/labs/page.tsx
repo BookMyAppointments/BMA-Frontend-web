@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Lab } from "@/types/doctor";
 
 export default function LabsPage() {
-    const { hospitalId } = useParams<{ hospitalId: string }>();
+    const { hospitalId } = useParams<{ hospitalId: string }>() || {};
     const [labs, setLabs] = useState<Lab[]>([]);
     const [loading, setLoading] = useState(true);
 

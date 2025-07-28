@@ -27,7 +27,8 @@ interface Test {
 }
 
 const TestDetails: FC = () => {
-    const { id } = useParams();
+    const params = useParams();
+    const id = params && typeof params.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : undefined;
     const [test, setTest] = useState<Test | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

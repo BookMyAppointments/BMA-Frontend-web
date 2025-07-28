@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import UnAuthorized from '@/components/miscellaneous/UnAuthorized';
 
 export default function StandAloneLabCreateForm() {
-    const searchParams = useSearchParams();
+    const searchParams = useSearchParams() || new URLSearchParams();
     const [Authorized, setAuthorized] = useState<boolean>(true);
 
     useEffect(() => {

@@ -9,7 +9,7 @@ import { Doctor } from "@/types/doctor";
 import { SearchUser } from "./types";
 
 export default function DoctorsPage() {
-    const { hospitalId } = useParams<{ hospitalId: string }>();
+    const { hospitalId } = useParams<{ hospitalId: string }>() as Record<string, string>;
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
