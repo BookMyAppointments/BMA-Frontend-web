@@ -9,7 +9,7 @@ import { FacilityBanner } from "@/components/dash/hospital/FacilityBanner";
 import { API_BASE_URL } from "@/services/api";
 
 const LabDetails: FC = () => {
-    const { labId } = useParams();
+    const { labId } = useParams() as Record<string, string>;
     const labIdString = labId || '';
     const [selectedCategory, setSelectedCategory] = useState<string>('Biochemistry');
 

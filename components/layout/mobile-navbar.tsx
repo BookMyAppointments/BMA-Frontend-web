@@ -6,11 +6,40 @@ import { useService } from '@/context/serviceProvider'
 import Link from 'next/link'
 import Image from 'next/image'
 
-const MobileNavbar: FC = () => {
-    const { serviceType, toggleService } = useService()
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const [isHomePage, setIsHomePage] = useState(false);
+import axios from 'axios';
+import { API_BASE_URL } from '../../services/api';
+import { useSession } from '@/context/sessionProvider';
 
+const MobileNavbar: FC = () => {
+    const { serviceType, toggleService } = useService();
+    const { user, isAuthenticated, logout } = useSession();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isHomePage, setIsHomePage] = useState(false);
+    const [profilePicture, setProfilePicture] = useState('/images/cat.jpg');
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchUserProfile();
+        }
+    }, [isAuthenticated]);
+
+    const fetchUserProfile = async () => {
+        try {
+            const response = await axios.get(
+                `${API_BASE_URL}/auth/profile`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+            if (response.data.picture) {
+                setProfilePicture(response.data.picture);
+            }
+        } catch (error) {
+            console.error('Failed to fetch profile:', error);
+        }
+    };
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
@@ -39,12 +68,14 @@ const MobileNavbar: FC = () => {
 
                         <div className="flex items-center">
                             <span className="text-gray-700 text-xs">Good Evening, </span>
-                            <span className="text-blue-600 font-semibold text-xs ml-0.5">Rachana!</span>
+                            <span className="text-blue-600 font-semibold text-xs ml-0.5">
+                                {isAuthenticated ? user?.name : 'Guest'}
+                            </span>
                         </div>
 
                         <div className="w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
                             <Image
-                                src="/profile-placeholder.png"
+                                src={profilePicture}
                                 alt="Profile"
                                 width={100}
                                 unoptimized

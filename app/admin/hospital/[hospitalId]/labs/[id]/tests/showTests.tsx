@@ -16,7 +16,7 @@ interface Test {
 }
 
 export default function LabTestsPage() {
-  const { id, hospitalId } = useParams<{ id: string; hospitalId: string }>();
+  const { id, hospitalId } = useParams<{ id: string; hospitalId: string }>()  || {};
   const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
 

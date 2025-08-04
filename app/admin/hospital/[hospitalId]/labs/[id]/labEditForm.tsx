@@ -10,7 +10,7 @@ import { useParams } from 'next/navigation';
 export default function LabEditForm() {
 
     const params = useParams<{ hospitalId: string; id: string }>();
-    const { hospitalId, id } = params;
+    const { hospitalId, id } = params || {};
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<LabFormErrors>({}); const [formData, setFormData] = useState<LabDataRequest>({

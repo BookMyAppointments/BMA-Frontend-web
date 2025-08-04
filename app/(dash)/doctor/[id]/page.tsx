@@ -7,7 +7,7 @@ import DoctorInfo from '@/components/dash/doctor/DoctorInfo';
 import { API_BASE_URL } from '@/services/api';
 
 const DoctorDetails: FC = () => {
-    const { id } = useParams();
+    const { id } = useParams() as Record<string, string>;
     const [doctor, setDoctor] = useState(null);
     const [loading, setLoading] = useState(true);
 

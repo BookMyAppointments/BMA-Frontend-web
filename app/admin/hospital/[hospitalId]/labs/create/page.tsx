@@ -4,7 +4,7 @@ import { LabCreateForm } from ".";
 
 export default function Page() {
 
-    const { hospitalId } = useParams<{ hospitalId: string }>();
+    const { hospitalId } = useParams<{ hospitalId: string }>() || {};
 
     return (
         <LabCreateForm hospitalId={hospitalId} />

@@ -10,7 +10,7 @@ import { API_BASE_URL, fetchDoctorsBySpecialization } from "@/services/api"
 // import { Doctor } from '@/types/doctor';
 
 const HospitalDetails: FC = () => {
-    const { id } = useParams();
+    const { id } = useParams() as Record<string, string>;
     const hospitalId = id || '';
     const [selectedCategory, setSelectedCategory] = useState<string>('Cardiology');
 

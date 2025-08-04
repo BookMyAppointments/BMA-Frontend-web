@@ -10,7 +10,7 @@ export default function AddTestPage() {
     hospitalId: string;
     id: string;
     tid: string;
-  }>();
+  }>() || {};
   const router = useRouter();
 
   const [form, setForm] = useState({

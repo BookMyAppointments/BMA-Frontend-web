@@ -27,7 +27,7 @@ interface Doctor {
 }
 
 export default function DoctorAppointmentsPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>() as Record<string, string>;
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [users, setUsers] = useState<Record<string, User>>({});
   const [doctor, setDoctor] = useState<Doctor | null>(null);
