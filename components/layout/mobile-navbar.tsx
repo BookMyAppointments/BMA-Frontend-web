@@ -12,7 +12,7 @@ import { useSession } from '@/context/sessionProvider';
 
 const MobileNavbar: FC = () => {
     const { serviceType, toggleService } = useService();
-    const { user, isAuthenticated, logout } = useSession();
+    const { user, isAuthenticated } = useSession();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isHomePage, setIsHomePage] = useState(false);
     const [profilePicture, setProfilePicture] = useState('/images/cat.jpg');
