@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { FC } from 'react'
 import { API_BASE_URL } from '@/services/api'
 import Image from 'next/image';
+import { toast } from 'react-toastify';
 
 interface BaseBooking {
     id: string;
@@ -15,6 +16,7 @@ interface BaseBooking {
 
 interface DoctorBooking extends BaseBooking {
     type: 'doctor';
+    doctorId: string;
     doctorName: string;
     doctorImage: string;
     qualification: string;
@@ -47,6 +49,12 @@ interface RescheduleData {
     time: string;
 }
 
+interface Availability {
+    day: string;
+    startTime: string;
+    endTime: string;
+}
+
 const BookingsList: FC = () => {
     const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
     const [searchQuery, setSearchQuery] = useState('');
@@ -60,6 +68,107 @@ const BookingsList: FC = () => {
     const [loading, setLoading] = useState(true);
     const [rescheduleLoading, setRescheduleLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [timeSlots, setTimeSlots] = useState<string[]>([]);
+    const [doctorAvailability, setDoctorAvailability] = useState<Availability[]>([]);
+
+    const dates: { [key: number]: string } = {
+        0: "Sunday",
+        1: "Monday",
+        2: "Tuesday",
+        3: "Wednesday",
+        4: "Thursday",
+        5: "Friday",
+        6: "Saturday"
+    };
+
+    const formatTimeTo24Hour = (time12h: string) => {
+        const [time, modifier] = time12h.split(' ');
+        let [hours, minutes] = time.split(':');
+
+        if (hours === '12') {
+            hours = '00';
+        }
+
+        if (modifier === 'PM') {
+            hours = (parseInt(hours, 10) + 12).toString();
+        }
+
+        minutes = minutes || '00';
+
+        return `${hours.padStart(2, '0')}:${minutes}`;
+    };
+
+    const fetchDoctorAvailability = async (doctorId: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch(`${API_BASE_URL}/doctors/get/${doctorId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch doctor details');
+            }
+
+            const doctorData = await response.json();
+            setDoctorAvailability(doctorData.availability || []);
+        } catch (err) {
+            console.error('Error fetching doctor availability:', err);
+            setDoctorAvailability([]);
+        }
+    };
+
+    const handleRescheduleDateChange = (date: string) => {
+        const day: string = dates[new Date(date).getDay()];
+        setRescheduleData({ ...rescheduleData, date, time: '' });
+        
+        const filteredAvailability = doctorAvailability.filter(
+            (aval: Availability) => aval.day === day
+        );
+
+        // Generate time slots based on availability
+        if (filteredAvailability.length > 0) {
+            const slots: string[] = [];
+            const startTime = filteredAvailability[0].startTime; // e.g., "09:00"
+            const endTime = filteredAvailability[0].endTime; // e.g., "17:00"
+            
+            const [startHour] = startTime.split(':').map(Number);
+            const [endHour] = endTime.split(':').map(Number);
+
+            for (let hour = startHour; hour < endHour; hour++) {
+                let displayHour = hour;
+                let period = 'AM';
+                
+                if (hour === 0) {
+                    displayHour = 12;
+                } else if (hour === 12) {
+                    period = 'PM';
+                } else if (hour > 12) {
+                    displayHour = hour - 12;
+                    period = 'PM';
+                }
+                
+                const time = `${displayHour}:00 ${period}`;
+                slots.push(time);
+            }
+            setTimeSlots(slots);
+        } else {
+            setTimeSlots([]);
+        }
+    };
+
+    const resetRescheduleModal = () => {
+        setIsRescheduleModalOpen(false);
+        setSelectedBooking(null);
+        setRescheduleData({ date: '', time: '' });
+        setTimeSlots([]);
+        setDoctorAvailability([]);
+    };
 
     const fetchBookings = useCallback(async () => {
         try {
@@ -100,6 +209,7 @@ const BookingsList: FC = () => {
                         return {
                             id: appointment.id,
                             type: 'doctor',
+                            doctorId: appointment.doctorId,
                             doctorName: appointment.doctor.name,
                             doctorImage: appointment.doctor?.picture || '/doctors/doctor1.png',
                             qualification: appointment.doctor.qualifications.join(', '),
@@ -172,7 +282,16 @@ const BookingsList: FC = () => {
             throw new Error('No authentication token found');
         }
 
-        const newDateTime = new Date(`${rescheduleData.date}T${rescheduleData.time}`);
+        let newDateTime;
+        if (booking.type === 'doctor') {
+            // For doctor appointments, use the slot-based time (12-hour format)
+            const formattedTime = formatTimeTo24Hour(rescheduleData.time);
+            newDateTime = new Date(`${rescheduleData.date}T${formattedTime}`);
+        } else {
+            // For test appointments, use the time input directly (24-hour format)
+            newDateTime = new Date(`${rescheduleData.date}T${rescheduleData.time}`);
+        }
+        
         const response = await fetch(`${API_BASE_URL}/appointments/reschedule/${booking.id}`, {
             method: 'PUT',
             headers: {
@@ -188,9 +307,11 @@ const BookingsList: FC = () => {
             throw new Error('Failed to reschedule booking');
         }
 
+        toast.success('Appointment rescheduled successfully!')
+
         // Refresh bookings after successful reschedule
         await fetchBookings();
-        setIsRescheduleModalOpen(false);
+        resetRescheduleModal();
     } catch (err) {
         console.error('Error rescheduling booking:', err);
         setError(err instanceof Error ? err.message : 'Failed to reschedule booking');
@@ -274,7 +395,7 @@ const BookingsList: FC = () => {
                         <p className="text-gray-600">{error}</p>
                         <button
                             onClick={fetchBookings}
-                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"
                         >
                             Try Again
                         </button>
@@ -308,7 +429,7 @@ const BookingsList: FC = () => {
                     <div className="flex gap-4 mb-6">
                         <button
                             onClick={() => setActiveTab('upcoming')}
-                            className={`px-4 py-2 rounded-full ${activeTab === 'upcoming'
+                            className={`px-4 py-2 rounded-full cursor-pointer ${activeTab === 'upcoming'
                                 ? 'bg-blue-100 text-blue-600'
                                 : 'text-gray-500 hover:bg-gray-100'
                                 }`}
@@ -317,7 +438,7 @@ const BookingsList: FC = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('completed')}
-                            className={`px-4 py-2 rounded-full ${activeTab === 'completed'
+                            className={`px-4 py-2 rounded-full cursor-pointer ${activeTab === 'completed'
                                 ? 'bg-blue-100 text-blue-600'
                                 : 'text-gray-500 hover:bg-gray-100'
                                 }`}
@@ -396,27 +517,33 @@ const BookingsList: FC = () => {
                                         {booking.status === 'pending' || booking.status === 'confirmed' || booking.status === 'rescheduled' ? (
                                             <>
                                                 <button
-                                                    onClick={() => {
+                                                    onClick={async () => {
                                                         setSelectedBooking(booking);
                                                         setRescheduleData({
-                                                            date: booking.date,
-                                                            time: booking.time
+                                                            date: '',
+                                                            time: ''
                                                         });
+                                                        setTimeSlots([]);
                                                         setIsRescheduleModalOpen(true);
+                                                        
+                                                        // Fetch doctor availability if it's a doctor booking
+                                                        if (booking.type === 'doctor') {
+                                                            await fetchDoctorAvailability(booking.doctorId);
+                                                        }
                                                     }}
-                                                    className="w-full sm:w-auto px-4 py-2 text-sm text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50"
+                                                    className="w-full sm:w-auto px-4 py-2 text-sm text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 cursor-pointer"
                                                 >
                                                     Reschedule
                                                 </button>
                                                 <button
                                                     onClick={() => handleCancel(booking.id)}
-                                                    className="w-full sm:w-auto px-4 py-2 text-sm text-red-600 hover:text-red-700 border border-red-200 rounded-lg hover:bg-red-50"
+                                                    className="w-full sm:w-auto px-4 py-2 text-sm text-red-600 hover:text-red-700 border border-red-200 rounded-lg hover:bg-red-50 cursor-pointer"
                                                 >
                                                     Cancel
                                                 </button>
                                                 <button
                                                     onClick={() => openGoogleMaps(booking.coordinates)}
-                                                    className="w-full sm:w-auto px-4 py-2 text-sm text-gray-600 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50"
+                                                    className="w-full sm:w-auto px-4 py-2 text-sm text-gray-600 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
                                                 >
                                                     View Location
                                                 </button>
@@ -424,7 +551,7 @@ const BookingsList: FC = () => {
                                         ) : (
                                             <button
                                                 onClick={() => openGoogleMaps(booking.coordinates)}
-                                                className="w-full sm:w-auto px-4 py-2 text-sm text-gray-600 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50"
+                                                className="w-full sm:w-auto px-4 py-2 text-sm text-gray-600 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
                                             >
                                                 View Location
                                             </button>
@@ -449,44 +576,82 @@ const BookingsList: FC = () => {
         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-semibold">Reschedule Appointment</h3>
-                <button onClick={() => setIsRescheduleModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                <button onClick={resetRescheduleModal} className="text-gray-500 hover:text-gray-700 cursor-pointer">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-gray-700 mb-2">Date</label>
-                    <input
-                        type="date"
-                        value={rescheduleData.date}
-                        onChange={(e) => setRescheduleData({ ...rescheduleData, date: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
-                    />
+            
+            {selectedBooking.type === 'doctor' ? (
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-gray-700 mb-2">Select Date</label>
+                        <input
+                            type="date"
+                            value={rescheduleData.date}
+                            onChange={(e) => handleRescheduleDateChange(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                            min={new Date().toISOString().split('T')[0]}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 mb-2">Select Time</label>
+                        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                            {timeSlots.length > 0 ? timeSlots.map((time) => (
+                                <button
+                                    key={time}
+                                    onClick={() => setRescheduleData({ ...rescheduleData, time })}
+                                    className={`px-3 py-2 text-sm rounded-lg border cursor-pointer ${rescheduleData.time === time
+                                        ? 'bg-blue-50 border-blue-500 text-blue-600'
+                                        : 'border-gray-200 hover:border-blue-500'
+                                    }`}
+                                >
+                                    {time}
+                                </button>
+                            )) : (
+                                <div className="col-span-2 text-center text-gray-500 py-4">
+                                    {rescheduleData.date ? 'No available slots for this date' : 'Please select a date first'}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label className="block text-gray-700 mb-2">Time</label>
-                    <input
-                        type="time"
-                        value={rescheduleData.time}
-                        onChange={(e) => setRescheduleData({ ...rescheduleData, time: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
-                    />
+            ) : (
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-gray-700 mb-2">Date</label>
+                        <input
+                            type="date"
+                            value={rescheduleData.date}
+                            onChange={(e) => setRescheduleData({ ...rescheduleData, date: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 mb-2">Time</label>
+                        <input
+                            type="time"
+                            value={rescheduleData.time}
+                            onChange={(e) => setRescheduleData({ ...rescheduleData, time: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
+            
             <div className="mt-6 flex justify-end gap-3">
                 <button
-                    onClick={() => setIsRescheduleModalOpen(false)}
-                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                    onClick={resetRescheduleModal}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer"
                     disabled={rescheduleLoading}
                 >
                     Cancel
                 </button>
                 <button
                     onClick={() => handleReschedule(selectedBooking)}
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center"
-                    disabled={rescheduleLoading}
+                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center cursor-pointer"
+                    disabled={rescheduleLoading || !rescheduleData.date || !rescheduleData.time}
                 >
                     {rescheduleLoading ? (
                         <span className="flex items-center gap-2">
