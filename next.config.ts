@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       "img.freepik.com",
       "media.gettyimages.com",
       "picsum.photos",
+      "images.unsplash.com",
     ],
   },
 };

@@ -82,7 +82,7 @@ export default function DoctorPage() {
     }
 
     return (
-        <div className="space-y-6 pb-24">
+        <div className="space-y-6 pb-40">
             <Link
                 href={doctor.hospitalId ? `/hospital/${doctor.hospitalId}` : '/home'}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-3 hover:text-ink"

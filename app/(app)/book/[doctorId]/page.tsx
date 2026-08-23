@@ -146,7 +146,7 @@ export default function BookingPaymentPage() {
     }
 
     return (
-        <div className="space-y-5 pb-24">
+        <div className="space-y-5 pb-40">
             <Link
                 href={`/doctor/${doctorId}`}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-3 hover:text-ink"
