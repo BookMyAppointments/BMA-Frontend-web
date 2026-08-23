@@ -7,6 +7,8 @@ import { toast } from 'react-toastify';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
+const DAY_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
 export default function Dashboard() {
     const [hospital, setHospital] = useState<Hospital | null>(null);
     const [loading, setLoading] = useState(true);
@@ -43,7 +45,10 @@ export default function Dashboard() {
     return (
         <div className="p-6">
             <div className='flex items-center justify-between mb-6'>
-                <h1 className="text-2xl font-bold mb-6">{hospital?.name}</h1>
+                <div>
+                    <p className="text-sm font-medium text-blue-600 uppercase tracking-wide">Admin Dashboard</p>
+                    <h1 className="text-2xl font-bold">{hospital?.name}</h1>
+                </div>
                 <Link href={`/admin/hospital/update/${hospital?.id}`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
                     Update Hospital Info
                 </Link>
@@ -59,7 +64,9 @@ export default function Dashboard() {
                         <h3 className="font-medium mb-2">Hours:</h3>
                         {hospital?.hours && typeof hospital.hours === 'object' ? (
                             <div className="text-sm space-y-1">
-                                {Object.entries(hospital.hours).map(([day, hours]) => (
+                                {Object.entries(hospital.hours)
+                                    .sort(([a], [b]) => DAY_ORDER.indexOf(a.toLowerCase()) - DAY_ORDER.indexOf(b.toLowerCase()))
+                                    .map(([day, hours]) => (
                                     <div key={day} className="flex justify-between">
                                         <span className="capitalize font-medium">{day}:</span>
                                         <span>
