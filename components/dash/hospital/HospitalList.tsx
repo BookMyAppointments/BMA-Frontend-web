@@ -21,13 +21,18 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
     const [distances, setDistances] = useState<{ [key: string]: string }>({})
     const itemsPerPage = 6;
 
+    const [locationDenied, setLocationDenied] = useState(false);
+
     useEffect(() => {
-        const fetchLocation = () => navigator.geolocation.getCurrentPosition((position) => {
-            setUserLocation({
-                lat: position.coords.latitude,
-                long: position.coords.longitude
-            })
-        })
+        const fetchLocation = () => navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setUserLocation({
+                    lat: position.coords.latitude,
+                    long: position.coords.longitude
+                })
+            },
+            () => setLocationDenied(true)
+        )
         fetchLocation()
     }, [])
 
@@ -99,17 +104,23 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
         const distance = R * c;
         return `${distance.toFixed(1)} Kms`;
     };
-    const transformedHospitals = useMemo(() =>
-        data?.pages.flatMap(page =>
+    const transformedHospitals = useMemo(() => {
+        const seenHospitalIds = new Set<string>();
+        return data?.pages.flatMap(page =>
             page.items
                 .filter((item: Doctor) => item.hospital)
+                .filter((item: Doctor) => {
+                    if (seenHospitalIds.has(item.hospital!.id)) return false;
+                    seenHospitalIds.add(item.hospital!.id);
+                    return true;
+                })
                 .map((item: Doctor) => ({
                     id: item.hospital!.id,
                     name: item.hospital!.name,
                     picture: item.hospital!.picture || '/logos/default.png',
                     description: `Located at ${item.hospital!.location.address}`,
                     specialties: item.hospital!.departments.slice(0, 4),
-                    distance: distances[item.hospital!.id] || 'Calculating...',
+                    distance: distances[item.hospital!.id] || (locationDenied ? 'Distance unavailable' : 'Calculating...'),
                     isTopRated: (item?.ratings ?? 0) >= 4,
                     departmentsCount: item.hospital!.departments.length,
                     doctor: {
@@ -119,7 +130,8 @@ const HospitalList: FC<HospitalListProps> = ({ selectedCategory = 'Cardiology' }
                         rating: item.ratings
                     }
                 }))
-        ) || [], [data, distances]);
+        ) || [];
+    }, [data, distances, locationDenied]);
 
     const facilities = serviceType === 'hospitals' ? transformedHospitals : staticLabs;
 
