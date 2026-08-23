@@ -54,13 +54,13 @@ export default function Personal() {
                 email: response.data.email || '',
                 phone: response.data.phone || '',
                 address: response.data.address || '',
-                gender: response.data.gender.toLowerCase() || '',
+                gender: response.data.gender?.toLowerCase() || '',
                 dob: response.data.dob ? new Date(response.data.dob).toISOString().split('T')[0] : ''
             };
 
             setFormData(newFormData);
             setInitialFormData(newFormData);
-            setImageUrl(response.data.picture || '/profile-placeholder.png');
+            setImageUrl(response.data.picture || '/images/cat.jpg');
         } catch (error) {
             console.error('Failed to fetch profile:', error);
         }
