@@ -179,18 +179,12 @@ export default function Super() {
                                                 <div>
                                                     <div className="text-sm font-medium text-gray-900">{request.hospital?.name}</div>
                                                     <div className="text-sm text-gray-500">
-                                                        Services: {request.hospital?.services.join(', ')}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">
-                                                        Departments: {request.hospital?.departments.join(', ')}
+                                                        {request.hospital?.services.length || 0} services, {request.hospital?.departments.length || 0} departments
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm text-gray-900">{request.hospital?.location.address}</div>
-                                                <div className="text-sm text-gray-500">
-                                                    Lat: {request.hospital?.location.lat}, Lng: {request.hospital?.location.lng}
-                                                </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
