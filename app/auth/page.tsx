@@ -330,6 +330,15 @@ export default function AuthPage() {
                         </>
                     )}
                 </Card>
+
+                {step === 'phone' && (
+                    <p className="mt-5 text-center text-sm text-ink-3">
+                        Hospital staff?{' '}
+                        <Link href="/staff" className="font-semibold text-brand-600">
+                            Sign in here
+                        </Link>
+                    </p>
+                )}
             </main>
         </div>
     );
