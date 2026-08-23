@@ -1,11 +1,20 @@
 import { Doctor } from '@/types/doctor';
+import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import { type FC, useState } from 'react';
 
 export const DoctorBanner: FC<{ doctor: Doctor }> = ({ doctor }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        <div className="relative w-[97%] mx-auto h-[400px] bg-[#EEF4FF] rounded-lg py-4 px-4">
+        <div className="relative w-[97%] mx-auto h-[400px] bg-[#EEF4FF] rounded-lg py-4 px-4 overflow-hidden">
+            <ImageWithFallback
+                src={doctor?.picture || '/doctors/doctor1.png'}
+                alt={doctor?.name || 'Doctor'}
+                width={280}
+                height={280}
+                unoptimized
+                className="hidden sm:block absolute right-8 bottom-0 h-[360px] w-[280px] object-cover object-top rounded-t-2xl"
+            />
             <div className="flex flex-col sm:flex-row h-full sm:items-center">
                 <div className="flex-1 sm:pr-[300px] z-10">
                     <span className="text-gray-500 text-sm">{doctor.specialization?.join(', ')}</span>
