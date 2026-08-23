@@ -153,3 +153,29 @@ export const saveProfile = (payload: Record<string, unknown>) =>
         method: 'PUT',
         body: payload,
     });
+
+/* -------------------------------------------------------- Lab reports ---- */
+
+/** File upload needs multipart/form-data, so this bypasses the JSON-only `api()` helper. */
+export async function uploadTestResult(
+    testId: string,
+    payload: { userId: string; file: File; notes?: string }
+): Promise<{ message: string }> {
+    const form = new FormData();
+    form.append('userId', payload.userId);
+    form.append('file', payload.file);
+    if (payload.notes) form.append('notes', payload.notes);
+
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/tests/results/${testId}`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: form,
+    });
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+        throw new ApiError(data?.message ?? `Upload failed (${response.status})`, response.status);
+    }
+    return data;
+}
