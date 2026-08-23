@@ -2,6 +2,7 @@
 "use client"
 import { useState, useEffect, useCallback } from 'react'
 import type { FC } from 'react'
+import { useRouter } from 'next/navigation'
 import { API_BASE_URL } from '@/services/api'
 import Image from 'next/image';
 import { toast } from 'react-toastify';
@@ -56,6 +57,7 @@ interface Availability {
 }
 
 const BookingsList: FC = () => {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -271,8 +273,12 @@ const BookingsList: FC = () => {
     }, [activeTab]);
 
     useEffect(() => {
+        if (!localStorage.getItem('token')) {
+            router.replace('/auth/signin');
+            return;
+        }
         fetchBookings();
-    }, [fetchBookings]);
+    }, [fetchBookings, router]);
 
     const handleReschedule = async (booking: Booking) => {
     try {
