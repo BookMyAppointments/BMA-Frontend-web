@@ -1,5 +1,5 @@
 import { Doctor } from '@/types/doctor';
-import Image from 'next/image';
+import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import { useState } from 'react';
 interface Props {
     doctors: Doctor[];
@@ -29,11 +29,11 @@ const DoctorsList = ({ doctors }: Props) => {
                         onClick={() => handleDoctorClick(doctor.id)}
                         className="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
                     >
-                        <div className="flex gap-3 lg:gap-4 items-start">                            <Image
+                        <div className="flex gap-3 lg:gap-4 items-start">                            <ImageWithFallback
                                 width={80}
                                 height={80}
                                 unoptimized
-                                src={doctor?.picture || '/images/placeholder.png'}
+                                src={doctor?.picture || '/doctors/doctor1.png'}
                                 alt={doctor?.name || 'Doctor Image'}
                                 className="w-16 h-16 lg:w-20 lg:h-20 rounded-lg object-cover"
                             />                            <div className="flex-1">

@@ -4,7 +4,7 @@ import SuccessPopup from '@/components/ui/SuccessPopup'
 import type { Doctor } from "@/types/doctor"
 import { createAppointment } from '@/services/api'
 import { toast } from 'react-toastify';
-import Image from 'next/image'
+import ImageWithFallback from '@/components/ui/ImageWithFallback'
 
 interface Availability {
     day: string;
@@ -136,11 +136,11 @@ const BookingForm: FC<BookingFormProps> = ({ doctor }) => {
             <div className="bg-white rounded-lg p-6">
                 {/* Doctor Info Section */}
                 <div className="flex items-center gap-4 pb-6 border-b">
-                    <Image
+                    <ImageWithFallback
                         width={80}
                         height={80}
                         unoptimized
-                        src={doctorData?.picture || '/default-doctor.png'}
+                        src={doctorData?.picture || '/doctors/doctor1.png'}
                         alt={doctorData?.name || 'Doctor'}
                         className="w-auto h-20 rounded-full object-fit"
                     />
