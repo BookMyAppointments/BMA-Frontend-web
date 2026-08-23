@@ -34,6 +34,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         setMenuOpen(false);
     }, [pathname]);
 
+    // Stop the page behind the drawer from scrolling under it.
+    useEffect(() => {
+        if (!menuOpen) return;
+        const previous = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = previous;
+        };
+    }, [menuOpen]);
+
     if (isLoading || !isAuthenticated) {
         return (
             <div className="min-h-screen grid place-items-center bg-canvas">

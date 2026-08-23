@@ -36,20 +36,20 @@ export default function Dashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <Loader2 className="animate-spin text-blue-600" size={32} />
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <Loader2 className="animate-spin text-brand-500" size={32} />
             </div>
         );
     }
 
     return (
-        <div className="p-6">
+        <div>
             <div className='flex items-center justify-between mb-6'>
                 <div>
-                    <p className="text-sm font-medium text-blue-600 uppercase tracking-wide">Admin Dashboard</p>
+                    <p className="text-sm font-semibold text-brand-600 uppercase tracking-wide">Admin Dashboard</p>
                     <h1 className="text-2xl font-bold">{hospital?.name}</h1>
                 </div>
-                <Link href={`/admin/hospital/update/${hospital?.id}`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                <Link href={`/admin/hospital/update/${hospital?.id}`} className="inline-flex items-center h-11 px-4 rounded-[12px] bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors">
                     Update Hospital Info
                 </Link>
 
@@ -57,8 +57,8 @@ export default function Dashboard() {
 
             {/* Hospital Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white p-4 rounded-lg shadow">
-                    <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+                <div className="bg-surface border border-line p-5 rounded-[16px]">
+                    <h2 className="text-lg font-bold text-ink mb-4">Basic Information</h2>
                     <p>Location: {hospital?.location.address}</p>
                     <div>
                         <h3 className="font-medium mb-2">Hours:</h3>
@@ -87,8 +87,8 @@ export default function Dashboard() {
                 </div>
 
                 {/* Departments, Facilities, Services */}
-                <div className="bg-white p-4 rounded-lg shadow">
-                    <h2 className="text-xl font-semibold mb-4">Services & Facilities</h2>
+                <div className="bg-surface border border-line p-5 rounded-[16px]">
+                    <h2 className="text-lg font-bold text-ink mb-4">Services & Facilities</h2>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <h3 className="font-medium">Departments</h3>
@@ -113,8 +113,8 @@ export default function Dashboard() {
             {/* Doctors */}
             <div className="mb-8">
                 <div className='flex items-center justify-between mb-4'>
-                    <h2 className="text-xl font-semibold mb-4">Doctors</h2>
-                    <Link href={`/admin/hospital/${hospital?.id}/doctors/create`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                    <h2 className="text-lg font-bold text-ink mb-4">Doctors</h2>
+                    <Link href={`/admin/hospital/${hospital?.id}/doctors/create`} className="inline-flex items-center h-11 px-4 rounded-[12px] bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors">
                         Create New Doctor
                     </Link>
                 </div>
@@ -122,7 +122,7 @@ export default function Dashboard() {
                     {hospital?.doctors.map((doctor) => (
                         <div
                             key={doctor.id}
-                            className="bg-white p-4 rounded-lg shadow cursor-pointer flex flex-col items-center"
+                            className="bg-surface border border-line p-4 rounded-[16px] flex flex-col items-center"
                         >
                             <Image
                                 width={100}
@@ -132,20 +132,20 @@ export default function Dashboard() {
                                 className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                             />
                             <h3 className="font-medium text-center">{doctor.name}</h3>
-                            <p className="text-sm text-gray-600 text-center">{doctor.email}</p>
-                            <p className="text-sm text-gray-600 text-center">{doctor.phone}</p>
+                            <p className="text-sm text-ink-3 text-center">{doctor.email}</p>
+                            <p className="text-sm text-ink-3 text-center">{doctor.phone}</p>
                             
                            <div className="flex gap-2 mt-4 w-full">
                               <Link
                                 href={`/admin/hospital/${hospital.id}/doctors/${doctor.id}`}
-                                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center font-semibold"
+                                className="flex-1 h-11 inline-flex items-center justify-center rounded-[12px] border border-line-strong text-ink font-semibold hover:border-brand-300 transition-colors"
                                 onClick={e => e.stopPropagation()}
                             >
                                 Edit
                             </Link>
                             <Link
                                 href={`/admin/hospital/${hospital.id}/doctors/${doctor.id}/appointments`}
-                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center font-semibold"
+                                className="flex-1 h-11 inline-flex items-center justify-center rounded-[12px] bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors"
                                 onClick={e => e.stopPropagation()}
                             >
                                 View Appointments
@@ -159,8 +159,8 @@ export default function Dashboard() {
             {/* Labs */}
             <div>
                 <div className='flex items-center justify-between mb-4'>
-                    <h2 className="text-xl font-semibold mb-4">Laboratory Facilities</h2>
-                    <Link href={`/admin/hospital/${hospital?.id}/labs/create`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                    <h2 className="text-lg font-bold text-ink mb-4">Laboratory Facilities</h2>
+                    <Link href={`/admin/hospital/${hospital?.id}/labs/create`} className="inline-flex items-center h-11 px-4 rounded-[12px] bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors">
                         Create New Lab
                     </Link>
                 </div>

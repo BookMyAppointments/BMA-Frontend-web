@@ -118,75 +118,75 @@ export default function Super() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <Loader2 className="animate-spin text-blue-600" size={32} />
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <Loader2 className="animate-spin text-brand-600" size={32} />
             </div>
         );
     }
 
     if (!superAdmin) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-[60vh] flex items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
-                    <p className="text-gray-600">You do not have super admin privileges.</p>
-                    <Link href={'/'} className='text-blue-500 hover:text-blue-600 cursor-pointer'>Home Page</Link>
+                    <p className="text-ink-3">You do not have super admin privileges.</p>
+                    <Link href={'/'} className='text-brand-500 hover:text-brand-600 cursor-pointer'>Home Page</Link>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8 px-4">
-            <div className="max-w-6xl mx-auto">
-                <div className="bg-white rounded-lg shadow-lg space-y-4 p-6 mb-6">
+        <div className="">
+            <div>
+                <div className="bg-surface border border-line rounded-[16px] space-y-4 p-5 mb-6">
                     <div className="flex items-center gap-3 mb-6">
-                        <ShieldCheck className="text-blue-600" size={32} />
+                        <ShieldCheck className="text-brand-600" size={32} />
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Super Admin Dashboard</h1>
-                            <p className="text-gray-600">Manage access requests and permissions</p>
+                            <h1 className="font-display text-2xl font-extrabold text-ink">Super Admin Dashboard</h1>
+                            <p className="text-ink-3">Manage access requests and permissions</p>
                         </div>
                     </div>
 
                     <UserSearchBox />
-                    <Link href="/super-admin/banner-images" className="text-white hover:bg-blue-500 bg-blue-400 px-3 py-2 rounded-xl">
+                    <Link href="/super-admin/banner-images" className="inline-flex items-center h-11 px-4 rounded-[12px] border border-line-strong font-semibold text-ink hover:border-brand-300 transition-colors">
                         Banner Images
                     </Link>
                     {requests.length === 0 ? (
-                        <div className="text-center py-12 bg-gray-50 rounded-lg">
-                            <p className="text-gray-600">No pending hospital requests found.</p>
+                        <div className="text-center py-12 bg-canvas rounded-[12px]">
+                            <p className="text-ink-3">No pending hospital requests found.</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-canvas">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Email</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hospital Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-ink-3 uppercase tracking-wide">User Email</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-ink-3 uppercase tracking-wide">Hospital Name</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-ink-3 uppercase tracking-wide">Location</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-ink-3 uppercase tracking-wide">Status</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-ink-3 uppercase tracking-wide">Expiry Date</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-ink-3 uppercase tracking-wide">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-surface divide-y divide-line">
                                     {requests.map((request: AdminRequest) => (
                                         <tr key={request.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{request.userEmail}</div>
+                                            <td className="px-4 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-semibold text-ink">{request.userEmail}</div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-4 py-4 whitespace-nowrap">
                                                 <div>
-                                                    <div className="text-sm font-medium text-gray-900">{request.hospital?.name}</div>
-                                                    <div className="text-sm text-gray-500">
+                                                    <div className="text-sm font-semibold text-ink">{request.hospital?.name}</div>
+                                                    <div className="text-sm text-ink-3">
                                                         {request.hospital?.services.length || 0} services, {request.hospital?.departments.length || 0} departments
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-900">{request.hospital?.location.address}</div>
+                                            <td className="px-4 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-ink">{request.hospital?.location.address}</div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-4 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                     ${request.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
                                                         request.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
@@ -194,22 +194,22 @@ export default function Super() {
                                                     {request.status}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-4 py-4 whitespace-nowrap text-sm text-ink-3">
                                                 {new Date(request.expiryTime).toLocaleDateString()}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                                                 {request.status === 'PENDING' && (
                                                     <div className="flex gap-2">
                                                         <button
                                                             onClick={() => handleRequestAction(request.id, 'ACTIVE')}
-                                                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-brand-500 hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                                                         >
                                                             <CheckCircle size={16} className="mr-1" />
                                                             Approve
                                                         </button>
                                                         <button
                                                             onClick={() => handleRequestAction(request.id, 'SUSPENDED')}
-                                                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-danger-500 hover:bg-danger-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger-500"
                                                         >
                                                             <XCircle size={16} className="mr-1" />
                                                             Reject
