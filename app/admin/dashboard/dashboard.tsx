@@ -166,7 +166,7 @@ export default function Dashboard() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {hospital?.labs.map((lab) => (
-                        <Link href={`/admin/hospital/${hospital.id}/labs/${lab.id}`} key={lab.id} className="bg-white p-4 rounded-lg shadow cursor-pointer">
+                        <div key={lab.id} className="bg-surface border border-line p-4 rounded-[16px]">
                             <Image
                                 width={300}
                                 height={200}
@@ -176,8 +176,22 @@ export default function Dashboard() {
                                 className="w-full h-40 object-cover rounded-lg mb-4"
                             />
                             <h3 className="font-medium">{lab.name}</h3>
-                            <p className="text-sm text-gray-600">{lab.location.address}</p>
-                        </Link>
+                            <p className="text-sm text-ink-3">{lab.location.address}</p>
+                            <div className="flex gap-2 mt-4">
+                                <Link
+                                    href={`/admin/hospital/${hospital.id}/labs/${lab.id}`}
+                                    className="flex-1 h-11 inline-flex items-center justify-center rounded-[12px] border border-line-strong text-ink font-semibold hover:border-brand-300 transition-colors"
+                                >
+                                    Edit
+                                </Link>
+                                <Link
+                                    href={`/admin/hospital/${hospital.id}/labs/${lab.id}/bookings`}
+                                    className="flex-1 h-11 inline-flex items-center justify-center rounded-[12px] bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors"
+                                >
+                                    Bookings
+                                </Link>
+                            </div>
+                        </div>
                     ))}
                 </div>
             </div>

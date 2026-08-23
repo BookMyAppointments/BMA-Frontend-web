@@ -157,6 +157,12 @@ export default function LabEditForm() {
                         <div className="pt-6 border-t border-gray-200">
                             <div className="flex gap-3 mt-4">
                                 <Link
+                                    href={`/admin/hospital/${hospitalId}/labs/${id}/bookings`}
+                                    className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
+                                >
+                                    View Bookings
+                                </Link>
+                                <Link
                                     href={`/admin/hospital/${hospitalId}/labs/${id}/tests`}
                                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                 >
