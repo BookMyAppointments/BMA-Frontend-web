@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Search, SearchX, ArrowLeft } from 'lucide-react';
+import { Search, SearchX, ArrowLeft, FlaskConical } from 'lucide-react';
 import { Card, EmptyState, Input, SectionHeader, Skeleton } from '@/components/ui';
 import { DoctorCard } from '@/components/care/DoctorCard';
-import { fetchDoctors } from '@/services/api';
-import { SPECIALTIES } from '@/lib/domain';
+import { fetchDoctors, fetchLabs } from '@/services/api';
+import { SPECIALTIES, rupees } from '@/lib/domain';
 
 export default function SearchPage() {
     const [query, setQuery] = useState('');
@@ -17,15 +17,21 @@ export default function SearchPage() {
         inputRef.current?.focus();
     }, []);
 
-    const { data: doctors, isLoading } = useQuery({
+    const { data: doctors, isLoading: doctorsLoading } = useQuery({
         queryKey: ['doctors', 'all'],
         queryFn: fetchDoctors,
     });
 
+    const { data: labs, isLoading: labsLoading } = useQuery({
+        queryKey: ['labs', 'all'],
+        queryFn: () => fetchLabs(),
+    });
+
+    const isLoading = doctorsLoading || labsLoading;
     const trimmed = query.trim().toLowerCase();
 
     const matches = useMemo(() => {
-        if (trimmed.length < 2) return { specialties: [], doctors: [], hospitals: [] };
+        if (trimmed.length < 2) return { specialties: [], doctors: [], hospitals: [], labs: [], tests: [] };
 
         const specialties = SPECIALTIES.filter(
             (s) =>
@@ -55,18 +61,35 @@ export default function SearchPage() {
             }
         }
 
+        // Labs matched by name, address, or a service/test they offer.
+        const matchedLabs = (labs ?? []).filter(
+            (l) =>
+                l.name?.toLowerCase().includes(trimmed) ||
+                l.location?.address?.toLowerCase().includes(trimmed) ||
+                l.services?.some((s) => s.toLowerCase().includes(trimmed))
+        );
+
+        // Individual tests, surfaced with the lab that offers them.
+        const matchedTests = (labs ?? [])
+            .flatMap((l) => (l.tests ?? []).map((t) => ({ ...t, lab: l })))
+            .filter((t) => t.name?.toLowerCase().includes(trimmed));
+
         return {
             specialties: specialties.slice(0, 6),
             doctors: matchedDoctors.slice(0, 10),
             hospitals: Array.from(hospitalMap.values()).slice(0, 6),
+            labs: matchedLabs.slice(0, 6),
+            tests: matchedTests.slice(0, 8),
         };
-    }, [trimmed, doctors]);
+    }, [trimmed, doctors, labs]);
 
     const nothingFound =
         trimmed.length >= 2 &&
         matches.specialties.length === 0 &&
         matches.doctors.length === 0 &&
-        matches.hospitals.length === 0;
+        matches.hospitals.length === 0 &&
+        matches.labs.length === 0 &&
+        matches.tests.length === 0;
 
     return (
         <div className="space-y-5">
@@ -84,7 +107,7 @@ export default function SearchPage() {
                     ref={inputRef}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Doctor, hospital or specialty"
+                    placeholder="Doctor, hospital, lab or test"
                     className="pl-11"
                     aria-label="Search"
                 />
@@ -120,7 +143,7 @@ export default function SearchPage() {
                 <EmptyState
                     icon={<SearchX size={24} />}
                     title={`Nothing matches "${query.trim()}"`}
-                    body="Try a specialty like heart or skin, or a doctor's name."
+                    body="Try a specialty, a doctor's name, or a test like blood sugar."
                 />
             )}
 
@@ -168,6 +191,50 @@ export default function SearchPage() {
                     <div className="space-y-3">
                         {matches.doctors.map((doctor) => (
                             <DoctorCard key={doctor.id} doctor={doctor} href={`/doctor/${doctor.id}`} />
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {matches.labs.length > 0 && (
+                <section>
+                    <SectionHeader title="Labs" />
+                    <div className="space-y-2.5">
+                        {matches.labs.map((lab) => (
+                            <Link
+                                key={lab.id}
+                                href={`/lab/${lab.id}`}
+                                className="block rounded-[14px] border border-line bg-surface p-3.5 hover:border-brand-300"
+                            >
+                                <p className="font-bold text-ink truncate">{lab.name}</p>
+                                {lab.location?.address && (
+                                    <p className="text-[13px] text-ink-3 truncate">{lab.location.address}</p>
+                                )}
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {matches.tests.length > 0 && (
+                <section>
+                    <SectionHeader title="Tests" />
+                    <div className="space-y-2.5">
+                        {matches.tests.map((test) => (
+                            <Link
+                                key={test.id}
+                                href={`/lab/${test.lab.id}`}
+                                className="flex items-center gap-3 rounded-[14px] border border-line bg-surface p-3.5 hover:border-brand-300"
+                            >
+                                <span className="grid place-items-center size-9 rounded-full bg-brand-50 text-brand-500 shrink-0">
+                                    <FlaskConical size={16} />
+                                </span>
+                                <span className="min-w-0 flex-1">
+                                    <span className="block font-semibold text-ink truncate">{test.name}</span>
+                                    <span className="block text-[13px] text-ink-3 truncate">{test.lab.name}</span>
+                                </span>
+                                <span className="font-bold text-ink tabular shrink-0">{rupees(test.price)}</span>
+                            </Link>
                         ))}
                     </div>
                 </section>

@@ -53,7 +53,10 @@ export default function BookingConfirmationPage() {
     }
 
     const doctor = appointment.doctor;
-    const hospital = doctor?.hospital;
+    const lab = appointment.lab;
+    const test = appointment.test;
+    // A doctor visit happens at the doctor's hospital; a lab test happens at the lab itself.
+    const place = doctor ? doctor.hospital : lab;
     const reference = appointment.id.slice(0, 8).toUpperCase();
 
     return (
@@ -88,6 +91,13 @@ export default function BookingConfirmationPage() {
                         </div>
                     )}
 
+                    {test && (
+                        <div>
+                            <dt className="text-sm text-ink-3">Test</dt>
+                            <dd className="font-bold text-ink">{test.name}</dd>
+                        </div>
+                    )}
+
                     <div className="flex items-start gap-2.5">
                         <CalendarDays size={17} className="text-brand-500 shrink-0 mt-0.5" />
                         <div>
@@ -98,14 +108,14 @@ export default function BookingConfirmationPage() {
                         </div>
                     </div>
 
-                    {hospital && (
+                    {place && (
                         <div className="flex items-start gap-2.5">
                             <MapPin size={17} className="text-brand-500 shrink-0 mt-0.5" />
                             <div className="min-w-0">
                                 <dt className="text-sm text-ink-3">Where</dt>
-                                <dd className="font-bold text-ink">{hospital.name}</dd>
-                                {hospital.location?.address && (
-                                    <dd className="text-sm text-ink-3">{hospital.location.address}</dd>
+                                <dd className="font-bold text-ink">{place.name}</dd>
+                                {place.location?.address && (
+                                    <dd className="text-sm text-ink-3">{place.location.address}</dd>
                                 )}
                             </div>
                         </div>
@@ -129,9 +139,9 @@ export default function BookingConfirmationPage() {
                     )}
                 </dl>
 
-                {hospital?.location && (
+                {place?.location && (
                     <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${hospital.location.lat},${hospital.location.lng}`}
+                        href={`https://www.google.com/maps/search/?api=1&query=${place.location.lat},${place.location.lng}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-5 w-full h-12 inline-flex items-center justify-center gap-2 rounded-[12px] border border-line-strong font-semibold text-ink hover:border-brand-300"
