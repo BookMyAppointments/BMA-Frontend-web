@@ -1,70 +1,86 @@
 'use client';
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import axios from "axios";
-import { SessionContextType } from "@/types/session";
-import { User } from "@/types/doctor";
 
-const SessionContext = createContext<SessionContextType>({
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { api, clearToken, getToken } from '@/services/api';
+
+export interface SessionUser {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    role: 'NORMAL' | 'ADMIN' | 'SUPERADMIN';
+    picture: string | null;
+    gender: string | null;
+    dob: string | null;
+    address: string | null;
+    bloodGroup: string | null;
+    heightCm: number | null;
+    weightKg: number | null;
+}
+
+interface SessionContextValue {
+    user: SessionUser | null;
+    isLoading: boolean;
+    isAuthenticated: boolean;
+    /** A signed-in user who has not filled in name + date of birth yet. */
+    profileComplete: boolean;
+    refresh: () => Promise<void>;
+    logout: () => void;
+}
+
+const SessionContext = createContext<SessionContextValue>({
     user: null,
     isLoading: true,
     isAuthenticated: false,
-    logout: () => { },
-    refresh: () => { }
+    profileComplete: false,
+    refresh: async () => {},
+    logout: () => {},
 });
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<SessionUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        fetchUserProfile();
-    }, []);
-
-    const fetchUserProfile = async () => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
+    const refresh = useCallback(async () => {
+        if (!getToken()) {
+            setUser(null);
             setIsLoading(false);
             return;
         }
 
         try {
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/profile`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            setUser(response.data);
+            const profile = await api<SessionUser>('/auth/profile');
+            setUser(profile);
         } catch (error) {
-            console.log(error);
-            if (axios.isAxiosError(error) && error.response?.status === 401) {
-                localStorage.removeItem("token");
+            // A rejected token is a signed-out user, not an app error.
+            if (typeof error === 'object' && error && 'status' in error && (error as { status: number }).status === 401) {
+                clearToken();
             }
+            setUser(null);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
-    const refresh = async () => {
-        fetchUserProfile();
-    }
+    useEffect(() => {
+        refresh();
+    }, [refresh]);
 
-    const logout = () => {
-        localStorage.removeItem("token");
+    const logout = useCallback(() => {
+        clearToken();
         setUser(null);
-    };
+        window.location.href = '/';
+    }, []);
 
     return (
         <SessionContext.Provider
             value={{
                 user,
                 isLoading,
-                isAuthenticated: !!user,
+                isAuthenticated: Boolean(user),
+                profileComplete: Boolean(user?.name && user?.dob),
+                refresh,
                 logout,
-                refresh
             }}
         >
             {children}
@@ -72,10 +88,4 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     );
 }
 
-export const useSession = () => {
-    const context = useContext(SessionContext);
-    if (!context) {
-        throw new Error('useSession must be used within a SessionProvider');
-    }
-    return context;
-};
+export const useSession = () => useContext(SessionContext);

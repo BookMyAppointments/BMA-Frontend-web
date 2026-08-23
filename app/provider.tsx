@@ -1,29 +1,15 @@
 import { SessionProvider } from '@/context/sessionProvider';
-import { ServiceProvider } from '@/context/serviceProvider';
-import { ReactQueryProvider } from "@/context/queryProvider"
+import { ReactQueryProvider } from '@/context/queryProvider';
 
-import Navbar from '@/components/layout/navbar';
-import MobileNavbar from '@/components/layout/mobile-navbar';
-import Footer from '@/components/layout/footer';
-
+/**
+ * Global data providers only. App chrome (header, bottom nav) lives in the
+ * (app) route group layout so the landing page, auth flow, and admin screens
+ * are not forced to wear the patient navigation.
+ */
 export default function Provider({ children }: { children: React.ReactNode }) {
     return (
-        <ReactQueryProvider >
-            <SessionProvider>
-                <ServiceProvider>
-                    <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
-
-                        <div className="block lg:hidden sticky top-0 z-30 bg-white">
-                            <MobileNavbar />
-                        </div>
-                        <div className="hidden lg:block">
-                            <Navbar />
-                        </div>
-                        {children}
-                        <Footer />
-                    </div>
-                </ServiceProvider>
-            </SessionProvider >
+        <ReactQueryProvider>
+            <SessionProvider>{children}</SessionProvider>
         </ReactQueryProvider>
     );
 }

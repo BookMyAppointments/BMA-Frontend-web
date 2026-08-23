@@ -1,168 +1,155 @@
-import { Appointment, Doctor, Lab } from "@/types/doctor";
+import { Appointment, Doctor, Lab } from '@/types/doctor';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1';
+export const API_BASE_URL =
+    process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5050/api/v1';
 
-export const fetchDoctors = async (): Promise<Doctor[]> => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/search/doctors`);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching doctors:', error);
-        throw error;
+export const TOKEN_KEY = 'token';
+
+export function getToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    const token = window.localStorage.getItem(TOKEN_KEY);
+    return token && token.length > 0 ? token : null;
+}
+
+export function setToken(token: string) {
+    window.localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken() {
+    window.localStorage.removeItem(TOKEN_KEY);
+}
+
+export class ApiError extends Error {
+    status: number;
+    constructor(message: string, status: number) {
+        super(message);
+        this.name = 'ApiError';
+        this.status = status;
     }
-};
+}
 
-export const fetchDoctorsBySpecialization = async (specialization: string): Promise<Doctor[]> => {
-    try {
-        console.log(API_BASE_URL);
-        
-        const response = await fetch(`${API_BASE_URL}/search/doctors?specialization=${encodeURIComponent(specialization)}`);
+interface ApiOptions extends Omit<RequestInit, 'body'> {
+    body?: unknown;
+    /** Attach the stored bearer token. Defaults to true. */
+    auth?: boolean;
+}
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+/**
+ * Single entry point for every backend call: attaches auth, parses JSON once,
+ * and turns a non-2xx response into an ApiError carrying the server's message
+ * so screens can show something specific instead of "Something went wrong".
+ */
+export async function api<T = unknown>(path: string, options: ApiOptions = {}): Promise<T> {
+    const { body, auth = true, headers, ...rest } = options;
 
-        const data = await response.json();
-        console.log("Fetched doctors by specialization:", data);
-        return data;
-    } catch (error) {
-        console.error('Error fetching doctors:', error);
-        throw error;
-    }
-};
-
-export const fetchLabs = async (service?: string): Promise<Lab[]> => {
-    try {
-        const url = service
-            ? `${API_BASE_URL}/labs/all?service=${encodeURIComponent(service)}`
-            : `${API_BASE_URL}/labs/all`;
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching labs:', error);
-        throw error;
-    }
-};
-
-export const createAppointment = async (appointmentData: {
-    doctorId: string;
-    scheduledAt: string;
-}): Promise<Appointment> => {
-
-    try {
-        console.log("reached here");
-
-        const response = await fetch(`${API_BASE_URL}/appointments/create`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-            body: JSON.stringify(appointmentData),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error creating appointment:', error);
-        throw error;
-    }
-};
-
-export const fetchUserAppointments = async (status?: string, page: number = 1, limit: number = 10): Promise<{
-    appointments: Appointment[];
-    pagination: {
-        page: number;
-        limit: number;
-        total: number;
-        pages: number;
+    const finalHeaders: Record<string, string> = {
+        ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...((headers as Record<string, string>) ?? {}),
     };
-}> => {
-    try {
-        let url = `${API_BASE_URL}/appointments/user/all?page=${page}&limit=${limit}`;
-        if (status) {
-            url += `&status=${encodeURIComponent(status)}`;
-        }
 
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching user appointments:', error);
-        throw error;
+    if (auth) {
+        const token = getToken();
+        if (token) finalHeaders.Authorization = `Bearer ${token}`;
     }
+
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+        ...rest,
+        headers: finalHeaders,
+        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
+
+    const text = await response.text();
+    const data = text ? safeParse(text) : null;
+
+    if (!response.ok) {
+        const message =
+            (data && typeof data === 'object' && 'message' in data
+                ? String((data as { message: unknown }).message)
+                : null) ?? `Request failed (${response.status})`;
+        throw new ApiError(message, response.status);
+    }
+
+    return data as T;
+}
+
+function safeParse(text: string): unknown {
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
+    }
+}
+
+/* ------------------------------------------------------------- Doctors --- */
+
+export const fetchDoctors = () => api<Doctor[]>('/search/doctors', { auth: false });
+
+export const fetchDoctorsBySpecialization = (specialization: string, treats?: string) => {
+    const params = new URLSearchParams({ specialization });
+    if (treats) params.set('treats', treats);
+    return api<Doctor[]>(`/search/doctors?${params}`, { auth: false });
 };
 
-export const fetchDoctorAppointments = async (status?: string, page: number = 1, limit: number = 10): Promise<{
-    appointments: Appointment[];
-    pagination: {
-        page: number;
-        limit: number;
-        total: number;
-        pages: number;
-    };
-}> => {
-    try {
-        let url = `${API_BASE_URL}/appointments/doctor/all?page=${page}&limit=${limit}`;
-        if (status) {
-            url += `&status=${encodeURIComponent(status)}`;
-        }
+export const fetchDoctorById = (id: string) => api<Doctor>(`/doctors/get/${id}`, { auth: false });
 
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
+/* ---------------------------------------------------------------- Labs --- */
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+export const fetchLabs = (service?: string) =>
+    api<Lab[]>(`/search/labs${service ? `?service=${encodeURIComponent(service)}` : ''}`, {
+        auth: false,
+    });
 
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching doctor appointments:', error);
-        throw error;
-    }
-};
+/* -------------------------------------------------------- Appointments --- */
 
-export const fetchAppointmentById = async (appointmentId: string): Promise<Appointment> => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/appointments/get/${appointmentId}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
+export const createAppointment = (payload: { doctorId?: string; labId?: string; testId?: string; scheduledAt: string }) =>
+    api<Appointment>('/appointments/create', { method: 'POST', body: payload });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+export const fetchAppointmentById = (appointmentId: string) =>
+    api<Appointment>(`/appointments/get/${appointmentId}`);
 
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching appointment:', error);
-        throw error;
-    }
-};
+export const fetchAppointmentsByStatus = (status: string) =>
+    api<Appointment[]>(`/search/appointments?status=${encodeURIComponent(status)}`);
+
+export const fetchDoctorAvailability = (doctorId: string) =>
+    api<unknown>(`/appointments/doctors/availability/${doctorId}`, { auth: false });
+
+/* ------------------------------------------------------------- Payment --- */
+
+export interface PaymentMethods {
+    online: boolean;
+    payAtHospital: boolean;
+}
+
+export const fetchPaymentMethods = () => api<PaymentMethods>('/payment/methods', { auth: false });
+
+export const createPaymentOrder = (payload: {
+    appointmentId: string;
+    amount: number;
+    method: 'RAZORPAY' | 'PAY_AT_HOSPITAL';
+}) => api<{
+    payment: { id: string; status: string; method: string; amount: number };
+    requiresCheckout: boolean;
+    checkout?: { orderId: string; amount: number; currency: string; key: string };
+}>('/payment/create-order', { method: 'POST', body: payload });
+
+/* ----------------------------------------------------------------- OTP --- */
+
+export const requestOtp = (phone: string) =>
+    api<{ message: string; smsConfigured: boolean; devCode?: string }>('/otp/request', {
+        method: 'POST',
+        body: { phone },
+        auth: false,
+    });
+
+export const verifyOtp = (phone: string, code: string) =>
+    api<{ token: string; user: Record<string, unknown>; profileComplete: boolean }>('/otp/verify', {
+        method: 'POST',
+        body: { phone, code },
+        auth: false,
+    });
+
+export const saveProfile = (payload: Record<string, unknown>) =>
+    api<{ user: Record<string, unknown>; message: string }>('/otp/profile', {
+        method: 'PUT',
+        body: payload,
+    });

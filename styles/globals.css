@@ -1,259 +1,142 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* ==========================================================================
+   BookMyAppointments design system
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
+   One palette, one type scale, one radius scale. Deep teal reads as clinical
+   and calm without being the default SaaS blue; red is reserved exclusively
+   for emergency so it never competes for attention.
+   ========================================================================== */
 
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+@theme {
+  /* Brand */
+  --color-brand-50:  #E8F5F2;
+  --color-brand-100: #C9E8E1;
+  --color-brand-200: #98D3C8;
+  --color-brand-300: #63BAAB;
+  --color-brand-400: #349E8D;
+  --color-brand-500: #0D7A6F;
+  --color-brand-600: #0A6259;
+  --color-brand-700: #084E47;
+  --color-brand-800: #063A35;
+  --color-brand-900: #042523;
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Warm accent, used sparingly for highlights and secondary CTAs */
+  --color-accent-100: #FDEDE6;
+  --color-accent-300: #F3B79B;
+  --color-accent-500: #E8734A;
+  --color-accent-600: #C85A34;
+
+  /* Emergency only. Never use for validation errors or generic destructive UI. */
+  --color-emergency-100: #FDE7E5;
+  --color-emergency-500: #D92D20;
+  --color-emergency-600: #B42318;
+
+  /* Feedback */
+  --color-success-100: #E3F5E9;
+  --color-success-500: #0F8A46;
+  --color-warning-100: #FDF2DC;
+  --color-warning-500: #B25E09;
+  --color-danger-100:  #FDE7E5;
+  --color-danger-500:  #C4362B;
+
+  /* Warm neutrals: softer than pure gray, keeps the clinical palette human */
+  --color-canvas:  #F7F6F3;
+  --color-surface: #FFFFFF;
+  --color-line:    #E6E3DC;
+  --color-line-strong: #D3CFC6;
+  --color-ink:     #131A1B;
+  --color-ink-2:   #3D4849;
+  --color-ink-3:   #6B7677;
+  --color-ink-4:   #97A0A0;
+
+  /* Type */
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  /* Radii: a real scale, not one bubbly radius on everything */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* Elevation: barely-there, borders carry most of the structure */
+  --shadow-xs: 0 1px 2px rgb(19 26 27 / 0.05);
+  --shadow-sm: 0 2px 8px rgb(19 26 27 / 0.06);
+  --shadow-md: 0 8px 24px rgb(19 26 27 / 0.08);
+  --shadow-lg: 0 20px 48px rgb(19 26 27 / 0.12);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  html {
+    -webkit-text-size-adjust: 100%;
   }
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible focus everywhere, never removed without a replacement */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Numeric columns line up (prices, times, vitals) */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-}
-
-/* Header styles (adapted for React component) */
-.pulse-dot {
-  color: #34d399; /* Green for active status */
-  animation: pulse 1.5s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.5; }
-  50% { opacity: 1; }
-  100% { opacity: 0.5; }
-}
-
-/* Scrollbar styles */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: #a78bfa #e9d5ff; /* thumb and track */
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-  width: 8px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: #e9d5ff;
-  border-radius: 10px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #a78bfa;
-  border-radius: 10px;
-  border: 2px solid #e9d5ff;
-}
-
-/* Message type indicators */
-.message-type-indicator {
-  @apply text-xs font-semibold px-2 py-1 rounded-full mb-3 inline-flex items-center gap-1;
-}
-
-.type-symptoms {
-  @apply bg-orange-100 text-orange-700 border border-orange-300;
-}
-
-.type-report {
-  @apply bg-blue-100 text-blue-700 border border-blue-300;
-}
-
-.type-general {
-  @apply bg-purple-100 text-purple-700 border border-purple-300;
-}
-
-/* Doctor card styles (originally from JS, now explicit CSS) */
-.doctor-card {
-  @apply bg-white p-4 rounded-xl shadow-sm border border-purple-200;
-  display: flex;
-  flex-direction: column;
-}
-
-.doctor-info {
-  @apply text-purple-800 mb-2;
-}
-
-.doctor-name {
-  @apply font-bold text-lg;
-}
-
-.doctor-specialization {
-  @apply text-sm opacity-90;
-}
-
-.doctor-location {
-  @apply text-sm opacity-70;
-}
-
-.doctor-rating {
-  @apply flex items-center text-purple-600;
-}
-
-.doctor-rating-stars {
-  @apply mr-1;
-  color: #8B5CF6; /* Default purple star color */
-}
-
-/* Dot flashing animation for processing state */
-.dot-flashing {
-  position: relative;
-  width: 10px;
-  height: 10px;
-  border-radius: 5px;
-  background-color: #a78bfa; /* Example purple */
-  color: #a78bfa;
-  animation: dotFlashing 1s infinite linear alternate;
-  animation-delay: .5s;
-}
-
-.dot-flashing::before, .dot-flashing::after {
-  content: '';
-  display: inline-block;
-  position: absolute;
-  top: 0;
-}
-
-.dot-flashing::before {
-  left: -15px;
-  width: 10px;
-  height: 10px;
-  border-radius: 5px;
-  background-color: #a78bfa;
-  color: #a78bfa;
-  animation: dotFlashing 1s infinite linear alternate;
-  animation-delay: 0s;
-}
-
-.dot-flashing::after {
-  left: 15px;
-  width: 10px;
-  height: 10px;
-  border-radius: 5px;
-  background-color: #a78bfa;
-  color: #a78bfa;
-  animation: dotFlashing 1s infinite linear alternate;
-  animation-delay: 1s;
-}
-
-@keyframes dotFlashing {
-  0% {
-    background-color: #a78bfa;
+@layer utilities {
+  /* Horizontal chip rails: scrollable without a visible scrollbar */
+  .rail {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
   }
-  50%,
-  100% {
-    background-color: #e9d5ff; /* Lighter purple when inactive */
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+  .rail > * {
+    scroll-snap-align: start;
+  }
+
+  /* Respects the iPhone home indicator under the bottom nav */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .h-safe-nav {
+    height: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
