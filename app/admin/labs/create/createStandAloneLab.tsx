@@ -12,11 +12,16 @@ export default function StandAloneLabCreateForm() {
     const [Authorized, setAuthorized] = useState<boolean>(true);
 
     useEffect(() => {
-        const uniqueCode = searchParams.get("uniqueCode");
-        if (!uniqueCode) {
+        // Being signed in is enough to submit a request now -- a super admin
+        // reviews it before the lab goes live either way. An invite link (if
+        // a super admin issued one) still needs to check out if present.
+        if (!localStorage.getItem("token")) {
             setAuthorized(false);
             return;
         }
+
+        const uniqueCode = searchParams.get("uniqueCode");
+        if (!uniqueCode) return;
 
         const verifyCode = async () => {
             try {
@@ -29,19 +34,16 @@ export default function StandAloneLabCreateForm() {
                     }
                 );
 
-                const data = await response.json();
-                console.log("Response:", data);
                 if (!response.status || response.status !== 201) {
+                    toast.error("That invite link is invalid or already used.");
                     setAuthorized(false);
-                    return;
                 }
             } catch (error) {
                 console.error("Error verifying code:", error);
-                setAuthorized(false);
             }
         };
 
-        if (uniqueCode) verifyCode();
+        verifyCode();
     }, [searchParams]);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,7 +92,8 @@ export default function StandAloneLabCreateForm() {
 
         setIsSubmitting(true);
         try {
-            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/create?uniqueCode=${searchParams.get('uniqueCode') || ''}`;
+            const uniqueCode = searchParams.get('uniqueCode');
+            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/labs/create${uniqueCode ? `?uniqueCode=${uniqueCode}` : ''}`;
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -104,7 +107,7 @@ export default function StandAloneLabCreateForm() {
             const data = await response.json();
 
             if (response.ok) {
-                toast.success('Lab created successfully!');
+                toast.success('Submitted! A super admin will review it before it goes live.');
                 setFormData({
                     name: '',
                     description: '',

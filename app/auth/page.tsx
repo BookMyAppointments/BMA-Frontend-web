@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Check, ShieldCheck } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
@@ -12,8 +12,16 @@ import { BLOOD_GROUPS } from '@/lib/domain';
 
 type Step = 'phone' | 'code' | 'profile';
 
+/** Only ever redirect within our own app -- never follow an external URL. */
+function safeNext(raw: string | null): string {
+    if (raw && raw.startsWith('/') && !raw.startsWith('//')) return raw;
+    return '/home';
+}
+
 export default function AuthPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const next = safeNext(searchParams?.get('next') ?? null);
     const { refresh } = useSession();
 
     const [step, setStep] = useState<Step>('phone');
@@ -72,7 +80,7 @@ export default function AuthPage() {
             setToken(result.token);
             if (result.profileComplete) {
                 await refresh();
-                router.replace('/home');
+                router.replace(next);
             } else {
                 setStep('profile');
             }
@@ -96,7 +104,7 @@ export default function AuthPage() {
                 weightKg: profile.weightKg || undefined,
             });
             await refresh();
-            router.replace('/home');
+            router.replace(next);
         } catch (err) {
             setError(err instanceof ApiError ? err.message : 'Could not save your details.');
         } finally {

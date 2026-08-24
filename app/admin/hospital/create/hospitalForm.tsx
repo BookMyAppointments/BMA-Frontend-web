@@ -16,11 +16,16 @@ const HospitalForm = () => {
   const searchParams = useSearchParams() || new URLSearchParams();
 
   useEffect(() => {
-    const uniqueCode = searchParams.get("uniqueCode");
-    if (!uniqueCode) {
+    // Being signed in is enough to submit a request now -- a super admin
+    // reviews it before the hospital goes live either way. An invite link
+    // (if a super admin issued one) still needs to check out if present.
+    if (!localStorage.getItem("token")) {
       setAuthorized(false);
       return;
     }
+
+    const uniqueCode = searchParams.get("uniqueCode");
+    if (!uniqueCode) return;
 
     const verifyCode = async () => {
       try {
@@ -33,19 +38,16 @@ const HospitalForm = () => {
           }
         );
 
-        const data = await response.json();
-        console.log("Response:", data);
         if (!response.status || response.status !== 201) {
+          toast.error("That invite link is invalid or already used.");
           setAuthorized(false);
-          return;
         }
       } catch (error) {
         console.error("Error verifying code:", error);
-        setAuthorized(false);
       }
     };
 
-    if (uniqueCode) verifyCode();
+    verifyCode();
   }, [searchParams]);
 
   const [errors, setErrors] = useState<HospitalFormErrors>({});
@@ -109,7 +111,11 @@ const HospitalForm = () => {
     try {
       console.log("Submitting hospital data:", formData);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/create?uniqueCode=${searchParams.get("uniqueCode")}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/hospitals/create${
+          searchParams.get("uniqueCode")
+            ? `?uniqueCode=${searchParams.get("uniqueCode")}`
+            : ""
+        }`,
         {
           method: "POST",
           headers: {
@@ -123,7 +129,7 @@ const HospitalForm = () => {
       const data = await response.json();
       console.log(response.status, data);
       if (data.success) {
-        toast.success("Hospital created successfully!");
+        toast.success("Submitted! A super admin will review it before it goes live.");
         setFormData({
           name: "",
           location: { lat: "", lng: "", address: "" },

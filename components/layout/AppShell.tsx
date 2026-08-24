@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
     Home, CalendarDays, FlaskConical, FileText, Ambulance,
-    Search, User, LogOut, HelpCircle, Mail, ChevronRight, X, ShieldCheck,
+    Search, User, LogOut, HelpCircle, Mail, ChevronRight, X, ShieldCheck, Building2,
 } from 'lucide-react';
 import { Logo, LogoMark } from '@/components/brand/Logo';
 import { useSession } from '@/context/sessionProvider';
@@ -169,6 +169,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                                 { href: '/reports', label: 'My reports', icon: FileText },
                                 { href: '/help', label: 'Help', icon: HelpCircle },
                                 { href: '/contact', label: 'Contact us', icon: Mail },
+                                { href: '/register', label: 'Register a hospital or lab', icon: Building2 },
                             ].map(({ href, label, icon: Icon }) => (
                                 <Link
                                     key={href}

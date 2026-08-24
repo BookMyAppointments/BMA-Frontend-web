@@ -183,6 +183,7 @@ export default function LandingPage() {
                         <Link href="/help" className="hover:text-brand-600">Help</Link>
                         <Link href="/contact" className="hover:text-brand-600">Contact us</Link>
                         <Link href="/emergency" className="hover:text-brand-600">Emergency</Link>
+                        <Link href="/register" className="hover:text-brand-600">List your hospital or lab</Link>
                     </nav>
                 </div>
             </footer>

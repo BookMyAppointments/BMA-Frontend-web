@@ -107,6 +107,13 @@ export default function StaffSignInPage() {
                         </Button>
                     </form>
                 </Card>
+
+                <p className="mt-5 text-center text-sm text-ink-3">
+                    Own a hospital or lab?{' '}
+                    <Link href="/register" className="font-semibold text-brand-600">
+                        Register it here
+                    </Link>
+                </p>
             </main>
         </div>
     );

@@ -70,7 +70,7 @@ export default function LabCreateForm({ hospitalId }: LabCreateFormProps) {
             const data = await response.json();
 
             if (response.ok) {
-                toast.success('Lab created successfully!');
+                toast.success('Submitted! A super admin will review it before it goes live.');
                 setFormData({
                     name: '',
                     description: '',
