@@ -80,6 +80,13 @@ export default function RegisterPage() {
                             once approved.
                         </p>
                     </Card>
+
+                    <p className="mt-5 text-center text-sm text-ink-3">
+                        Already submitted one?{' '}
+                        <Link href="/register/status" className="font-semibold text-brand-600">
+                            Check its status
+                        </Link>
+                    </p>
                 </div>
             </main>
         </div>

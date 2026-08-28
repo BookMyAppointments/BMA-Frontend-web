@@ -4,11 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { Building, Heart, Save, Loader2 } from 'lucide-react';
 import { LabDataRequest, LabFormErrors } from "@/app/admin/hospital/[hospitalId]/labs/types";
 import { LabArraySection, LabBasicInfoSection, LabLocationSection, LabOperatingHoursSection } from "@/app/admin/hospital/[hospitalId]/labs/components";
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import UnAuthorized from '@/components/miscellaneous/UnAuthorized';
 
 export default function StandAloneLabCreateForm() {
     const searchParams = useSearchParams() || new URLSearchParams();
+    const router = useRouter();
     const [Authorized, setAuthorized] = useState<boolean>(true);
 
     useEffect(() => {
@@ -108,13 +109,7 @@ export default function StandAloneLabCreateForm() {
 
             if (response.ok) {
                 toast.success('Submitted! A super admin will review it before it goes live.');
-                setFormData({
-                    name: '',
-                    description: '',
-                    location: { lat: '', lng: '', address: '' },
-                    services: [],
-                    hours: []
-                });
+                router.push('/register/status');
             } else {
                 throw new Error(data.message || 'Failed to create lab');
             }

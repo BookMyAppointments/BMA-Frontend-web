@@ -1,6 +1,7 @@
 'use client';
 import { toast } from 'react-toastify';
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Building, Heart, Save, Loader2 } from 'lucide-react';
 import { LabDataRequest, LabFormErrors } from '../types';
 import { LabArraySection, LabBasicInfoSection, LabLocationSection, LabOperatingHoursSection } from '../components';
@@ -10,6 +11,7 @@ interface LabCreateFormProps {
 }
 
 export default function LabCreateForm({ hospitalId }: LabCreateFormProps) {
+    const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<LabFormErrors>({});
     const [formData, setFormData] = useState<LabDataRequest>({
@@ -71,13 +73,7 @@ export default function LabCreateForm({ hospitalId }: LabCreateFormProps) {
 
             if (response.ok) {
                 toast.success('Submitted! A super admin will review it before it goes live.');
-                setFormData({
-                    name: '',
-                    description: '',
-                    location: { lat: '', lng: '', address: '' },
-                    services: [],
-                    hours: []
-                });
+                router.push('/register/status');
             } else {
                 throw new Error(data.message || 'Failed to create lab');
             }

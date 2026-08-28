@@ -9,11 +9,12 @@ import {
   HoursSection,
   LocationSection,
 } from "../components";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import UnAuthorized from "@/components/miscellaneous/UnAuthorized";
 
 const HospitalForm = () => {
   const searchParams = useSearchParams() || new URLSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     // Being signed in is enough to submit a request now -- a super admin
@@ -130,22 +131,7 @@ const HospitalForm = () => {
       console.log(response.status, data);
       if (data.success) {
         toast.success("Submitted! A super admin will review it before it goes live.");
-        setFormData({
-          name: "",
-          location: { lat: "", lng: "", address: "" },
-          departments: [],
-          facilities: [],
-          services: [],
-          hours: {
-            monday: { open: "", close: "", closed: false },
-            tuesday: { open: "", close: "", closed: false },
-            wednesday: { open: "", close: "", closed: false },
-            thursday: { open: "", close: "", closed: false },
-            friday: { open: "", close: "", closed: false },
-            saturday: { open: "", close: "", closed: false },
-            sunday: { open: "", close: "", closed: false },
-          },
-        });
+        router.push("/register/status");
       } else {
         throw new Error(data.message || "Failed to create hospital");
       }
