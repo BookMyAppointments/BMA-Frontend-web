@@ -10,13 +10,13 @@ import { useSession } from '@/context/sessionProvider';
 
 const OPTIONS = [
     {
-        href: '/admin/hospital/create',
+        href: '/register/hospital',
         icon: Building2,
         title: 'Register a hospital',
         body: 'List your hospital, its doctors and departments. A super admin reviews it before it goes live to patients.',
     },
     {
-        href: '/admin/labs/create',
+        href: '/register/lab',
         icon: FlaskConical,
         title: 'Register a lab',
         body: 'List a diagnostic lab, on its own or under an existing hospital. Reviewed before it becomes bookable.',

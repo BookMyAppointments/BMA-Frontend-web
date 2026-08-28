@@ -89,8 +89,8 @@ export default function UserSearchBox() {
             console.log('Make admin response:', data);
 
             if (data.code) {
-                const hospitalLink = `${process.env.NEXT_PUBLIC_APP_URL}/admin/hospital/create?uniqueCode=${data.code}`;
-                const labLink = `${process.env.NEXT_PUBLIC_APP_URL}/admin/labs/create?uniqueCode=${data.code}`;
+                const hospitalLink = `${process.env.NEXT_PUBLIC_APP_URL}/register/hospital?uniqueCode=${data.code}`;
+                const labLink = `${process.env.NEXT_PUBLIC_APP_URL}/register/lab?uniqueCode=${data.code}`;
                 
                 setAdminLinks({
                     hospital: hospitalLink,
