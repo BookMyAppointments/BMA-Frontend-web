@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import UnAuthorized from '@/components/miscellaneous/UnAuthorized';
 
 export default function StandAloneLabCreateForm() {
-    const searchParams = useSearchParams() || new URLSearchParams();
+    const searchParams = useSearchParams();
     const router = useRouter();
     const [Authorized, setAuthorized] = useState<boolean>(true);
 

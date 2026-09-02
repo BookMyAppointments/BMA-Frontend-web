@@ -13,7 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import UnAuthorized from "@/components/miscellaneous/UnAuthorized";
 
 const HospitalForm = () => {
-  const searchParams = useSearchParams() || new URLSearchParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
