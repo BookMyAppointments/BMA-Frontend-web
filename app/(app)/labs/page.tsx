@@ -3,9 +3,9 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { FlaskConical, MapPin, SearchX, ChevronRight, Home } from 'lucide-react';
+import { FlaskConical, MapPin, SearchX, ChevronRight } from 'lucide-react';
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
-import { Card, Chip, EmptyState, Skeleton, Tag } from '@/components/ui';
+import { Chip, EmptyState, Skeleton, Tag } from '@/components/ui';
 import { fetchLabs } from '@/services/api';
 import { useLocation } from '@/hooks/useLocation';
 import { distanceKm, LAB_SERVICES, rupees } from '@/lib/domain';

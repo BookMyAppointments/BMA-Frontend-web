@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { MapPin, Navigation, FlaskConical, FileText, Ambulance, ChevronRight, Loader2 } from 'lucide-react';
-import { Card, Chip, SectionHeader, Tag } from '@/components/ui';
+import { Card, SectionHeader, Tag } from '@/components/ui';
 import { useSession } from '@/context/sessionProvider';
 import { useLocation } from '@/hooks/useLocation';
 import { PATIENT_TYPES, SPECIALTIES, type PatientTypeKey } from '@/lib/domain';

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import {
-    ArrowLeft, CalendarDays, MapPin, CreditCard, Building2, Check, ShieldCheck, Loader2,
+    ArrowLeft, CalendarDays, MapPin, CreditCard, Building2, Check, ShieldCheck,
 } from 'lucide-react';
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import { Button, Card, EmptyState, Skeleton } from '@/components/ui';

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Search, SearchX, ArrowLeft, FlaskConical } from 'lucide-react';
-import { Card, EmptyState, Input, SectionHeader, Skeleton } from '@/components/ui';
+import { EmptyState, Input, SectionHeader, Skeleton } from '@/components/ui';
 import { DoctorCard } from '@/components/care/DoctorCard';
 import { fetchDoctors, fetchLabs } from '@/services/api';
 import { SPECIALTIES, rupees } from '@/lib/domain';

@@ -3,10 +3,10 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQueries, useQuery } from '@tanstack/react-query';
-import { CalendarDays, MapPin, Bell, CalendarX, ChevronRight, Clock } from 'lucide-react';
+import { Bell, CalendarX, ChevronRight, Clock } from 'lucide-react';
 import { ButtonLink, Card, Chip, EmptyState, SectionHeader, Skeleton, Tag } from '@/components/ui';
 import { api, fetchAppointmentsByStatus } from '@/services/api';
-import { formatDateTime, rupees } from '@/lib/domain';
+import { formatDateTime } from '@/lib/domain';
 import type { Appointment } from '@/types/doctor';
 
 const UPCOMING = ['PENDING', 'CONFIRMED', 'RESCHEDULED'] as const;

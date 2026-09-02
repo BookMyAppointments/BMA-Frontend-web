@@ -1,12 +1,11 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import {
     Check, CalendarDays, MapPin, Navigation, MessageCircle, Building2, SearchX,
 } from 'lucide-react';
-import { Button, ButtonLink, Card, EmptyState, Skeleton, Tag } from '@/components/ui';
+import { ButtonLink, Card, EmptyState, Skeleton, Tag } from '@/components/ui';
 import { api, fetchAppointmentById } from '@/services/api';
 import { formatDateTime, rupees } from '@/lib/domain';
 

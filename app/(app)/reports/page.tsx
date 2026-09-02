@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { FileText, Download, FlaskConical, ChevronRight } from 'lucide-react';
+import { FileText, Download, FlaskConical } from 'lucide-react';
 import { ButtonLink, Card, EmptyState, Skeleton } from '@/components/ui';
 import { api } from '@/services/api';
 import { formatDay } from '@/lib/domain';
