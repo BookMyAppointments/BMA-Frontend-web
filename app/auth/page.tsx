@@ -121,7 +121,10 @@ export default function AuthPage() {
             </header>
 
             <main className="flex-1 flex items-start justify-center px-5 pb-16 pt-4 sm:pt-10">
-                <Card className="w-full max-w-md p-6 sm:p-8 shadow-sm">
+                {/* Column wrapper: main is a flex row, so the card and the footer
+                    line below it must share a single child to stack. */}
+                <div className="w-full max-w-md">
+                <Card className="p-6 sm:p-8 shadow-sm">
                     {step === 'phone' && (
                         <>
                             <h1 className="font-display text-2xl font-extrabold text-ink">
@@ -347,6 +350,7 @@ export default function AuthPage() {
                         </Link>
                     </p>
                 )}
+                </div>
             </main>
         </div>
     );

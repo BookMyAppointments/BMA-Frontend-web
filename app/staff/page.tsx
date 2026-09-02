@@ -57,7 +57,10 @@ export default function StaffSignInPage() {
             </header>
 
             <main className="flex-1 flex items-start justify-center px-5 pb-16 pt-4 sm:pt-10">
-                <Card className="w-full max-w-md p-6 sm:p-8 shadow-sm">
+                {/* Column wrapper: main is a flex row, so the card and the footer
+                    line below it must share a single child to stack. */}
+                <div className="w-full max-w-md">
+                <Card className="p-6 sm:p-8 shadow-sm">
                     <span className="inline-grid place-items-center size-11 rounded-full bg-brand-50 text-brand-500">
                         <ShieldCheck size={20} />
                     </span>
@@ -114,6 +117,7 @@ export default function StaffSignInPage() {
                         Register it here
                     </Link>
                 </p>
+                </div>
             </main>
         </div>
     );
