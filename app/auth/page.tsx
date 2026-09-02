@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Check, ShieldCheck } from 'lucide-react';
@@ -18,7 +18,11 @@ function safeNext(raw: string | null): string {
     return '/home';
 }
 
-export default function AuthPage() {
+/**
+ * useSearchParams() opts a route out of static prerendering unless it sits
+ * behind a Suspense boundary, so the page shell below wraps this.
+ */
+function AuthFlow() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const next = safeNext(searchParams?.get('next') ?? null);
@@ -353,5 +357,29 @@ export default function AuthPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function AuthPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="min-h-screen bg-canvas flex flex-col">
+                    <header className="px-5 h-16 flex items-center">
+                        <Logo />
+                    </header>
+                    <main className="flex-1 flex items-start justify-center px-5 pb-16 pt-4 sm:pt-10">
+                        <Card className="w-full max-w-md p-6 sm:p-8 shadow-sm">
+                            <div className="h-6 w-24 rounded bg-line animate-pulse" />
+                            <div className="mt-4 h-4 w-56 rounded bg-line animate-pulse" />
+                            <div className="mt-8 h-12 w-full rounded-[12px] bg-line animate-pulse" />
+                            <div className="mt-5 h-14 w-full rounded-[14px] bg-line animate-pulse" />
+                        </Card>
+                    </main>
+                </div>
+            }
+        >
+            <AuthFlow />
+        </Suspense>
     );
 }
